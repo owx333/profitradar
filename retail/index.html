@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailDesk · 零售自适应平台</title>
+<style>
+  :root{
+    --nav:#12202B; --nav2:#1B2F3D; --navtext:#9FB3C2;
+    --canvas:#EDF1F4; --card:#FFFFFF; --line:#DFE5EC;
+    --text:#172030; --muted:#67748A;
+    --accent:#10B981; --accent-d:#059669;     /* 随行业流动 */
+    --gold:#D99A2B; --warn:#E8830C; --warn-bg:#FDF3E6;
+    --danger:#E0584B; --danger-bg:#FCEDEB; --info:#2C7BE5;
+    --radius:12px; --shadow:0 1px 3px rgba(20,30,45,.08),0 4px 16px rgba(20,30,45,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",system-ui,sans-serif;
+    background:var(--canvas);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select{font-family:inherit;font-size:14px}
+  ::selection{background:var(--accent);color:#fff}
+
+  .app{display:flex;min-height:100vh}
+  .nav{width:210px;background:var(--nav);color:var(--navtext);flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{padding:20px 18px 14px;color:#fff;font-weight:700;font-size:16px;letter-spacing:.5px;display:flex;align-items:center;gap:9px}
+  .brand .dot{width:9px;height:9px;border-radius:3px;background:var(--accent);box-shadow:0 0 0 4px rgba(16,185,129,.18);transition:.4s;animation:breathe 2.6s ease-in-out infinite}
+  .brand small{display:block;font-weight:400;font-size:11px;color:var(--navtext);letter-spacing:1px}
+  @keyframes breathe{0%,100%{box-shadow:0 0 0 3px rgba(255,255,255,.06)}50%{box-shadow:0 0 0 7px rgba(255,255,255,.02)}}
+  .navlist{flex:1;padding:8px 10px}
+  .navitem{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:9px;color:var(--navtext);font-size:14px;font-weight:500;margin-bottom:2px;transition:.14s;width:100%;text-align:left}
+  .navitem:hover{background:var(--nav2);color:#fff;transform:translateX(2px)}
+  .navitem.on{background:var(--accent);color:#fff}
+  .navitem .ic{width:18px;text-align:center;font-size:15px}
+  .navfoot{padding:14px;border-top:1px solid rgba(255,255,255,.07);font-size:12px;color:var(--navtext);line-height:1.6}
+
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{min-height:60px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 22px;position:sticky;top:0;z-index:30;flex-wrap:wrap}
+  .topbar h2{font-size:17px;font-weight:700}
+  .tagline{font-size:12px;color:var(--muted);padding-left:10px;border-left:2px solid var(--accent);transition:.4s}
+  .spacer{flex:1}
+  .pill{display:inline-flex;align-items:center;gap:7px;background:var(--canvas);border:1px solid var(--line);padding:7px 12px;border-radius:9px;font-size:13px;font-weight:600}
+  .pill select{border:none;background:none;font-weight:600;outline:none;cursor:pointer;max-width:140px}
+  .livebtn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--canvas);transition:.15s}
+  .livebtn:hover{background:#e3e9f0}
+  .livebtn.on{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .livebtn .d{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+  .livebtn.on .d{background:#fff;animation:blink 1s infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .content{padding:22px;overflow:auto}
+
+  .grid{display:grid;gap:16px}
+  .blk{margin-bottom:16px}.blk:last-child{margin-bottom:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .card-h{padding:15px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .card-h h3{font-size:15px;font-weight:700}
+  .card-b{padding:18px}
+  .muted{color:var(--muted)}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;line-height:1.6}
+  .b-warn{background:var(--warn-bg);color:var(--warn)} .b-dan{background:var(--danger-bg);color:var(--danger)}
+  .b-ok{background:#E7F7F0;color:var(--accent-d)} .b-gold{background:#FBF2DD;color:var(--gold)}
+  .b-info{background:#E8F1FD;color:var(--info)} .b-grey{background:var(--canvas);color:var(--muted)}
+  .b-acc{background:rgba(16,185,129,.12);color:var(--accent-d)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 15px;border-radius:9px;font-weight:600;font-size:13px;background:var(--canvas);border:1px solid var(--line);transition:.14s}
+  .btn:hover{background:#E3E9F0}
+  .btn-pri{background:var(--accent);color:#fff;border-color:var(--accent)} .btn-pri:hover{background:var(--accent-d)}
+  .btn-dark{background:var(--nav);color:#fff;border-color:var(--nav)} .btn-dark:hover{background:var(--nav2)}
+  .btn-sm{padding:5px 10px;font-size:12px}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:12px;font-weight:700;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:11px 12px;border-bottom:1px solid var(--line);font-size:13px}
+  tr:last-child td{border-bottom:none}
+  tbody tr{transition:.12s} tbody tr:hover{background:#FAFBFC}
+  .right{text-align:right}.center{text-align:center}
+  .inp{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;outline:none;transition:.15s}
+  .inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,.12)}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:.0;transition:.4s}
+  .kpi:hover::after{opacity:.9}
+  .kpi .lab{font-size:12px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+  .kpi .val{font-size:27px;font-weight:800;margin-top:7px;letter-spacing:-.5px}
+  .kpi .sub{font-size:12px;color:var(--muted);margin-top:3px}
+  .kpi.flash{animation:flash .7s ease}
+  @keyframes flash{0%{background:rgba(16,185,129,.14)}100%{background:var(--card)}}
+
+  /* 入场动画 —— 仅切换视图时触发 */
+  #view.enter .kpi,#view.enter .card{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+  #view.enter .kpi:nth-child(2),#view.enter .card:nth-child(2){animation-delay:.05s}
+  #view.enter .kpi:nth-child(3),#view.enter .card:nth-child(3){animation-delay:.1s}
+  #view.enter .kpi:nth-child(4),#view.enter .card:nth-child(4){animation-delay:.15s}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  /* 趋势图 */
+  .spark{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.15s ease forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .area{opacity:0;animation:fadein .8s .35s forwards}
+  .dot{opacity:0;animation:popdot .3s forwards}
+  @keyframes fadein{to{opacity:1}}@keyframes popdot{to{opacity:1}}
+  .bar-fill{transition:width .9s cubic-bezier(.2,.7,.2,1)}
+
+  /* POS */
+  .pos{display:grid;grid-template-columns:1fr 380px;gap:16px;height:calc(100vh - 81px - 44px)}
+  .pos-left{display:flex;flex-direction:column;min-height:0}
+  .pos-search{display:flex;gap:10px;margin-bottom:14px}
+  .pgrid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px;cursor:pointer;transition:.14s;position:relative}
+  .pcard:hover{border-color:var(--accent);box-shadow:0 6px 18px rgba(16,185,129,.16);transform:translateY(-3px)}
+  .pcard:active{transform:translateY(0)}
+  .pcard .biz{position:absolute;top:9px;right:9px}
+  .pcard .nm{font-weight:700;font-size:14px;margin:2px 0 4px;padding-right:42px}
+  .pcard .br{font-size:12px;color:var(--muted)}
+  .pcard .pr{font-weight:800;font-size:17px;margin-top:9px}
+  .pcard .pr small{font-size:12px;font-weight:600;color:var(--muted)}
+  .cart{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);display:flex;flex-direction:column;box-shadow:var(--shadow)}
+  .cart-h{padding:15px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+  .cart-h h3{font-size:15px;font-weight:800}
+  .cart-body{flex:1;overflow:auto;padding:6px 0}
+  .cline{padding:11px 16px;border-bottom:1px solid var(--line);animation:rise .25s ease both}
+  .cline .top{display:flex;justify-content:space-between;gap:8px}
+  .cline .nm{font-weight:600;font-size:13px}.cline .dim{font-size:12px;color:var(--muted)}
+  .qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:7px}
+  .qty button{width:28px;height:28px;font-size:16px;font-weight:700;background:var(--canvas)}
+  .qty button:hover{background:#dde3ea}
+  .qty span{width:36px;text-align:center;font-weight:700}
+  .cart-empty{padding:50px 20px;text-align:center;color:var(--muted)}
+  .cart-foot{border-top:1px solid var(--line);padding:14px 16px;background:#FBFCFD;border-radius:0 0 var(--radius) var(--radius)}
+  .ftrow{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}
+  .ftrow.tot{font-size:20px;font-weight:800;padding-top:8px;margin-top:6px;border-top:1px dashed var(--line)}
+  .memberbar{display:flex;align-items:center;gap:8px;padding:9px 16px;background:#FBF2DD;border-bottom:1px solid var(--line);font-size:13px}
+
+  .mask{position:fixed;inset:0;background:rgba(18,32,43,.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;animation:fadein .15s}
+  .modal{background:#fff;border-radius:16px;max-width:440px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:rise .25s cubic-bezier(.2,.7,.2,1)}
+  .modal-h{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .modal-h h3{font-size:17px;font-weight:800}
+  .modal-b{padding:22px}
+  .x{font-size:22px;color:var(--muted);width:30px;height:30px;border-radius:8px}.x:hover{background:var(--canvas)}
+  .field{margin-bottom:14px}.field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+  .opt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .opt{padding:11px;border:1.5px solid var(--line);border-radius:10px;text-align:center;font-weight:600;font-size:13px;cursor:pointer;transition:.13s}
+  .opt:hover{border-color:var(--accent)}.opt.on{border-color:var(--accent);background:rgba(16,185,129,.1);color:var(--accent-d)}
+  .opt.dis{opacity:.4;cursor:not-allowed}
+  .receipt{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:12.5px;background:#fff;border:1px dashed var(--line);border-radius:8px;padding:18px;line-height:1.7}
+  .receipt hr{border:none;border-top:1px dashed #bbb;margin:8px 0}
+  .receipt .rrow{display:flex;justify-content:space-between}
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--nav);color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:rise .25s}
+
+  @media(max-width:880px){
+    .app{flex-direction:column}
+    .nav{width:100%;height:auto;flex-direction:row;align-items:center;position:sticky;top:0;z-index:40;overflow-x:auto}
+    .brand{display:none}
+    .navfoot{display:none}
+    .navlist{display:flex;flex-direction:row;gap:4px;padding:8px;flex:1}
+    .navitem{flex:0 0 auto;white-space:nowrap;padding:9px 13px;margin-bottom:0}
+    .navitem span:not(.ic){display:inline}
+    .navitem:hover{transform:none}
+    .topbar{position:static;padding:10px 14px;gap:8px}
+    .pill{padding:6px 10px;font-size:12px}
+    .pill select{max-width:none}
+    .tagline,#clock{display:none}
+    .content{padding:14px}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .pos{grid-template-columns:1fr;height:auto}
+    .opt-grid{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="nav">
+    <div class="brand"><span class="dot"></span><div>RetailDesk<small id="brandSub">零售自适应平台</small></div></div>
+    <nav class="navlist" id="nav"></nav>
+    <div class="navfoot">v0.2 · 自适应原型<br>切换行业 → 整套重组</div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <h2 id="title">看板</h2>
+      <span class="tagline" id="tagline"></span>
+      <span class="spacer"></span>
+      <button class="livebtn" id="liveBtn" onclick="toggleLive()"><span class="d"></span>实时演示</button>
+      <span class="pill">🏭 <select id="indSel" onchange="loadIndustry(this.value)"></select></span>
+      <span class="pill">🏬 <select id="storeSel"></select></span>
+      <span class="pill">👤 <select id="roleSel">
+        <option value="cashier">收银员</option><option value="manager" selected>店长</option><option value="boss">老板</option>
+      </select></span>
+      <span class="pill num" id="clock"></span>
+    </header>
+    <div class="content" id="view"></div>
+  </div>
+</div>
+<div id="modalRoot"></div>
+
+<script>
+/* ============================================================
+   行业引擎  INDUSTRIES —— 切换即重组商品库/SKU模式/主题色/数据
+   每个 product.mode: variant 颜色尺码 | batch 批次效期 | serial 序列号 | simple 单品
+   接 Firestore：每个行业 = 一份模板文档；客户开店时选模板生成初始 /products
+   ============================================================ */
+const INDUSTRIES = {
+  all:{name:'全业态混合',icon:'🧩',accent:'#10B981',accentD:'#059669',tag:'一套系统通吃四种业态',products:[
+    {id:'P1',name:'纯棉圆领T恤',biz:'服装',mode:'variant',reorder:5,units:[
+      {sku:'TS-WH-M',label:'白 / M',barcode:'9551001',price:39.90,cost:14,stock:{S1:12,S2:3}},
+      {sku:'TS-BK-M',label:'黑 / M',barcode:'9551003',price:39.90,cost:14,stock:{S1:2,S2:6}},
+      {sku:'TS-BK-L',label:'黑 / L',barcode:'9551004',price:39.90,cost:14,stock:{S1:15,S2:9}}]},
+    {id:'P2',name:'矿泉水 600ml',biz:'杂货',mode:'batch',reorder:24,units:[
+      {sku:'WTR',label:'批次 B2509',batch:'B2509',expiry:'2026-09-30',barcode:'9552001',price:1.50,cost:0.7,stock:{S1:120,S2:60}}]},
+    {id:'P3',name:'鲜牛奶 1L',biz:'杂货',mode:'batch',reorder:12,units:[
+      {sku:'MLK',label:'批次 B0620',batch:'B0620',expiry:'2026-06-20',price:7.90,cost:5.2,stock:{S1:9,S2:4}}]},
+    {id:'P4',name:'无线降噪耳机 X1',biz:'3C',mode:'serial',reorder:2,units:[
+      {sku:'EAR1',label:'SN 8801',serial:'8801',warranty:'12月',price:299,cost:180,stock:{S1:1,S2:0}},
+      {sku:'EAR2',label:'SN 8802',serial:'8802',warranty:'12月',price:299,cost:180,stock:{S1:1,S2:0}}]},
+    {id:'P5',name:'保湿面霜 50g',biz:'美妆',mode:'batch',reorder:6,units:[
+      {sku:'CRM1',label:'批号 L25A',batch:'L25A',expiry:'2027-01-31',price:68,cost:28,stock:{S1:14,S2:5}},
+      {sku:'CRM2',label:'批号 L24C 临期',batch:'L24C',expiry:'2026-07-10',price:68,cost:28,stock:{S1:3,S2:0}}]},
+    {id:'P6',name:'帆布托特包',biz:'服装',mode:'simple',reorder:4,units:[
+      {sku:'BAG',label:'本色',barcode:'9551050',price:25,cost:9,stock:{S1:7,S2:2}}]}]},
+
+  fashion:{name:'服装精品',icon:'👗',accent:'#6366F1',accentD:'#4F46E5',tag:'颜色尺码 SKU · 当季款式',products:[
+    {id:'F1',name:'纯棉圆领T恤',biz:'上衣',mode:'variant',reorder:6,units:[
+      {sku:'T-WH-M',label:'白 / M',price:39.90,cost:14,stock:{S1:12,S2:3}},
+      {sku:'T-WH-L',label:'白 / L',price:39.90,cost:14,stock:{S1:8,S2:0}},
+      {sku:'T-BK-M',label:'黑 / M',price:39.90,cost:14,stock:{S1:2,S2:6}},
+      {sku:'T-BK-L',label:'黑 / L',price:39.90,cost:14,stock:{S1:15,S2:9}}]},
+    {id:'F2',name:'修身牛仔裤',biz:'裤装',mode:'variant',reorder:4,units:[
+      {sku:'J-30',label:'蓝 / 30',price:89,cost:38,stock:{S1:5,S2:2}},
+      {sku:'J-32',label:'蓝 / 32',price:89,cost:38,stock:{S1:1,S2:3}},
+      {sku:'J-34',label:'蓝 / 34',price:89,cost:38,stock:{S1:7,S2:0}}]},
+    {id:'F3',name:'连帽卫衣',biz:'外套',mode:'variant',reorder:4,units:[
+      {sku:'H-GY-M',label:'灰 / M',price:119,cost:52,stock:{S1:6,S2:1}},
+      {sku:'H-GY-L',label:'灰 / L',price:119,cost:52,stock:{S1:0,S2:4}}]},
+    {id:'F4',name:'帆布托特包',biz:'配件',mode:'simple',reorder:5,units:[
+      {sku:'BAG',label:'本色',price:25,cost:9,stock:{S1:9,S2:2}}]},
+    {id:'F5',name:'棒球帽',biz:'配件',mode:'simple',reorder:6,units:[
+      {sku:'CAP',label:'黑',price:35,cost:12,stock:{S1:3,S2:5}}]}]},
+
+  grocery:{name:'便利杂货',icon:'🛒',accent:'#16A34A',accentD:'#15803D',tag:'批次效期 · 临期预警先进先出',products:[
+    {id:'G1',name:'矿泉水 600ml',biz:'饮料',mode:'batch',reorder:24,units:[
+      {sku:'WTR',label:'批次 B2509',batch:'B2509',expiry:'2026-12-31',barcode:'955201',price:1.50,cost:0.7,stock:{S1:120,S2:60}}]},
+    {id:'G2',name:'鲜牛奶 1L',biz:'乳制品',mode:'batch',reorder:12,units:[
+      {sku:'MLK',label:'批次 B0620',batch:'B0620',expiry:'2026-06-20',price:7.90,cost:5.2,stock:{S1:9,S2:4}}]},
+    {id:'G3',name:'全麦面包',biz:'烘焙',mode:'batch',reorder:8,units:[
+      {sku:'BRD',label:'今日烘焙',batch:'D0614',expiry:'2026-06-17',price:6.50,cost:2.8,stock:{S1:5,S2:2}}]},
+    {id:'G4',name:'鸡蛋 (10粒)',biz:'生鲜',mode:'simple',reorder:10,units:[
+      {sku:'EGG',label:'盒装',barcode:'955240',price:9.90,cost:6,stock:{S1:18,S2:7}}]},
+    {id:'G5',name:'原味薯片',biz:'零食',mode:'simple',reorder:12,units:[
+      {sku:'CHP',label:'大包',barcode:'955250',price:5.50,cost:2.5,stock:{S1:30,S2:14}}]},
+    {id:'G6',name:'即溶咖啡',biz:'饮料',mode:'simple',reorder:8,units:[
+      {sku:'COF',label:'3合1 ×20',barcode:'955260',price:13.90,cost:7,stock:{S1:2,S2:9}}]}]},
+
+  electronics:{name:'3C 电器',icon:'📱',accent:'#0EA5E9',accentD:'#0284C7',tag:'序列号追踪 · 保修管理',products:[
+    {id:'E1',name:'无线降噪耳机 X1',biz:'音频',mode:'serial',reorder:2,units:[
+      {sku:'EAR1',label:'SN 8801',serial:'8801',warranty:'12月',price:299,cost:180,stock:{S1:1,S2:0}},
+      {sku:'EAR2',label:'SN 8802',serial:'8802',warranty:'12月',price:299,cost:180,stock:{S1:1,S2:0}},
+      {sku:'EAR3',label:'SN 8803',serial:'8803',warranty:'12月',price:299,cost:180,stock:{S1:0,S2:1}}]},
+    {id:'E2',name:'快充充电宝 20000mAh',biz:'配件',mode:'serial',reorder:3,units:[
+      {sku:'PB1',label:'SN P201',serial:'P201',warranty:'6月',price:89,cost:42,stock:{S1:1,S2:0}},
+      {sku:'PB2',label:'SN P202',serial:'P202',warranty:'6月',price:89,cost:42,stock:{S1:1,S2:2}}]},
+    {id:'E3',name:'智能手表 W5',biz:'穿戴',mode:'serial',reorder:2,units:[
+      {sku:'W1',label:'SN W5-01',serial:'W5-01',warranty:'12月',price:459,cost:280,stock:{S1:1,S2:0}},
+      {sku:'W2',label:'SN W5-02',serial:'W5-02',warranty:'12月',price:459,cost:280,stock:{S1:0,S2:1}}]},
+    {id:'E4',name:'Type-C 数据线',biz:'配件',mode:'simple',reorder:10,units:[
+      {sku:'CBL',label:'1.5m',barcode:'955380',price:19,cost:6,stock:{S1:24,S2:8}}]}]},
+
+  beauty:{name:'美妆保健',icon:'💄',accent:'#EC4899',accentD:'#DB2777',tag:'批号效期 · 专柜会员',products:[
+    {id:'B1',name:'保湿面霜 50g',biz:'护肤',mode:'batch',reorder:6,units:[
+      {sku:'CRM1',label:'批号 L25A',batch:'L25A',expiry:'2027-01-31',price:68,cost:28,stock:{S1:14,S2:5}},
+      {sku:'CRM2',label:'批号 L24C 临期',batch:'L24C',expiry:'2026-07-10',price:68,cost:28,stock:{S1:3,S2:0}}]},
+    {id:'B2',name:'烟酰胺精华液',biz:'护肤',mode:'batch',reorder:5,units:[
+      {sku:'SER',label:'批号 S25B',batch:'S25B',expiry:'2027-03-31',price:128,cost:55,stock:{S1:7,S2:2}}]},
+    {id:'B3',name:'哑光唇膏',biz:'彩妆',mode:'variant',reorder:4,units:[
+      {sku:'LIP-01',label:'色号 #01 豆沙',price:59,cost:22,stock:{S1:6,S2:1}},
+      {sku:'LIP-02',label:'色号 #02 正红',price:59,cost:22,stock:{S1:1,S2:4}}]},
+    {id:'B4',name:'维C泡腾片',biz:'保健',mode:'batch',reorder:8,units:[
+      {sku:'VC',label:'批号 V25',batch:'V25',expiry:'2026-08-15',price:42,cost:18,stock:{S1:11,S2:3}}]}]},
+
+  fnb:{name:'餐饮 F&B',icon:'🍜',accent:'#F97316',accentD:'#EA580C',tag:'菜单出餐 · 翻台快收',products:[
+    {id:'D1',name:'招牌豚骨拉面',biz:'主食',mode:'simple',reorder:0,units:[
+      {sku:'RMN',label:'大碗',price:18.90,cost:6.5,stock:{S1:999,S2:999}}]},
+    {id:'D2',name:'黯然叉烧饭',biz:'主食',mode:'simple',reorder:0,units:[
+      {sku:'RICE',label:'例',price:15.90,cost:5.2,stock:{S1:999,S2:999}}]},
+    {id:'D3',name:'珍珠奶茶',biz:'饮品',mode:'simple',reorder:0,units:[
+      {sku:'BBT',label:'大杯',price:8.50,cost:2.4,stock:{S1:999,S2:999}}]},
+    {id:'D4',name:'盐酥鸡',biz:'小食',mode:'simple',reorder:0,units:[
+      {sku:'CHK',label:'份',price:9.90,cost:3.8,stock:{S1:999,S2:999}}]},
+    {id:'D5',name:'柠檬蜂蜜冰茶',biz:'饮品',mode:'simple',reorder:0,units:[
+      {sku:'LMN',label:'大杯',price:7.50,cost:2.0,stock:{S1:999,S2:999}}]}]},
+};
+
+const DB = {
+  stores:[{id:'S1',name:'总店 (乔治市)'},{id:'S2',name:'分店 (峇六拜)'}],
+  members:[
+    {id:'M001',name:'陈大文',phone:'012-3456789',tier:'金卡',points:1240,balance:80.00},
+    {id:'M002',name:'Siti Aminah',phone:'017-8881122',tier:'银卡',points:430,balance:0},
+    {id:'M003',name:'林美玲',phone:'016-5550098',tier:'普通',points:60,balance:200.00}],
+  products:[], orders:[], held:[],
+  suppliers:[
+    {id:'SUP1',name:'宏达批发 Hong Tat',contact:'王经理 012-7778888',terms:'月结30天'},
+    {id:'SUP2',name:'信源贸易 Sin Guan',contact:'Mr. Tan 013-2223344',terms:'货到付款'}],
+  purchaseOrders:[],
+  promotions:[
+    {id:'PR1',name:'满100减10',type:'threshold',min:100,off:10,on:true},
+    {id:'PR2',name:'同款第二件半价',type:'bogo',on:true},
+    {id:'PR3',name:'会员日全场95折',type:'percent',pct:5,on:false}],
+  shifts:[], settings:{sst:0,service:0},
+};
+
+const S = { view:'dash', store:'S1', role:'manager', industry:'all', cart:[], member:null, shift:null, _enter:false, _pay:'duitnow', _einv:false, _redeem:0 };
+const BIZ_COLORS=['b-info','b-ok','b-gold','b-dan','b-acc'];
+const bizBadge=(()=>{const m={};let i=0;return b=>{if(!(b in m))m[b]=BIZ_COLORS[i++%BIZ_COLORS.length];return m[b];};})();
+const MENU=[{k:'dash',ic:'📊',t:'看板'},{k:'pos',ic:'🧾',t:'收银'},{k:'sale',ic:'🧮',t:'销售/退货'},{k:'inv',ic:'📦',t:'库存'},{k:'buy',ic:'🚚',t:'采购'},{k:'promo',ic:'🎁',t:'促销'},{k:'mem',ic:'💳',t:'会员'},{k:'ai',ic:'🤖',t:'智能洞察'},{k:'shift',ic:'🧰',t:'交班'},{k:'rpt',ic:'📈',t:'报表'},{k:'einv',ic:'🏛️',t:'e-Invoice'}];
+
+/* 工具 */
+const $=s=>document.querySelector(s);
+const money=n=>'RM'+Number(n).toFixed(2);
+const canSeeCost=()=>S.role==='manager'||S.role==='boss';
+const isFnb=()=>S.industry==='fnb';
+const unitStock=u=>u.stock[S.store]||0;
+const allUnits=()=>DB.products.flatMap(p=>p.units.map(u=>({...u,p})));
+const daysTo=d=>d?Math.ceil((new Date(d)-new Date())/864e5):null;
+const memberById=id=>DB.members.find(m=>m.id===id);
+
+/* ============================================================
+   行业切换 —— 重组商品/数据/主题
+   ============================================================ */
+function loadIndustry(key){
+  if(liveTimer)toggleLive();
+  S.industry=key;
+  const ind=INDUSTRIES[key];
+  DB.products=JSON.parse(JSON.stringify(ind.products));   // 深拷贝，库存改动不跨行业残留
+  DB.orders=seedOrders();
+  document.documentElement.style.setProperty('--accent',ind.accent);
+  document.documentElement.style.setProperty('--accent-d',ind.accentD);
+  $('#brandSub').textContent=ind.icon+' '+ind.name;
+  $('#tagline').textContent=ind.tag;
+  S.cart=[];S.member=null;
+  go('dash');
+}
+function seedOrders(){
+  const us=allUnits(); const o=[]; const now=Date.now();
+  const mk=(id,store,ago,picks,method,mem,einv)=>({
+    id,store,ts:now-ago,method,memberId:mem,
+    lines:picks.map(([u,q])=>({sku:u.sku,name:u.p.name+' '+u.label,qty:q,price:u.price,cost:u.cost||0})),
+    total:+picks.reduce((s,[u,q])=>s+u.price*q,0).toFixed(2),
+    einv:einv?{tin:'C25845632100',name:'Maju Trading Sdn Bhd',uin:'MYI-2026-000128456',validated:true}:null});
+  if(us[0])o.push(mk('O-1041','S1',2*36e5,[[us[0],2]],'duitnow','M001',true));
+  if(us[1])o.push(mk('O-1042','S1',36e5,[[us[1],1]].concat(us[2]?[[us[2],1]]:[]),'ewallet',null,false));
+  if(us[2])o.push(mk('O-1043','S2',18e5,[[us[2],1]],'card','M003',false));
+  return o;
+}
+
+/* ============================================================
+   渲染
+   ============================================================ */
+function renderNav(){ $('#nav').innerHTML=MENU.map(m=>`<button class="navitem ${S.view===m.k?'on':''}" onclick="go('${m.k}')"><span class="ic">${m.ic}</span><span>${m.t}</span></button>`).join(''); }
+function go(k){ S.view=k; S._enter=true; renderNav(); $('#title').textContent=MENU.find(m=>m.k===k).t; render(); }
+function render(){
+  const v=$('#view');
+  const map={dash:viewDash,pos:viewPos,sale:viewSale,inv:viewInv,buy:viewBuy,promo:viewPromo,mem:viewMem,ai:viewAI,shift:viewShift,rpt:viewRpt,einv:viewEinv};
+  v.innerHTML=(map[S.view]||viewDash)();
+  if(S._enter){ v.classList.add('enter'); animateCounts(); animateBars(); setTimeout(()=>v.classList.remove('enter'),700); S._enter=false; }
+}
+function animateCounts(){
+  $('#view').querySelectorAll('[data-count]').forEach(el=>{
+    const target=parseFloat(el.dataset.count)||0, fmt=el.dataset.fmt, t0=performance.now(), dur=750;
+    (function step(t){const p=Math.min((t-t0)/dur,1),e=1-Math.pow(1-p,3),v=target*e;
+      el.textContent=fmt==='money'?'RM'+v.toFixed(2):Math.round(v).toLocaleString();
+      if(p<1)requestAnimationFrame(step);})(t0);
+  });
+}
+function animateBars(){ $('#view').querySelectorAll('.bar-fill').forEach(b=>{const w=b.dataset.w;b.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>b.style.width=w+'%'));}); }
+
+/* ---------- 看板 ---------- */
+function viewDash(){
+  const os=DB.orders.filter(o=>o.store===S.store);
+  const sales=os.reduce((s,o)=>s+o.total,0), orders=os.length, aov=orders?sales/orders:0;
+  const margin=os.reduce((s,o)=>s+o.lines.reduce((x,l)=>x+(l.price-(l.cost||0))*l.qty,0),0);
+  const lowList=isFnb()?[]:allUnits().filter(u=>unitStock(u)<=u.p.reorder&&unitStock(u)>0);
+  const out=isFnb()?[]:allUnits().filter(u=>unitStock(u)===0);
+  const expiring=allUnits().filter(u=>{const d=daysTo(u.expiry);return d!==null&&d<=30&&unitStock(u)>0;});
+  const pts=todaySeries(sales);
+  return `<div class="kpis blk">
+      ${kpi('今日销售额','💰',sales,orders+' 单','money')}
+      ${kpi(isFnb()?'出餐数':'客单价','🧍',isFnb()?orders:aov,isFnb()?'今日':'平均每单',isFnb()?'int':'money')}
+      ${canSeeCost()?kpi('今日毛利','📈',margin,(sales?Math.round(margin/sales*100):0)+'% 毛利率','money'):kpi('今日单数','🧾',orders,'店长可见毛利','int')}
+      ${kpi(isFnb()?'热销品项':'库存预警','⚠️',isFnb()?os.reduce((s,o)=>s+o.lines.length,0):(lowList.length+out.length),isFnb()?'今日':(out.length+' 断货 · '+lowList.length+' 偏低'),'int')}
+    </div>
+    <div class="grid blk" style="grid-template-columns:1.5fr 1fr">
+      <div class="card">
+        <div class="card-h"><h3>今日销售趋势</h3><span class="spacer"></span><span class="badge b-acc">${INDUSTRIES[S.industry].icon} ${INDUSTRIES[S.industry].name}</span></div>
+        <div class="card-b">${trendSVG(pts)}
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px">${pts.filter((_,i)=>i%2===0).map(p=>`<span>${p.label}</span>`).join('')}</div></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>${isFnb()?'备料提醒':'需要补货 / 临期'}</h3><span class="spacer"></span><span class="badge b-info">🤖 AI</span></div>
+        <div class="card-b" style="padding:8px 0">
+        ${(()=>{const t=[...out,...lowList][0];return t?`<div style="padding:10px 18px;background:#E8F1FD;color:#1f4e8c;font-size:12.5px;border-bottom:1px solid var(--line)">🤖 建议为「${t.p.name} ${t.label}」补货 ${Math.max(t.p.reorder*2-unitStock(t),t.p.reorder)} 件（依补货点与售速测算）</div>`:'';})()}
+        ${[...out.map(u=>almRow(u,'断货','b-dan')),...lowList.map(u=>almRow(u,'仅 '+unitStock(u),'b-warn')),...expiring.map(u=>almRow(u,daysTo(u.expiry)+'天到期','b-warn'))].join('')||'<div class="center muted" style="padding:34px">一切正常 ✅</div>'}
+        </div>
+      </div>
+    </div>
+    <div class="card blk">
+      <div class="card-h"><h3>最近交易</h3><span class="spacer"></span><span class="muted" style="font-size:12px">${DB.stores.find(s=>s.id===S.store).name}</span></div>
+      <table><thead><tr><th>单号</th><th>${isFnb()?'品项':'商品'}</th><th>会员</th><th>方式</th><th class="right">金额</th></tr></thead><tbody id="txbody">
+      ${os.slice().reverse().map(txRow).join('')||'<tr><td colspan=5 class="center muted">本店今日暂无交易</td></tr>'}
+      </tbody></table>
+    </div>`;
+}
+function txRow(o){return `<tr><td class="num">${o.id}</td>
+  <td>${o.lines.map(l=>l.name+' ×'+l.qty).join('<br>')}</td>
+  <td>${o.memberId?memberById(o.memberId).name:'<span class="muted">散客</span>'}</td>
+  <td><span class="badge b-grey">${payLabel(o.method)}</span></td>
+  <td class="right num" style="font-weight:700">${money(o.total)}</td></tr>`;}
+function kpi(lab,ic,val,sub,fmt){
+  const v=typeof val==='number'?`<div class="val num" data-count="${val}" data-fmt="${fmt||'int'}">${fmt==='money'?'RM0.00':'0'}</div>`:`<div class="val">${val}</div>`;
+  return `<div class="kpi"><div class="lab">${ic} ${lab}</div>${v}<div class="sub">${sub}</div></div>`;}
+function almRow(u,tag,cls){return `<div style="display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--line)"><div style="flex:1"><div style="font-weight:600">${u.p.name}</div><div class="muted" style="font-size:12px">${u.label}</div></div><span class="badge ${cls}">${tag}</span></div>`;}
+function payLabel(m){return {cash:'现金',ewallet:'电子钱包',card:'刷卡',balance:'储值',duitnow:'DuitNow QR'}[m]||m;}
+function todaySeries(total){
+  total=total||1; const hrs=['10','11','12','13','14','15','16','17','18','19','20'];
+  const w=[0.04,0.06,0.12,0.10,0.06,0.05,0.07,0.09,0.13,0.12,0.10]; let acc=0;
+  return w.map((x,i)=>{acc+=total*x;return {label:hrs[i],y:+acc.toFixed(2)};});
+}
+function trendSVG(pts){
+  const w=560,h=150,pad=10,maxY=Math.max(...pts.map(p=>p.y),1);
+  const X=i=>pad+(w-2*pad)*(i/(pts.length-1)), Y=y=>h-pad-(h-2*pad)*(y/maxY);
+  const line=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' ');
+  const area=line+` L ${X(pts.length-1).toFixed(1)} ${h-pad} L ${X(0).toFixed(1)} ${h-pad} Z`;
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="150" preserveAspectRatio="none" style="display:block">
+    <defs><linearGradient id="ga" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".30"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#ga)" class="area"/>
+    <path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" pathLength="1" class="spark"/>
+    ${pts.map((p,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="3" fill="#fff" stroke="var(--accent)" stroke-width="2" class="dot" style="animation-delay:${(.4+i*.05).toFixed(2)}s"/>`).join('')}
+  </svg>`;
+}
+
+/* ---------- POS ---------- */
+function viewPos(){
+  return `<div class="pos">
+    <div class="pos-left">
+      <div class="pos-search">
+        <input class="inp" id="posq" placeholder="🔍 ${isFnb()?'搜菜品':'品名 / 条码 / 序列号'}…" oninput="render()" autofocus>
+        <button class="btn" onclick="$('#posq').value='';render()">清空</button>
+      </div>
+      <div class="pgrid">${posCards()}</div>
+    </div>${cartPanel()}</div>`;
+}
+function posCards(){
+  const q=($('#posq')?.value||'').toLowerCase();
+  return DB.products.filter(p=>!q||p.name.toLowerCase().includes(q)||p.units.some(u=>(u.barcode||'').includes(q)||(u.serial||'').toLowerCase().includes(q)||u.label.toLowerCase().includes(q)))
+   .map(p=>{const stk=p.units.reduce((s,u)=>s+(u.stock[S.store]||0),0),minp=Math.min(...p.units.map(u=>u.price));
+    return `<div class="pcard" onclick="pickProduct('${p.id}')"><span class="biz badge ${bizBadge(p.biz)}">${p.biz}</span>
+      <div class="nm">${p.name}</div><div class="br">${modeLabel(p.mode)}${isFnb()?'':' · 库存 '+stk}</div>
+      <div class="pr">${money(minp)}${p.units.length>1?' <small>起</small>':''}</div></div>`;}).join('')
+   ||'<div class="muted center" style="grid-column:1/-1;padding:40px">无匹配商品</div>';
+}
+function modeLabel(m){return {variant:'颜色尺码',batch:'批次效期',serial:'序列号',simple:isFnb()?'单品':'单品'}[m];}
+function pickProduct(pid){
+  const p=DB.products.find(x=>x.id===pid);
+  if(p.units.length===1){addToCart(p.units[0]);return;}
+  modal(`选择${modeLabel(p.mode)} · ${p.name}`,`<div class="opt-grid">${p.units.map(u=>{const stk=u.stock[S.store]||0;
+    return `<div class="opt ${stk<=0?'dis':''}" ${stk>0?`onclick="addToCart_byId('${p.id}','${u.sku}');closeModal()"`:''}><div>${u.label}</div><div class="muted" style="font-size:11px;margin-top:3px">库存 ${stk}</div></div>`;}).join('')}</div>`);
+}
+function addToCart_byId(pid,sku){addToCart(DB.products.find(p=>p.id===pid).units.find(x=>x.sku===sku));}
+function addToCart(u){
+  if((u.stock[S.store]||0)<=0){toast('该规格本店无库存');return;}
+  const ex=S.cart.find(c=>c.sku===u.sku), inCart=ex?ex.qty:0;
+  if(inCart+1>(u.stock[S.store]||0)){toast('已达本店库存上限');return;}
+  if(ex)ex.qty++; else S.cart.push({sku:u.sku,name:DB.products.find(p=>p.units.includes(u)).name,dim:u.label,price:u.price,cost:u.cost||0,qty:1});
+  render();
+}
+function chQty(sku,d){const c=S.cart.find(x=>x.sku===sku);if(!c)return;const u=allUnits().find(x=>x.sku===sku);
+  if(c.qty+d>(u.stock[S.store]||0)){toast('超过库存');return;}c.qty+=d;if(c.qty<=0)S.cart=S.cart.filter(x=>x.sku!==sku);render();}
+function cartPanel(){
+  const r=calcCart(), m=r.m;
+  return `<div class="cart">
+    <div class="cart-h"><h3>🛒 ${isFnb()?'点单':'购物车'}</h3><span class="spacer"></span>
+      ${DB.held.length?`<button class="btn btn-sm" onclick="openHeld()">挂单 ${DB.held.length}</button>`:''}
+      ${S.cart.length?`<button class="btn btn-sm" onclick="holdSale()">挂起</button> <button class="btn btn-sm" onclick="S.cart=[];render()">清空</button>`:''}</div>
+    ${m?`<div class="memberbar">💳 <b>${m.name}</b> · ${m.tier} · 积分 ${m.points} · 余额 ${money(m.balance)}<span class="spacer"></span><button class="btn btn-sm" onclick="S.member=null;render()">移除</button></div>`
+      :`<div class="memberbar" style="background:#FBFCFD;color:var(--muted)">散客<span class="spacer"></span><button class="btn btn-sm" onclick="openMemberPick()">+ 绑定会员</button></div>`}
+    <div class="cart-body">
+      ${S.cart.length?S.cart.map(c=>`<div class="cline"><div class="top"><div><div class="nm">${c.name}</div><div class="dim">${c.dim}</div></div><div class="num" style="font-weight:700">${money(c.price*c.qty)}</div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><div class="qty"><button onclick="chQty('${c.sku}',-1)">−</button><span class="num">${c.qty}</span><button onclick="chQty('${c.sku}',1)">+</button></div><span class="muted num" style="font-size:12px">${money(c.price)} / 件</span></div></div>`).join('')
+        :`<div class="cart-empty">点击左侧${isFnb()?'菜品':'商品'}<br>加入${isFnb()?'点单':'购物车'}</div>`}
+    </div>
+    <div class="cart-foot">
+      <div class="ftrow"><span class="muted">小计</span><span class="num">${money(r.sub)}</span></div>
+      ${r.names.map(n=>`<div class="ftrow" style="color:var(--accent-d)"><span>🎁 ${n}</span><span></span></div>`).join('')}
+      ${r.promoDisc>0?`<div class="ftrow" style="color:var(--accent-d)"><span>促销优惠</span><span class="num">−${money(r.promoDisc)}</span></div>`:''}
+      ${r.tierDisc>0?`<div class="ftrow" style="color:var(--accent-d)"><span>${m.tier}会员折扣</span><span class="num">−${money(r.tierDisc)}</span></div>`:''}
+      <div class="ftrow tot"><span>应收</span><span class="num">${money(r.total)}</span></div>
+      <button class="btn btn-pri" style="width:100%;margin-top:12px;padding:13px;font-size:15px" ${S.cart.length?'':'disabled style="opacity:.4;width:100%;margin-top:12px;padding:13px;font-size:15px"'} onclick="openCheckout()">收款 ${money(r.total)}</button>
+    </div></div>`;
+}
+function openMemberPick(){modal('绑定会员',`<div class="field"><input class="inp" id="mq" placeholder="搜索姓名 / 电话" oninput="renderMemPick()"></div><div id="mpick">${memPickList('')}</div>`);setTimeout(()=>$('#mq')?.focus(),50);}
+function renderMemPick(){$('#mpick').innerHTML=memPickList($('#mq').value.toLowerCase());}
+function memPickList(q){return DB.members.filter(m=>m.name.toLowerCase().includes(q)||m.phone.includes(q)).map(m=>`<div class="opt" style="text-align:left;margin-bottom:8px" onclick="S.member='${m.id}';closeModal();render()"><b>${m.name}</b> <span class="badge ${m.tier==='金卡'?'b-gold':'b-grey'}">${m.tier}</span><div class="muted" style="font-size:12px;margin-top:2px">${m.phone} · 积分 ${m.points} · 余额 ${money(m.balance)}</div></div>`).join('')||'<div class="muted center" style="padding:20px">无匹配会员</div>';}
+function openCheckout(){
+  if(!S.cart.length)return; S._pay='duitnow';S._einv=false;S._redeem=0;
+  const r=calcCart(), m=r.m, maxPts=m?Math.min(m.points,Math.floor(r.total*100)):0;
+  modal('收款 · <span id="ckTot">'+money(r.total)+'</span>',`
+    <div class="field"><label>支付方式</label><div class="opt-grid" id="payopts">
+      ${['duitnow','cash','ewallet','card'].map(p=>`<div class="opt ${p==='duitnow'?'on':''}" data-p="${p}" onclick="selPay('${p}')">${payLabel(p)}</div>`).join('')}
+      ${m?`<div class="opt ${m.balance>=r.total?'':'dis'}" data-p="balance" ${m.balance>=r.total?`onclick="selPay('balance')"`:''}>储值 ${m.balance>=r.total?'':'(不足)'}</div>`:''}
+    </div></div>
+    ${m&&m.points>0?`<div class="field"><label>积分抵现 (100分 = RM1 · 可用 ${m.points} 分)</label>
+      <input class="inp num" id="redeemPts" type="number" min="0" max="${maxPts}" value="0" oninput="updateRedeem(${maxPts})"></div>`:''}
+    <div class="field"><label>电子发票 (LHDN e-Invoice)</label><div class="opt-grid" style="grid-template-columns:1fr 1fr">
+      <div class="opt on" id="einvNo" onclick="setEinv(false)">合并开票<div class="muted" style="font-size:11px;margin-top:2px">散客 · 月底汇总</div></div>
+      <div class="opt" id="einvYes" onclick="setEinv(true)">需要个人发票<div class="muted" style="font-size:11px;margin-top:2px">填买方 TIN</div></div>
+    </div></div>
+    <div id="einvFields" style="display:none">
+      <div class="field"><label>买方名称 / 公司</label><input class="inp" id="bname" placeholder="如 ABC Sdn Bhd"></div>
+      <div class="field"><label>买方税号 TIN</label><input class="inp" id="btin" placeholder="如 C12345678900"></div></div>
+    <button class="btn btn-pri" style="width:100%;padding:13px;font-size:15px" onclick="commitSale()">确认收款 <span id="ckBtn">${money(r.total)}</span></button>`);
+}
+function updateRedeem(maxPts){let p=Math.max(0,Math.min(parseInt($('#redeemPts').value||0),maxPts));S._redeem=p/100;const r=calcCart();if($('#ckTot'))$('#ckTot').textContent=money(r.total);if($('#ckBtn'))$('#ckBtn').textContent=money(r.total);}
+function selPay(p){S._pay=p;document.querySelectorAll('#payopts .opt').forEach(o=>o.classList.toggle('on',o.dataset.p===p));}
+function setEinv(v){S._einv=v;$('#einvYes').classList.toggle('on',v);$('#einvNo').classList.toggle('on',!v);$('#einvFields').style.display=v?'block':'none';}
+function commitSale(){
+  if($('#redeemPts')){const mx=parseInt($('#redeemPts').max||0);let p=Math.max(0,Math.min(parseInt($('#redeemPts').value||0),mx));S._redeem=p/100;}
+  const r=calcCart(), m=r.m, total=r.total, redeemPts=Math.round(r.redeem*100);
+  S.cart.forEach(c=>{const u=unitBySku(c.sku);if(u)u.stock[S.store]-=c.qty;});
+  let einv=null;
+  if(S._einv){const tin=($('#btin')?.value||'').trim(),bn=($('#bname')?.value||'').trim()||'未具名买方';
+    einv={tin:tin||'EI00000000000',name:bn,uin:'MYI-'+new Date().getFullYear()+'-'+String(Date.now()).slice(-9),validated:true};}
+  const order={id:'O-'+(1044+DB.orders.length),store:S.store,ts:Date.now(),
+    lines:S.cart.map(c=>({sku:c.sku,name:c.name+' '+c.dim,qty:c.qty,price:c.price,cost:c.cost})),
+    sub:r.sub,promoDisc:r.promoDisc,tierDisc:r.tierDisc,redeem:r.redeem,total,method:S._pay,memberId:S.member,einv};
+  DB.orders.push(order);
+  if(m){ m.points+=Math.floor(total)-redeemPts; if(S._pay==='balance')m.balance-=total;
+    const spent=DB.orders.filter(o=>o.memberId===m.id&&o.total>0).reduce((s,o)=>s+o.total,0);
+    const nt=spent>=2000?'金卡':spent>=500?'银卡':'普通', rk={'普通':0,'银卡':1,'金卡':2};
+    if(rk[nt]>rk[m.tier]){m.tier=nt;setTimeout(()=>toast('🎉 '+m.name+' 升级为 '+nt),350);} }
+  showReceipt(order,m,total); S.cart=[];S.member=null;S._redeem=0;
+}
+function showReceipt(o,m,total){
+  modal('收款成功 ✅',`<div class="receipt">
+    <div style="text-align:center;font-weight:700">${DB.stores.find(s=>s.id===o.store).name}</div>
+    <div style="text-align:center" class="muted">RetailDesk 收据</div><hr>
+    <div class="rrow"><span>${o.id}</span><span>${new Date(o.ts).toLocaleTimeString('zh',{hour:'2-digit',minute:'2-digit'})}</span></div><hr>
+    ${o.lines.map(l=>`<div class="rrow"><span>${l.name}</span></div><div class="rrow"><span>&nbsp;&nbsp;${l.qty} × ${money(l.price)}</span><span>${money(l.qty*l.price)}</span></div>`).join('')}
+    <hr><div class="rrow" style="font-weight:700;font-size:14px"><span>合计</span><span>${money(total)}</span></div>
+    <div class="rrow"><span>支付</span><span>${payLabel(o.method)}</span></div>
+    ${m?`<div class="rrow"><span>会员</span><span>${m.name} (积分 ${m.points})</span></div>`:''}
+    ${o.einv?`<hr><div class="rrow" style="color:#1f7a4d"><span>e-Invoice</span><span>已验证</span></div><div class="rrow" style="font-size:11px"><span>UIN</span><span>${o.einv.uin}</span></div><div class="rrow" style="font-size:11px"><span>买方TIN</span><span>${o.einv.tin}</span></div><div style="text-align:center;margin-top:6px;letter-spacing:2px">▦ ▦ ▦ QR ▦ ▦ ▦</div>`:`<div class="rrow muted" style="font-size:11px"><span>e-Invoice</span><span>计入月度合并发票</span></div>`}
+    <hr><div style="text-align:center" class="muted">谢谢惠顾 · Terima Kasih</div></div>
+    <button class="btn btn-dark" style="width:100%;margin-top:14px;padding:12px" onclick="closeModal();go('pos')">完成 · 下一单</button>`);
+}
+
+/* ---------- 进销存 ---------- */
+function viewInv(){
+  if(isFnb())return `<div class="card"><div class="card-b center muted" style="padding:50px">餐饮模式以菜品出餐为主，库存以备料管理。<br>切换其他行业可查看 SKU 进销存。</div></div>`;
+  const other=DB.stores.find(s=>s.id!==S.store);
+  const rows=allUnits().map(u=>{const stk=unitStock(u),d=daysTo(u.expiry);
+    let st=stk===0?'<span class="badge b-dan">断货</span>':stk<=u.p.reorder?'<span class="badge b-warn">偏低</span>':'<span class="badge b-ok">正常</span>';
+    if(d!==null&&d<=30&&stk>0)st+=' <span class="badge b-warn">'+d+'天到期</span>';
+    return `<tr><td><div style="font-weight:600">${u.p.name}</div><div class="muted" style="font-size:12px">${u.label}</div></td>
+      <td><span class="badge ${bizBadge(u.p.biz)}">${u.p.biz}</span></td>
+      <td class="num">${u.barcode||u.serial||'—'}</td>
+      <td class="right num" style="font-weight:700">${stk}</td><td class="right num muted">${u.stock[other.id]||0}</td>
+      <td class="right num">${money(u.price)}</td>
+      ${canSeeCost()?`<td class="right num muted">${money(u.cost||0)}</td><td class="right num" style="color:var(--accent-d)">${money(u.price-(u.cost||0))}</td>`:''}
+      <td>${st}</td>
+      <td class="right"><button class="btn btn-sm" onclick="stockIn('${u.sku}')">入库</button> <button class="btn btn-sm" onclick="transfer('${u.sku}')">调拨</button></td></tr>`;}).join('');
+  return `<div class="card"><div class="card-h"><h3>商品 · 库存</h3><span class="spacer"></span><button class="btn btn-sm btn-dark" onclick="startStocktake()">📋 盘点</button><span class="muted" style="font-size:12px">本店：${DB.stores.find(s=>s.id===S.store).name}</span></div>
+    <table><thead><tr><th>商品 / 规格</th><th>类别</th><th>条码/序号</th><th class="right">本店</th><th class="right">他店</th><th class="right">售价</th>${canSeeCost()?'<th class="right">成本</th><th class="right">单件毛利</th>':''}<th>状态</th><th class="right">操作</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function stockIn(sku){const u=allUnits().find(x=>x.sku===sku);modal('入库 · '+u.p.name,`<div class="muted" style="margin-bottom:12px">${u.label} · 当前本店 ${unitStock(u)}</div><div class="field"><label>入库数量</label><input class="inp num" id="qin" type="number" value="10" min="1"></div><button class="btn btn-pri" style="width:100%;padding:12px" onclick="doStockIn('${sku}')">确认入库</button>`);}
+function doStockIn(sku){const u=allUnits().find(x=>x.sku===sku),q=+$('#qin').value||0;if(q>0){u.stock[S.store]=(u.stock[S.store]||0)+q;toast('已入库 '+q+' 件');}closeModal();go('inv');}
+function transfer(sku){const u=allUnits().find(x=>x.sku===sku),other=DB.stores.find(s=>s.id!==S.store);modal('调拨 · '+u.p.name,`<div class="muted" style="margin-bottom:12px">${u.label}</div><div class="field"><label>从 ${DB.stores.find(s=>s.id===S.store).name} → ${other.name}</label><input class="inp num" id="qtr" type="number" value="1" min="1" max="${unitStock(u)}"></div><div class="muted" style="font-size:12px;margin-bottom:12px">本店可调出 ${unitStock(u)} 件</div><button class="btn btn-pri" style="width:100%;padding:12px" onclick="doTransfer('${sku}','${other.id}')">确认调拨</button>`);}
+function doTransfer(sku,to){const u=allUnits().find(x=>x.sku===sku),q=+$('#qtr').value||0;if(q>0&&q<=unitStock(u)){u.stock[S.store]-=q;u.stock[to]=(u.stock[to]||0)+q;toast('已调拨 '+q+' 件');}closeModal();go('inv');}
+
+/* ---------- 会员 ---------- */
+function viewMem(){return `<div class="card"><div class="card-h"><h3>会员</h3><span class="spacer"></span><button class="btn btn-dark" onclick="addMember()">+ 新增会员</button></div>
+  <table><thead><tr><th>姓名</th><th>电话</th><th>等级</th><th class="right">累计消费</th><th class="right">积分</th><th class="right">储值余额</th><th class="right">操作</th></tr></thead><tbody>
+  ${DB.members.map(m=>{const spent=DB.orders.filter(o=>o.memberId===m.id&&o.total>0).reduce((s,o)=>s+o.total,0);
+    return `<tr style="cursor:pointer" onclick="memberDetail('${m.id}')"><td style="font-weight:600">${m.name}</td><td class="num">${m.phone}</td><td><span class="badge ${m.tier==='金卡'?'b-gold':m.tier==='银卡'?'b-info':'b-grey'}">${m.tier}</span></td><td class="right num">${money(spent)}</td><td class="right num">${m.points}</td><td class="right num" style="font-weight:700">${money(m.balance)}</td><td class="right"><button class="btn btn-sm" onclick="event.stopPropagation();topup('${m.id}')">储值</button></td></tr>`;}).join('')}
+  </tbody></table></div>`;}
+function addMember(){modal('新增会员',`<div class="field"><label>姓名</label><input class="inp" id="mn"></div><div class="field"><label>电话</label><input class="inp" id="mp"></div><div class="field"><label>等级</label><select class="inp" id="mt"><option>普通</option><option>银卡</option><option>金卡</option></select></div><button class="btn btn-pri" style="width:100%;padding:12px" onclick="doAddMember()">创建</button>`);}
+function doAddMember(){const n=$('#mn').value.trim();if(!n){toast('请填姓名');return;}DB.members.push({id:'M'+String(DB.members.length+1).padStart(3,'0'),name:n,phone:$('#mp').value,tier:$('#mt').value,points:0,balance:0});toast('已创建会员');closeModal();go('mem');}
+function topup(id){const m=memberById(id);modal('储值 · '+m.name,`<div class="muted" style="margin-bottom:12px">当前余额 ${money(m.balance)}</div><div class="field"><label>储值金额</label><input class="inp num" id="tu" type="number" value="100"></div><button class="btn btn-pri" style="width:100%;padding:12px" onclick="doTopup('${id}')">确认储值</button>`);}
+function doTopup(id){const m=memberById(id),a=+$('#tu').value||0;if(a>0){m.balance+=a;toast('已储值 '+money(a));}closeModal();go('mem');}
+
+/* ---------- 报表 ---------- */
+function viewRpt(){
+  const os=DB.orders.filter(o=>o.store===S.store);
+  const sales=os.reduce((s,o)=>s+o.total,0), cogs=os.reduce((s,o)=>s+o.lines.reduce((x,l)=>x+(l.cost||0)*l.qty,0),0), margin=sales-cogs;
+  const rank={}; os.forEach(o=>o.lines.forEach(l=>{const k=l.name.split(' ')[0];rank[k]=(rank[k]||0)+l.qty*l.price;}));
+  const top=Object.entries(rank).sort((a,b)=>b[1]-a[1]); const max=top.length?top[0][1]:1;
+  return `<div class="kpis blk" style="grid-template-columns:repeat(3,1fr)">
+      ${kpi('销售总额','💰',sales,os.length+' 单','money')}
+      ${canSeeCost()?kpi('销售成本','📉',cogs,'COGS','money'):kpi('客单价','🧍',os.length?sales/os.length:0,'','money')}
+      ${canSeeCost()?kpi('毛利','📈',margin,(sales?Math.round(margin/sales*100):0)+'% 毛利率','money'):kpi('—','🔒','店长可见','成本与毛利')}
+    </div>
+    <div class="card blk"><div class="card-h"><h3>${isFnb()?'菜品':'商品'}销售排行（本店）</h3></div><div class="card-b">
+      ${top.map(([n,v])=>`<div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="font-weight:600">${n}</span><span class="num">${money(v)}</span></div><div style="background:var(--canvas);border-radius:6px;height:9px;overflow:hidden"><div class="bar-fill" data-w="${(v/max*100).toFixed(0)}" style="height:100%;width:0;background:var(--accent);border-radius:6px"></div></div></div>`).join('')||'<div class="muted center" style="padding:20px">暂无数据</div>'}
+    </div></div>
+    <div class="muted" style="font-size:12px">※ 原型用演示数据；接 Firestore 后按日期范围聚合 orders。</div>`;
+}
+
+/* ---------- e-Invoice ---------- */
+function viewEinv(){
+  const os=DB.orders.filter(o=>o.store===S.store), consol=os.filter(o=>!o.einv), indiv=os.filter(o=>o.einv);
+  const consolAmt=consol.reduce((s,o)=>s+o.total,0);
+  const now=new Date(), dl=new Date(now.getFullYear(),now.getMonth()+1,7), daysLeft=Math.ceil((dl-now)/864e5);
+  return `<div class="kpis blk">
+      ${kpi('待合并交易','🧾',consol.length,money(consolAmt),'int')}
+      ${kpi('已开个人发票','✅',indiv.length,'即时验证','int')}
+      ${kpi('合并截止','⏰',daysLeft,dl.toLocaleDateString('zh',{month:'2-digit',day:'2-digit'})+' 前提交','int')}
+      ${kpi('合规阶段','🏛️','Phase 4','RM1M–5M · 已生效')}
+    </div>
+    <div class="card blk"><div class="card-h"><h3>月度合并电子发票</h3><span class="spacer"></span><span class="badge ${daysLeft<=3?'b-dan':'b-info'}">${daysLeft<=3?'临近截止':'进行中'}</span></div>
+      <div class="card-b"><p class="muted" style="margin-bottom:14px">柜台散客免逐笔开票，月底汇总成一张合并 e-Invoice 提交 MyInvois。本店待合并 <b>${consol.length}</b> 笔，合计 <b>${money(consolAmt)}</b>。</p>
+      <button class="btn btn-pri" style="padding:12px 22px" ${consol.length?'':'disabled style="opacity:.4"'} onclick="submitConsol(${consol.length},${consolAmt})">🏛️ 生成并提交合并发票</button></div></div>
+    <div class="card blk"><div class="card-h"><h3>个人电子发票记录</h3></div>
+      <table><thead><tr><th>单号</th><th>买方</th><th>TIN</th><th class="right">金额</th><th>UIN</th><th>状态</th></tr></thead><tbody>
+      ${indiv.slice().reverse().map(o=>`<tr><td class="num">${o.id}</td><td>${o.einv.name}</td><td class="num muted">${o.einv.tin}</td><td class="right num">${money(o.total)}</td><td class="num" style="font-size:12px">${o.einv.uin}</td><td><span class="badge b-ok">已验证</span></td></tr>`).join('')||'<tr><td colspan=6 class="center muted" style="padding:24px">暂无 — POS 收款时选「需要个人发票」</td></tr>'}
+      </tbody></table></div>
+    <div class="muted" style="font-size:12px">※ 模拟验证。接线后：个人发票实时调 MyInvois API（≤55字段）取 UIN+QR；合并发票次月7日前批量提交。</div>`;
+}
+function submitConsol(n,amt){modal('提交合并电子发票',`<div class="receipt"><div style="text-align:center;font-weight:700">合并 e-Invoice · MyInvois</div><hr>
+  <div class="rrow"><span>门店</span><span>${DB.stores.find(s=>s.id===S.store).name}</span></div>
+  <div class="rrow"><span>期间</span><span>${new Date().toLocaleDateString('zh',{year:'numeric',month:'2-digit'})}</span></div>
+  <div class="rrow"><span>汇总笔数</span><span>${n} 笔</span></div>
+  <div class="rrow" style="font-weight:700"><span>合计</span><span>${money(amt)}</span></div><hr>
+  <div class="rrow" style="color:#1f7a4d"><span>状态</span><span>已验证 ✓</span></div>
+  <div class="rrow" style="font-size:11px"><span>UIN</span><span>CONS-${new Date().getFullYear()}-${String(Date.now()).slice(-9)}</span></div>
+  <div style="text-align:center;margin-top:6px;letter-spacing:2px">▦ ▦ ▦ QR ▦ ▦ ▦</div></div>
+  <button class="btn btn-dark" style="width:100%;margin-top:14px;padding:12px" onclick="closeModal()">完成</button>`);}
+
+/* ---------- 实时演示 ---------- */
+let liveTimer=null;
+function toggleLive(){
+  const btn=$('#liveBtn');
+  if(liveTimer){clearInterval(liveTimer);liveTimer=null;btn.classList.remove('on');btn.innerHTML='<span class="d"></span>实时演示';return;}
+  liveTimer=setInterval(simSale,2600); btn.classList.add('on'); btn.innerHTML='<span class="d"></span>停止演示';
+  if(S.view!=='dash')go('dash');
+}
+function simSale(){
+  const avail=allUnits().filter(u=>unitStock(u)>0); if(!avail.length){toast('库存已空，自动停止');toggleLive();return;}
+  const u=avail[Math.floor(Math.random()*avail.length)], q=Math.min(1+Math.floor(Math.random()*2),unitStock(u));
+  u.stock[S.store]-=q; const total=+(u.price*q).toFixed(2); const methods=['duitnow','cash','ewallet','card'];
+  DB.orders.push({id:'O-'+(1044+DB.orders.length),store:S.store,ts:Date.now(),lines:[{sku:u.sku,name:u.p.name+' '+u.label,qty:q,price:u.price,cost:u.cost||0}],total,method:methods[Math.floor(Math.random()*4)],memberId:null,einv:null});
+  if(S.view==='dash'){
+    render();
+    document.querySelectorAll('#view .kpi').forEach(k=>{k.classList.remove('flash');void k.offsetWidth;k.classList.add('flash');});
+    const tb=$('#txbody'); if(tb&&tb.firstElementChild)tb.firstElementChild.style.animation='flash .8s';
+  }
+  toast('🔔 新订单 '+(u.p.name)+' +'+money(total));
+}
+
+/* ============================================================
+   促销引擎 + 挂单 + 会员详情
+   ============================================================ */
+function unitBySku(sku){return allUnits().find(x=>x.sku===sku);}
+function calcCart(){
+  const m=S.member?memberById(S.member):null;
+  const sub=S.cart.reduce((s,c)=>s+c.price*c.qty,0);
+  let promoDisc=0; const names=[];
+  DB.promotions.filter(p=>p.on).forEach(pr=>{
+    if(pr.type==='percent'){const d=sub*pr.pct/100;if(d>0){promoDisc+=d;names.push(`${pr.name} −${pr.pct}%`);}}
+    else if(pr.type==='threshold'){if(sub>=pr.min){promoDisc+=pr.off;names.push(pr.name);}}
+    else if(pr.type==='bogo'){let d=0;S.cart.forEach(c=>{const pr2=Math.floor(c.qty/2);if(pr2>0)d+=pr2*c.price*0.5;});if(d>0){promoDisc+=d;names.push(pr.name);}}
+  });
+  const afterPromo=Math.max(sub-promoDisc,0);
+  const tierDisc=m?(m.tier==='金卡'?afterPromo*0.1:m.tier==='银卡'?afterPromo*0.05:0):0;
+  const beforePts=afterPromo-tierDisc;
+  const redeem=Math.min(S._redeem||0,beforePts);
+  return {sub,promoDisc,names,tierDisc,redeem,total:+Math.max(beforePts-redeem,0).toFixed(2),m};
+}
+function holdSale(){ if(!S.cart.length)return; const m=S.member?memberById(S.member):null;
+  DB.held.push({id:'H'+Date.now(),label:(m?m.name:'散客')+' · '+new Date().toLocaleTimeString('zh',{hour:'2-digit',minute:'2-digit'}),cart:S.cart,member:S.member});
+  S.cart=[];S.member=null;toast('已挂单');render(); }
+function openHeld(){ modal('挂单列表',DB.held.length?DB.held.map(h=>`<div class="opt" style="text-align:left;margin-bottom:8px" onclick="resumeHeld('${h.id}')"><b>${h.label}</b><div class="muted" style="font-size:12px;margin-top:2px">${h.cart.length} 项 · ${money(h.cart.reduce((s,c)=>s+c.price*c.qty,0))}</div></div>`).join(''):'<div class="muted center" style="padding:20px">暂无挂单</div>'); }
+function resumeHeld(id){ const h=DB.held.find(x=>x.id===id); if(!h)return; if(S.cart.length){toast('请先结清当前购物车');return;} S.cart=h.cart;S.member=h.member;DB.held=DB.held.filter(x=>x.id!==id);closeModal();render(); }
+function memberDetail(id){
+  const m=memberById(id); const his=DB.orders.filter(o=>o.memberId===id).slice().reverse();
+  const spent=his.filter(o=>o.total>0).reduce((s,o)=>s+o.total,0);
+  const next=m.tier==='普通'?{n:'银卡',t:500}:m.tier==='银卡'?{n:'金卡',t:2000}:null;
+  modal('会员 · '+m.name,`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="badge ${m.tier==='金卡'?'b-gold':m.tier==='银卡'?'b-info':'b-grey'}">${m.tier}</span>
+      <span class="badge b-grey">积分 ${m.points}</span><span class="badge b-grey">余额 ${money(m.balance)}</span><span class="badge b-acc">累计 ${money(spent)}</span></div>
+    ${next?`<div class="field"><label>距 ${next.n} 还差 ${money(Math.max(next.t-spent,0))}</label><div style="background:var(--canvas);border-radius:6px;height:9px;overflow:hidden"><div style="height:100%;width:${Math.min(spent/next.t*100,100)}%;background:var(--accent);border-radius:6px"></div></div></div>`:'<div class="field muted" style="font-size:12px">已是最高等级 🏆</div>'}
+    <label class="muted" style="font-size:12px;font-weight:700">消费历史</label>
+    <div style="max-height:240px;overflow:auto;margin-top:8px">${his.length?his.map(o=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px"><div><div>${o.lines.map(l=>l.name+'×'+Math.abs(l.qty)).join('、')}</div><div class="muted" style="font-size:11px">${new Date(o.ts).toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})} · ${o.total<0?'退款':payLabel(o.method)}</div></div><div class="num" style="font-weight:700;${o.total<0?'color:var(--danger)':''}">${money(o.total)}</div></div>`).join(''):'<div class="muted center" style="padding:20px">暂无消费记录</div>'}</div>`);
+}
+
+/* ---------- 销售记录 / 退货 ---------- */
+function viewSale(){
+  const os=DB.orders.filter(o=>o.store===S.store).slice().reverse();
+  return `<div class="card blk"><div class="card-h"><h3>销售记录 · 退货</h3><span class="spacer"></span><span class="muted" style="font-size:12px">${DB.stores.find(s=>s.id===S.store).name}</span></div>
+    <table><thead><tr><th>单号</th><th>时间</th><th>${isFnb()?'品项':'商品'}</th><th>会员</th><th>方式</th><th class="right">金额</th><th class="right">操作</th></tr></thead><tbody>
+    ${os.map(o=>`<tr><td class="num">${o.id}</td><td class="num muted">${new Date(o.ts).toLocaleTimeString('zh',{hour:'2-digit',minute:'2-digit'})}</td>
+      <td>${o.lines.map(l=>l.name+' ×'+Math.abs(l.qty)).join('<br>')}</td>
+      <td>${o.memberId?memberById(o.memberId).name:'<span class="muted">散客</span>'}</td>
+      <td><span class="badge ${o.total<0?'b-dan':'b-grey'}">${o.total<0?'退款':payLabel(o.method)}</span></td>
+      <td class="right num" style="font-weight:700;${o.total<0?'color:var(--danger)':''}">${money(o.total)}</td>
+      <td class="right">${o.total>0&&!o.returned?`<button class="btn btn-sm" onclick="openReturn('${o.id}')">退货</button>`:o.returned?'<span class="muted" style="font-size:12px">已退</span>':''}</td></tr>`).join('')||'<tr><td colspan=7 class="center muted" style="padding:24px">暂无记录</td></tr>'}
+    </tbody></table></div>`;
+}
+function openReturn(oid){
+  const o=DB.orders.find(x=>x.id===oid);
+  modal('退货 · '+oid,`<div class="muted" style="margin-bottom:12px">填写退货数量，确认后自动退款并回库</div>
+    ${o.lines.map((l,i)=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="flex:1"><div style="font-weight:600;font-size:13px">${l.name}</div><div class="muted" style="font-size:12px">已购 ${l.qty} · ${money(l.price)}</div></div><input class="inp num" id="rq${i}" type="number" min="0" max="${l.qty}" value="${l.qty}" style="width:74px"></div>`).join('')}
+    <button class="btn btn-pri" style="width:100%;padding:12px" onclick="doReturn('${oid}')">确认退货退款</button>`);
+}
+function doReturn(oid){
+  const o=DB.orders.find(x=>x.id===oid); let amt=0; const rl=[];
+  o.lines.forEach((l,i)=>{const q=Math.max(0,Math.min(parseInt($('#rq'+i).value||0),l.qty));if(q>0){amt+=q*l.price;rl.push({sku:l.sku,name:l.name,qty:-q,price:l.price,cost:l.cost});const u=unitBySku(l.sku);if(u)u.stock[S.store]=(u.stock[S.store]||0)+q;}});
+  if(amt<=0){toast('请选择退货数量');return;}
+  DB.orders.push({id:'R-'+String(Date.now()).slice(-6),store:S.store,ts:Date.now(),lines:rl,total:-(+amt.toFixed(2)),method:'refund',memberId:o.memberId,einv:null,refundOf:oid});
+  o.returned=true; closeModal(); toast('已退款 '+money(amt)); go('sale');
+}
+
+/* ---------- 采购 ---------- */
+function viewBuy(){
+  return `<div class="grid blk" style="grid-template-columns:1fr 1fr">
+    <div class="card"><div class="card-h"><h3>供应商</h3></div><table><tbody>${DB.suppliers.map(s=>`<tr><td><div style="font-weight:600">${s.name}</div><div class="muted" style="font-size:12px">${s.contact}</div></td><td class="right"><span class="badge b-grey">${s.terms}</span></td></tr>`).join('')}</tbody></table></div>
+    <div class="card"><div class="card-b"><div style="font-weight:700;margin-bottom:8px">采购概览</div><div class="muted" style="font-size:13px;line-height:1.9">待收货采购单：<b>${DB.purchaseOrders.filter(p=>p.status==='pending').length}</b><br>本店低库存待补：<b>${allUnits().filter(u=>!isFnb()&&unitStock(u)<=u.p.reorder).length}</b> 项</div><button class="btn btn-pri" style="margin-top:14px" onclick="newPO()">+ 新建采购单</button></div></div>
+  </div>
+  <div class="card blk"><div class="card-h"><h3>采购单</h3></div>
+    <table><thead><tr><th>单号</th><th>供应商</th><th>收货门店</th><th>明细</th><th class="right">金额</th><th>状态</th><th class="right">操作</th></tr></thead><tbody>
+    ${DB.purchaseOrders.slice().reverse().map(po=>`<tr><td class="num">${po.id}</td><td>${(DB.suppliers.find(s=>s.id===po.supplier)||{}).name||'—'}</td><td>${(DB.stores.find(s=>s.id===po.store)||{}).name||po.store}</td><td class="muted" style="font-size:12px">${po.lines.map(l=>l.name+'×'+l.qty).join('、')}</td><td class="right num">${money(po.total)}</td><td><span class="badge ${po.status==='received'?'b-ok':'b-warn'}">${po.status==='received'?'已收货':'待收货'}</span></td><td class="right">${po.status==='pending'?`<button class="btn btn-sm btn-pri" onclick="receivePO('${po.id}')">收货入库</button>`:''}</td></tr>`).join('')||'<tr><td colspan=7 class="center muted" style="padding:24px">暂无采购单 — 点「新建采购单」</td></tr>'}
+    </tbody></table></div>`;
+}
+function newPO(){
+  if(isFnb()){toast('餐饮模式以备料为主，暂不走采购单');return;}
+  modal('新建采购单',`<div class="field"><label>供应商</label><select class="inp" id="poSup">${DB.suppliers.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select></div>
+    <div class="field"><label>收货门店</label><select class="inp" id="poStore">${DB.stores.map(s=>`<option value="${s.id}" ${s.id===S.store?'selected':''}>${s.name}</option>`).join('')}</select></div>
+    <label class="muted" style="font-size:12px;font-weight:700">采购明细（填数量，0=不采购，低库存已预填）</label>
+    <div style="max-height:230px;overflow:auto;margin-top:8px">${allUnits().map((u,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><div style="flex:1"><div style="font-size:13px;font-weight:600">${u.p.name}</div><div class="muted" style="font-size:11px">${u.label} · 现 ${unitStock(u)} · 成本 ${money(u.cost||0)}</div></div><input class="poqty num inp" id="poq${i}" data-sku="${u.sku}" data-name="${u.p.name+' '+u.label}" data-cost="${u.cost||0}" type="number" min="0" value="${unitStock(u)<=u.p.reorder?u.p.reorder*2:0}" style="width:64px;padding:6px"></div>`).join('')}</div>
+    <button class="btn btn-pri" style="width:100%;padding:12px;margin-top:12px" onclick="createPO()">建立采购单</button>`);
+}
+function createPO(){
+  const lines=[]; let total=0;
+  document.querySelectorAll('.poqty').forEach(el=>{const q=parseInt(el.value||0);if(q>0){const cost=+el.dataset.cost;lines.push({sku:el.dataset.sku,name:el.dataset.name,qty:q,cost});total+=q*cost;}});
+  if(!lines.length){toast('请填采购数量');return;}
+  DB.purchaseOrders.push({id:'PO-'+(1001+DB.purchaseOrders.length),supplier:$('#poSup').value,store:$('#poStore').value,lines,total:+total.toFixed(2),status:'pending',ts:Date.now()});
+  closeModal();toast('采购单已建立');go('buy');
+}
+function receivePO(pid){const po=DB.purchaseOrders.find(x=>x.id===pid);po.lines.forEach(l=>{const u=unitBySku(l.sku);if(u)u.stock[po.store]=(u.stock[po.store]||0)+l.qty;});po.status='received';toast('已收货入库 '+po.lines.reduce((s,l)=>s+l.qty,0)+' 件');go('buy');}
+
+/* ---------- 促销 ---------- */
+function viewPromo(){
+  const desc=p=>p.type==='percent'?`全场 ${p.pct}% off`:p.type==='threshold'?`满 ${money(p.min)} 减 ${money(p.off)}`:'同款第二件半价';
+  const tn={percent:'百分比',threshold:'满减',bogo:'买赠'};
+  return `<div class="card blk"><div class="card-h"><h3>促销活动</h3><span class="spacer"></span><button class="btn btn-dark" onclick="addPromo()">+ 新增促销</button></div>
+    <table><thead><tr><th>名称</th><th>规则</th><th>类型</th><th class="center">状态</th></tr></thead><tbody>
+    ${DB.promotions.map(p=>`<tr><td style="font-weight:600">${p.name}</td><td class="muted">${desc(p)}</td><td><span class="badge b-info">${tn[p.type]}</span></td><td class="center"><button class="btn btn-sm ${p.on?'btn-pri':''}" onclick="togglePromo('${p.id}')">${p.on?'✓ 已启用':'已停用'}</button></td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="muted" style="font-size:12px">POS 收银时自动叠加所有启用的促销并显示优惠明细（实务可再加互斥/优先级规则）。</div>`;
+}
+function togglePromo(id){const p=DB.promotions.find(x=>x.id===id);p.on=!p.on;go('promo');}
+function addPromo(){modal('新增促销',`<div class="field"><label>名称</label><input class="inp" id="prN" placeholder="如 周年庆"></div><div class="field"><label>类型</label><select class="inp" id="prT" onchange="prFields()"><option value="percent">全场百分比折扣</option><option value="threshold">满额立减</option><option value="bogo">同款第二件半价</option></select></div><div id="prF"></div><button class="btn btn-pri" style="width:100%;padding:12px" onclick="createPromo()">建立</button>`);prFields();}
+function prFields(){const t=$('#prT').value;$('#prF').innerHTML=t==='percent'?'<div class="field"><label>折扣 %</label><input class="inp num" id="prV" type="number" value="10"></div>':t==='threshold'?'<div class="field"><label>满 (RM)</label><input class="inp num" id="prMin" type="number" value="100"></div><div class="field"><label>减 (RM)</label><input class="inp num" id="prOff" type="number" value="10"></div>':'<div class="muted" style="font-size:12px">每 2 件同款，第 2 件半价</div>';}
+function createPromo(){const n=$('#prN').value.trim()||'促销';const t=$('#prT').value;const o={id:'PR'+(DB.promotions.length+1),name:n,type:t,on:true};if(t==='percent')o.pct=+$('#prV').value||10;if(t==='threshold'){o.min=+$('#prMin').value||100;o.off=+$('#prOff').value||10;}DB.promotions.push(o);closeModal();toast('促销已建立');go('promo');}
+
+/* ---------- 库存盘点 ---------- */
+function startStocktake(){
+  const us=allUnits();
+  modal('库存盘点 · '+DB.stores.find(s=>s.id===S.store).name,`<div class="muted" style="margin-bottom:12px">录入实盘数量，系统计算差异并调整账面库存</div>
+    <div style="max-height:300px;overflow:auto">${us.map((u,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><div style="flex:1"><div style="font-size:13px;font-weight:600">${u.p.name}</div><div class="muted" style="font-size:11px">${u.label} · 账面 ${unitStock(u)}</div></div><input class=" stk num inp" id="stk${i}" data-sku="${u.sku}" data-sys="${unitStock(u)}" type="number" min="0" value="${unitStock(u)}" style="width:64px;padding:6px"></div>`).join('')}</div>
+    <button class="btn btn-pri" style="width:100%;padding:12px;margin-top:12px" onclick="applyStocktake()">应用盘点调整</button>`);
+}
+function applyStocktake(){
+  let diffs=0,items=0;
+  document.querySelectorAll('.stk').forEach(el=>{const sys=+el.dataset.sys,cnt=parseInt(el.value||0);if(cnt!==sys){const u=unitBySku(el.dataset.sku);if(u){u.stock[S.store]=cnt;diffs+=Math.abs(cnt-sys);items++;}}});
+  closeModal();toast(items?`盘点完成：${items} 项调整，差异 ${diffs} 件`:'盘点完成：账实相符 ✅');go('inv');
+}
+
+/* ---------- 交班 / Z 报表 ---------- */
+function viewShift(){
+  if(!S.shift){
+    return `<div class="card blk" style="max-width:460px"><div class="card-h"><h3>开班</h3></div><div class="card-b"><p class="muted" style="margin-bottom:14px">录入钱箱备用金后开始营业，交班时按支付方式核对现金差异（Z 报表）。</p><div class="field"><label>备用金 (RM)</label><input class="inp num" id="float" type="number" value="200"></div><button class="btn btn-pri" style="padding:12px 22px" onclick="openShift()">开始营业</button></div></div>${shiftHistory()}`;
+  }
+  const since=S.shift.openTs, os=DB.orders.filter(o=>o.store===S.store&&o.ts>=since), by={};
+  os.forEach(o=>{by[o.method]=(by[o.method]||0)+o.total;});
+  const sales=os.filter(o=>o.total>0).reduce((s,o)=>s+o.total,0);
+  return `<div class="kpis blk">
+      ${kpi('本班销售','💰',sales,os.filter(o=>o.total>0).length+' 单','money')}
+      ${kpi('现金应有','💵',S.shift.float+(by.cash||0),'含备用金 '+money(S.shift.float),'money')}
+      ${kpi('开班时间','🕒',new Date(since).toLocaleTimeString('zh',{hour:'2-digit',minute:'2-digit'}),'当班 '+S.shift.by)}
+      ${kpi('交易笔数','🧾',os.length,'含退款','int')}
+    </div>
+    <div class="card blk" style="max-width:520px"><div class="card-h"><h3>各支付方式汇总</h3></div>
+      <table><tbody>${['cash','duitnow','ewallet','card','balance','refund'].filter(k=>by[k]!==undefined).map(k=>`<tr><td>${payLabel(k)}</td><td class="right num" style="font-weight:700;${by[k]<0?'color:var(--danger)':''}">${money(by[k])}</td></tr>`).join('')||'<tr><td class="muted center" style="padding:16px">本班暂无交易</td></tr>'}</tbody></table>
+      <div class="card-b"><button class="btn btn-dark" style="padding:12px 22px" onclick="closeShiftModal()">🧾 交班结算 (Z 报表)</button></div></div>
+    ${shiftHistory()}`;
+}
+function shiftHistory(){ if(!DB.shifts.length)return''; return `<div class="card blk"><div class="card-h"><h3>历史交班</h3></div><table><thead><tr><th>交班时间</th><th class="right">销售</th><th class="right">现金应有</th><th class="right">实点</th><th class="right">差异</th></tr></thead><tbody>${DB.shifts.slice().reverse().map(s=>`<tr><td class="num muted">${new Date(s.closeTs).toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td class="right num">${money(s.sales)}</td><td class="right num">${money(s.cashExpected)}</td><td class="right num">${money(s.cashCounted)}</td><td class="right num" style="font-weight:700;color:${Math.abs(s.variance)<0.01?'var(--accent-d)':'var(--danger)'}">${s.variance>=0?'+':''}${money(s.variance)}</td></tr>`).join('')}</tbody></table></div>`; }
+function openShift(){S.shift={openTs:Date.now(),float:+$('#float').value||0,by:S.role};toast('已开班');go('shift');}
+function closeShiftModal(){
+  const since=S.shift.openTs, cash=DB.orders.filter(o=>o.store===S.store&&o.ts>=since&&o.method==='cash').reduce((s,o)=>s+o.total,0);
+  const exp=+(S.shift.float+cash).toFixed(2);
+  modal('交班结算 · Z 报表',`<div class="field muted" style="font-size:13px">现金应有 = 备用金 ${money(S.shift.float)} + 现金净销售 ${money(cash)} = <b>${money(exp)}</b></div><div class="field"><label>钱箱实点现金 (RM)</label><input class="inp num" id="counted" type="number" value="${exp.toFixed(2)}"></div><button class="btn btn-pri" style="width:100%;padding:12px" onclick="doCloseShift(${exp})">确认交班</button>`);
+}
+function doCloseShift(exp){
+  const counted=+$('#counted').value||0, variance=+(counted-exp).toFixed(2), since=S.shift.openTs;
+  const sales=DB.orders.filter(o=>o.store===S.store&&o.ts>=since&&o.total>0).reduce((s,o)=>s+o.total,0);
+  DB.shifts.push({openTs:since,closeTs:Date.now(),float:S.shift.float,sales,cashExpected:exp,cashCounted:counted,variance});
+  S.shift=null;closeModal();toast(Math.abs(variance)<0.01?'交班完成，现金平账 ✅':'交班完成，差异 '+money(variance));go('shift');
+}
+
+/* ---------- 智能洞察 AI ---------- */
+function viewAI(){
+  const us=allUnits();
+  const reorder=us.filter(u=>!isFnb()&&unitStock(u)<=u.p.reorder).map(u=>({u,qty:Math.max(u.p.reorder*2-unitStock(u),u.p.reorder)}));
+  const os=DB.orders.filter(o=>o.store===S.store&&o.total>0);
+  const soldSku={}; os.forEach(o=>o.lines.forEach(l=>{if(l.sku)soldSku[l.sku]=(soldSku[l.sku]||0)+l.qty;}));
+  const slow=us.filter(u=>unitStock(u)>0&&!soldSku[u.sku]&&!isFnb());
+  const pc={}; os.forEach(o=>{const ns=[...new Set(o.lines.map(l=>l.name.split(' ')[0]))];for(let i=0;i<ns.length;i++)for(let j=i+1;j<ns.length;j++){const k=[ns[i],ns[j]].sort().join(' + ');pc[k]=(pc[k]||0)+1;}});
+  const pairs=Object.entries(pc).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  const bh={}; os.forEach(o=>{const h=new Date(o.ts).getHours();bh[h]=(bh[h]||0)+o.total;});
+  const peak=Object.entries(bh).sort((a,b)=>b[1]-a[1])[0];
+  const todaySales=os.reduce((s,o)=>s+o.total,0), forecast=todaySales*7*1.06;
+  return `<div class="kpis blk">
+      ${kpi('待补货 SKU','📦',reorder.length,'AI 建议','int')}
+      ${kpi('滞销预警','🐌',slow.length,'今日零销售','int')}
+      ${kpi('7日销售预测','🔮',forecast,'近期均速 +6%','money')}
+      ${kpi('黄金时段','⏰',peak?peak[0]+':00':'—',peak?money(+peak[1].toFixed(0))+' 销售':'数据不足')}
+    </div>
+    <div class="grid blk" style="grid-template-columns:1fr 1fr">
+      <div class="card"><div class="card-h"><h3>🤖 智能补货建议</h3></div><div class="card-b" style="padding:0">
+        ${reorder.length?reorder.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--line)"><div style="flex:1"><div style="font-weight:600">${r.u.p.name}</div><div class="muted" style="font-size:12px">${r.u.label} · 现 ${unitStock(r.u)} / 补货点 ${r.u.p.reorder}</div></div><span class="badge b-warn">建议进 ${r.qty}</span></div>`).join(''):'<div class="muted center" style="padding:30px">库存充足 ✅</div>'}
+      </div></div>
+      <div class="card"><div class="card-h"><h3>🛒 连带购买分析</h3></div><div class="card-b">
+        ${pairs.length?pairs.map(([k,n])=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)"><span style="font-weight:600;font-size:13px">${k}</span><span class="badge b-acc">${n} 次同购</span></div>`).join('')+'<div class="muted" style="font-size:12px;margin-top:10px">💡 可做捆绑促销或货架邻位陈列</div>':'<div class="muted center" style="padding:30px">交易样本不足<br>开「实时演示」积累数据</div>'}
+      </div></div>
+    </div>
+    ${slow.length?`<div class="card blk"><div class="card-h"><h3>🐌 滞销预警</h3></div><div class="card-b"><div style="display:flex;flex-wrap:wrap;gap:8px">${slow.map(u=>`<span class="badge b-grey">${u.p.name} ${u.label}（存 ${unitStock(u)}）</span>`).join('')}</div><div class="muted" style="font-size:12px;margin-top:12px">💡 建议促销清仓或调拨到热销门店</div></div></div>`:''}
+    <div class="muted" style="font-size:12px">※ 洞察基于本店交易实时计算。开「实时演示」喂入更多订单，连带分析与高峰时段会更准。</div>`;
+}
+
+/* ---------- Modal / Toast ---------- */
+function modal(t,b){$('#modalRoot').innerHTML=`<div class="mask" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-h"><h3>${t}</h3><button class="x" onclick="closeModal()">×</button></div><div class="modal-b">${b}</div></div></div>`;}
+function closeModal(){$('#modalRoot').innerHTML='';}
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s';},1500);setTimeout(()=>t.remove(),1900);}
+
+/* ---------- 启动 ---------- */
+$('#indSel').innerHTML=Object.entries(INDUSTRIES).map(([k,v])=>`<option value="${k}">${v.icon} ${v.name}</option>`).join('');
+$('#storeSel').innerHTML=DB.stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+$('#storeSel').onchange=e=>{S.store=e.target.value;S._enter=true;render();};
+$('#roleSel').onchange=e=>{S.role=e.target.value;S._enter=true;render();};
+function tick(){$('#clock').textContent=new Date().toLocaleString('zh',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}
+tick();setInterval(tick,30000);
+renderNav(); loadIndustry('all');
+</script>
+</body>
+</html>

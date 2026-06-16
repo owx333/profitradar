@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coaching CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14202E; --ink-2:#1B2C3E; --line-ink:#2B3E52;
+  --bg:#F5F6F8; --card:#FFFFFF; --line:#E5E8ED;
+  --gold:#D4A12C; --gold-2:#B8861A; --gold-soft:#FBF3DE;
+  --teal:#1F9D8F; --teal-soft:#E4F4F1;
+  --red:#D1495B; --red-soft:#FBE9EC;
+  --t:#1A2330; --t-mut:#6B7785; --t-faint:#9AA4B0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:inherit;text-decoration:none}
+
+/* ---------- Layout ---------- */
+#app{display:none;min-height:100vh}
+#sidebar{width:248px;background:var(--ink);color:#C7D2DE;flex-shrink:0;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:40}
+.brand{padding:22px 22px 18px;border-bottom:1px solid var(--line-ink)}
+.brand .mark{font-family:'Fraunces',serif;font-weight:900;font-size:21px;color:#fff;letter-spacing:.3px;line-height:1.05}
+.brand .mark b{color:var(--gold)}
+.brand .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7E8FA1;margin-top:6px}
+.nav{flex:1;overflow-y:auto;padding:12px 12px 24px}
+.nav .grp{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#5F7184;padding:16px 12px 7px}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;color:#B7C3D0;font-weight:500;margin-bottom:2px;transition:.13s}
+.nav a .ic{width:18px;text-align:center;font-size:15px;opacity:.85}
+.nav a:hover{background:var(--ink-2);color:#fff}
+.nav a.active{background:linear-gradient(90deg,var(--gold) 0,var(--gold-2) 100%);color:#1B1405;font-weight:600}
+.nav a.active .ic{opacity:1}
+
+#main{flex:1;margin-left:248px;display:flex;flex-direction:column;min-width:0}
+.topbar{height:62px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:30}
+.topbar h1{font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:var(--ink)}
+.topbar .crumb{font-size:12px;color:var(--t-faint);margin-top:1px}
+.topbar .right{display:flex;align-items:center;gap:14px}
+.hamburger{display:none;font-size:22px;color:var(--ink)}
+.view{padding:26px;max-width:1280px;width:100%}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;font-weight:600;font-size:13px;transition:.13s;white-space:nowrap}
+.btn.primary{background:var(--ink);color:#fff}
+.btn.primary:hover{background:var(--ink-2)}
+.btn.gold{background:linear-gradient(180deg,var(--gold) 0,var(--gold-2) 100%);color:#1B1405}
+.btn.gold:hover{filter:brightness(1.05)}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--t)}
+.btn.ghost:hover{border-color:#C7CDD6;background:#FBFBFC}
+.btn.sm{padding:6px 11px;font-size:12px;border-radius:7px}
+.btn.danger{color:var(--red)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- Cards / grids ---------- */
+.row{display:flex;gap:18px;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px}
+.card.pad{padding:20px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:14px;flex-wrap:wrap}
+.sec-head .lead{font-size:13px;color:var(--t-mut);max-width:560px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:16px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold)}
+.kpi.teal::before{background:var(--teal)}
+.kpi.ink::before{background:var(--ink)}
+.kpi.red::before{background:var(--red)}
+.kpi .lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--t-mut);font-weight:600}
+.kpi .num{font-family:'Fraunces',serif;font-weight:600;font-size:32px;color:var(--ink);line-height:1.05;margin-top:8px;font-variant-numeric:tabular-nums}
+.kpi .note{font-size:12px;color:var(--t-faint);margin-top:5px}
+
+.dash-cols{display:grid;grid-template-columns:1.4fr 1fr;gap:18px}
+.panel-title{font-family:'Fraunces',serif;font-weight:600;font-size:16px;color:var(--ink);margin-bottom:2px}
+.panel-sub{font-size:12px;color:var(--t-faint);margin-bottom:14px}
+
+/* ---------- Table ---------- */
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.search{flex:1;min-width:180px;position:relative}
+.search input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.search .si{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t-faint)}
+.search input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+select.filter{padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff}
+
+.tbl-wrap{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--t-mut);font-weight:600;padding:13px 16px;background:#FAFBFC;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#FBFBFC}
+td .strong{font-weight:600;color:var(--ink)}
+td .mut{color:var(--t-faint);font-size:12.5px}
+.num-cell{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.actions-cell{text-align:right;white-space:nowrap}
+.actions-cell button{color:var(--t-mut);padding:5px 7px;border-radius:6px}
+.actions-cell button:hover{background:#EEF0F3;color:var(--ink)}
+.actions-cell button.del:hover{background:var(--red-soft);color:var(--red)}
+
+.empty{padding:54px 20px;text-align:center;color:var(--t-faint)}
+.empty .big{font-size:32px;margin-bottom:8px;opacity:.5}
+.empty .msg{font-weight:600;color:var(--t-mut);margin-bottom:4px}
+
+/* Pills */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+.pill.gold{background:var(--gold-soft);color:var(--gold-2)}
+.pill.teal{background:var(--teal-soft);color:var(--teal)}
+.pill.red{background:var(--red-soft);color:var(--red)}
+.pill.grey{background:#EEF0F3;color:var(--t-mut)}
+.pill.ink{background:#E7ECF1;color:var(--ink)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;background:#EEF0F3;color:var(--t-mut);font-size:11.5px;font-weight:500;margin:1px 3px 1px 0}
+
+.bar{height:7px;border-radius:6px;background:#EEF0F3;overflow:hidden;min-width:80px}
+.bar > i{display:block;height:100%;border-radius:6px;background:var(--teal)}
+.bar.gold > i{background:var(--gold)}
+
+/* ---------- Modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(20,32,46,.55);backdrop-filter:blur(2px);z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:560px;box-shadow:0 24px 60px rgba(20,32,46,.3);animation:pop .16s ease}
+.modal.wide{max-width:720px}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+.modal .mh{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
+.modal .mh h3{font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:var(--ink)}
+.modal .mh button{font-size:20px;color:var(--t-faint);padding:4px 8px;border-radius:6px}
+.modal .mh button:hover{background:#EEF0F3;color:var(--ink)}
+.modal .mb{padding:22px;max-height:64vh;overflow-y:auto}
+.modal .mf{padding:16px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:2px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;font-weight:600;color:var(--t-mut)}
+.field label .req{color:var(--red)}
+.field input,.field select,.field textarea{padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;width:100%}
+.field textarea{resize:vertical;min-height:74px}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.hint{font-size:11.5px;color:var(--t-faint)}
+
+/* detail rows */
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 14px;font-size:13.5px}
+.kv dt{color:var(--t-mut);font-weight:500}
+.kv dd{color:var(--ink);font-weight:500}
+.subhead{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-2);font-weight:700;margin:20px 0 10px}
+
+.install-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.install-row input{flex:1}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:11px;font-weight:600;font-size:13px;z-index:90;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:tin .2s ease}
+@keyframes tin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* ---------- Responsive ---------- */
+@media(max-width:880px){
+  #sidebar{transform:translateX(-100%);transition:.2s;box-shadow:0 0 40px rgba(0,0,0,.3)}
+  #sidebar.open{transform:none}
+  #main{margin-left:0}
+  .hamburger{display:block}
+  .dash-cols{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  .view{padding:18px 14px}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35}
+}
+.tbl-scroll{overflow-x:auto}
+
+/* nav badge */
+.nav a{position:relative}
+.navbadge{margin-left:auto;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+.nav a.active .navbadge{background:#1B1405;color:var(--gold)}
+
+/* user chip in topbar */
+.uchip{display:flex;align-items:center;gap:9px}
+.uinfo{text-align:right;line-height:1.1;padding:0 4px}
+.uinfo .uname{font-weight:600;font-size:13px;color:var(--ink)}
+.uinfo .urole{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-2);font-weight:600}
+
+/* reports */
+.rep-list{display:flex;flex-direction:column;gap:11px;margin-top:6px}
+.rep-row{display:flex;align-items:center;gap:12px}
+.rep-lab{width:120px;flex-shrink:0;font-size:12.5px;color:var(--t-mut);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep-row .bar{height:12px}
+.rep-val{width:96px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;font-size:12.5px;color:var(--ink);flex-shrink:0}
+.vbars{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:8px}
+.vcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%}
+.vbar-track{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.vbar{width:62%;max-width:42px;min-height:3px;background:linear-gradient(180deg,var(--gold) 0,var(--gold-2) 100%);border-radius:6px 6px 0 0;transition:height .3s}
+.vlab{font-size:11px;color:var(--t-mut);font-weight:600}
+
+/* login */
+#login-root .login-wrap{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:radial-gradient(1200px 600px at 70% -10%,#21364c 0,var(--ink) 55%)}
+.login-card{background:#fff;border-radius:18px;padding:34px 30px 26px;width:100%;max-width:380px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.login-brand{font-family:'Fraunces',serif;font-weight:900;font-size:30px;color:var(--ink);text-align:center;line-height:1}
+.login-brand b{color:var(--gold)}
+.login-sub{text-align:center;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--t-mut);margin:8px 0 22px}
+.login-err{color:var(--red);font-size:12.5px;font-weight:600;min-height:18px;margin-top:8px;text-align:center}
+.login-demo{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:11.5px;color:var(--t-faint);text-align:center;line-height:1.7}
+.login-demo b{color:var(--t-mut)}
+
+@media print{
+  #sidebar,.topbar,.toolbar{display:none!important}
+  #main{margin-left:0!important}
+  .view{padding:0!important;max-width:none!important}
+  .card,.kpi{break-inside:avoid;box-shadow:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="mark">Apex<b>CRM</b></div>
+      <div class="sub">Courses &amp; Coaching</div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+
+  <div id="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="hamburger" id="ham">☰</button>
+        <div>
+          <h1 id="page-title">Dashboard</h1>
+          <div class="crumb" id="page-crumb">Overview</div>
+        </div>
+      </div>
+      <div class="right" id="top-actions"></div>
+    </header>
+    <main class="view" id="view"></main>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script>
+/* ============================================================
+   APEX CRM — single file. Data persists to localStorage.
+   To go multi-user, swap loadDB/saveDB for Firestore.
+   ============================================================ */
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const uid = ()=> Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const esc = s => (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RM = n => 'RM '+(Number(n)||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+const today = ()=> new Date().toISOString().slice(0,10);
+const fmtDate = d => d? new Date(d+'T00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+
+/* ---------- Store ---------- */
+const KEY='apex_crm_v1';
+let db;
+function loadDB(){ try{const r=localStorage.getItem(KEY); if(r) return JSON.parse(r);}catch(e){} return null; }
+function saveDB(){ try{localStorage.setItem(KEY,JSON.stringify(db));}catch(e){} }
+function seed(){
+  return {
+    agents:[
+      {id:'a1',name:'Sarah Tan',email:'sarah@apex.my',phone:'012-3456789',role:'Senior Sales',status:'Active'},
+      {id:'a2',name:'Daniel Lim',email:'daniel@apex.my',phone:'016-7788991',role:'Sales Agent',status:'Active'},
+      {id:'a3',name:'Mei Ling',email:'mei@apex.my',phone:'011-2233445',role:'Account Manager',status:'Active'},
+    ],
+    companies:[
+      {id:'c1',name:'Sunrise Holdings Sdn Bhd',industry:'Manufacturing',contactPerson:'Mr. Yeoh',phone:'04-2233445',email:'hr@sunrise.my',address:'12 Lebuh Light, George Town, Penang',agentId:'a1'},
+      {id:'c2',name:'Lotus Tech Solutions',industry:'Technology',contactPerson:'Ms. Chong',phone:'03-99887766',email:'admin@lotustech.my',address:'Menara KL, Kuala Lumpur',agentId:'a2'},
+    ],
+    customers:[
+      {id:'u1',name:'Yeoh Wei Ming',email:'wm.yeoh@sunrise.my',phone:'012-1112222',companyId:'c1',agentId:'a1',notes:'Decision maker, interested in leadership programs.'},
+      {id:'u2',name:'Nadia Hassan',email:'nadia@sunrise.my',phone:'013-4445555',companyId:'c1',agentId:'a1',notes:''},
+      {id:'u3',name:'Chong Kar Wai',email:'kw.chong@lotustech.my',phone:'017-6667777',companyId:'c2',agentId:'a2',notes:'Looking for team coaching.'},
+    ],
+    courses:[
+      {id:'co1',title:'Leadership Mastery',description:'2-day intensive on team leadership and influence.',duration:'2 days',price:1800,materials:'Workbook, slide deck'},
+      {id:'co2',title:'Sales Accelerator',description:'High-impact B2B sales coaching.',duration:'1 day',price:1200,materials:'Playbook'},
+      {id:'co3',title:'Executive Coaching (1:1)',description:'Personalised coaching block, 6 sessions.',duration:'6 sessions',price:4500,materials:''},
+    ],
+    speakers:[
+      {id:'s1',name:'Dr. Andrew Khoo',expertise:'Leadership, Strategy',phone:'012-9001122',email:'andrew@speak.my',availability:'Weekdays',fee:3000},
+      {id:'s2',name:'Jessica Wong',expertise:'Sales, Negotiation',phone:'018-3344556',email:'jess@speak.my',availability:'Flexible',fee:2200},
+    ],
+    schedules:[
+      {id:'sc1',courseId:'co1',speakerId:'s1',date:offset(7),time:'09:00',venue:'Eastin Hotel, Penang',venueCost:2500,marketingCost:1500,speakerCost:3000,otherCost:600},
+      {id:'sc2',courseId:'co2',speakerId:'s2',date:offset(-14),time:'10:00',venue:'Online (Zoom)',venueCost:0,marketingCost:1200,speakerCost:2200,otherCost:300},
+    ],
+    attendance:[
+      {id:'at1',scheduleId:'sc2',customerId:'u3',status:'Attended'},
+      {id:'at2',scheduleId:'sc2',customerId:'u1',status:'Attended'},
+      {id:'at3',scheduleId:'sc1',customerId:'u1',status:'Registered'},
+    ],
+    sales:[
+      {id:'sl1',customerId:'u3',courseId:'co2',category:'Course Enrollment',description:'Sales Accelerator seat',amount:1200,paid:1200,status:'Paid',agentId:'a2',date:offset(-15),installments:[]},
+      {id:'sl2',customerId:'u1',courseId:'co1',category:'Course Enrollment',description:'Leadership Mastery seat',amount:1800,paid:900,status:'Partial',agentId:'a1',date:offset(-3),installments:[{date:offset(-3),amount:900}]},
+      {id:'sl3',customerId:'u1',courseId:'co3',category:'Coaching Service',description:'Executive coaching block',amount:4500,paid:0,status:'Unpaid',agentId:'a1',date:offset(-1),installments:[]},
+    ],
+    followups:[
+      {id:'f1',customerId:'u1',agentId:'a1',dueDate:offset(2),note:'Confirm seat for Leadership Mastery.',status:'Pending',outcome:''},
+      {id:'f2',customerId:'u3',agentId:'a2',dueDate:offset(-1),note:'Send post-course feedback form.',status:'Pending',outcome:''},
+    ],
+    users:[
+      {id:'us1',username:'admin',password:'admin',name:'Administrator',role:'Admin',agentId:''},
+      {id:'us2',username:'manager',password:'manager',name:'Operations Manager',role:'Manager',agentId:''},
+      {id:'us3',username:'sarah',password:'1234',name:'Sarah Tan',role:'Agent',agentId:'a1'},
+      {id:'us4',username:'daniel',password:'1234',name:'Daniel Lim',role:'Agent',agentId:'a2'},
+    ],
+  };
+}
+function offset(d){const t=new Date();t.setDate(t.getDate()+d);return t.toISOString().slice(0,10);}
+
+db = loadDB() || seed();
+if(!db.users) db.users = seed().users;   // migrate older saves
+saveDB();
+
+/* ============================================================
+   AUTH / SESSION / PERMISSIONS
+   ============================================================ */
+const SKEY='apex_crm_session';
+let me=null;
+function loadSession(){ try{const r=localStorage.getItem(SKEY); if(r){const u=byIdSafe(db.users,JSON.parse(r).id); if(u) return u;}}catch(e){} return null; }
+function saveSession(){ try{ me?localStorage.setItem(SKEY,JSON.stringify({id:me.id})):localStorage.removeItem(SKEY);}catch(e){} }
+function byIdSafe(arr,id){return arr?arr.find(x=>x.id===id):null;}
+
+const isAdmin = ()=> me && me.role==='Admin';
+const isMgr   = ()=> me && (me.role==='Admin'||me.role==='Manager');   // full data access
+const ownsRec = rec => !me || isMgr() || (rec && rec.agentId===me.agentId);
+
+// modules an Agent may open at all
+const AGENT_VIEW = ['dashboard','companies','customers','followups','courses','speakers','schedules','attendance','sales'];
+// modules an Agent may create/edit/delete in
+const AGENT_WRITE = ['customers','followups','sales','attendance'];
+function canView(mod){ return isMgr() || AGENT_VIEW.includes(mod); }
+function canWrite(mod){ return isMgr() || AGENT_WRITE.includes(mod); }
+
+// scope a collection's rows for the current user
+function scoped(coll){
+  const rows = db[coll]||[];
+  if(isMgr()) return rows;
+  if(coll==='customers'||coll==='sales'||coll==='followups') return rows.filter(r=>r.agentId===me.agentId);
+  if(coll==='companies'){
+    const myCustComps = new Set(db.customers.filter(c=>c.agentId===me.agentId).map(c=>c.companyId));
+    return rows.filter(r=>r.agentId===me.agentId || myCustComps.has(r.id));
+  }
+  return rows; // shared resources (courses, speakers, schedules, attendance, agents)
+}
+
+/* ---------- lookups ---------- */
+const byId = (arr,id)=> arr.find(x=>x.id===id);
+const agentName = id => byId(db.agents,id)?.name || '—';
+const companyName = id => byId(db.companies,id)?.name || '—';
+const customerName = id => byId(db.customers,id)?.name || '—';
+const courseTitle = id => byId(db.courses,id)?.title || '—';
+const speakerName = id => byId(db.speakers,id)?.name || '—';
+
+/* ---------- derived metrics ---------- */
+function scheduleCost(s){return (+s.venueCost||0)+(+s.marketingCost||0)+(+s.speakerCost||0)+(+s.otherCost||0);}
+function scheduleAttendees(scId){return db.attendance.filter(a=>a.scheduleId===scId);}
+function scheduleRevenue(s){
+  // revenue = sales for this schedule's course, by customers who attended this schedule
+  const attendeeIds = scheduleAttendees(s.id).map(a=>a.customerId);
+  return db.sales
+    .filter(sl=>sl.courseId===s.courseId && attendeeIds.includes(sl.customerId))
+    .reduce((t,sl)=>t+(+sl.paid||0),0);
+}
+function scheduleROI(s){
+  const cost=scheduleCost(s), rev=scheduleRevenue(s);
+  if(cost<=0) return rev>0?100:0;
+  return Math.round(((rev-cost)/cost)*100);
+}
+
+/* ============================================================
+   MODAL + FORM HELPERS
+   ============================================================ */
+function closeModal(){ $('#modal-root').innerHTML=''; }
+function toast(msg){
+  const r=$('#toast-root'); r.innerHTML=`<div class="toast">${esc(msg)}</div>`;
+  setTimeout(()=>r.innerHTML='',1900);
+}
+function confirmDelete(label,fn){
+  openModal({title:'Delete '+label, wide:false, bodyHTML:`<p style="color:var(--t-mut)">This will permanently remove <b style="color:var(--ink)">${esc(label)}</b>. This can't be undone.</p>`,
+    footer:[{label:'Cancel',cls:'ghost',act:closeModal},{label:'Delete',cls:'primary',style:'background:var(--red)',act:()=>{fn();closeModal();}}]});
+}
+
+function openModal({title,bodyHTML,footer=[],wide=false,onMount}){
+  const fHTML = footer.map((b,i)=>`<button class="btn ${b.cls||'ghost'}" data-fb="${i}" ${b.style?`style="${b.style}"`:''}>${esc(b.label)}</button>`).join('');
+  $('#modal-root').innerHTML=`<div class="overlay" data-ov><div class="modal ${wide?'wide':''}">
+    <div class="mh"><h3>${esc(title)}</h3><button data-x>×</button></div>
+    <div class="mb">${bodyHTML}</div>
+    ${footer.length?`<div class="mf">${fHTML}</div>`:''}
+  </div></div>`;
+  $('[data-x]').onclick=closeModal;
+  $('[data-ov]').onclick=e=>{ if(e.target.hasAttribute('data-ov')) closeModal(); };
+  footer.forEach((b,i)=>{ const el=$(`[data-fb="${i}"]`); if(el) el.onclick=b.act; });
+  if(onMount) onMount();
+}
+
+/* Build a form modal from a field schema.
+   fields: [{key,label,type,options,required,full,hint,placeholder,step}] */
+function formModal({title,fields,values={},onSave,wide=false,extraHTML=''}){
+  const inputHTML = f=>{
+    const v = values[f.key] ?? f.default ?? '';
+    const req = f.required?'<span class="req">*</span>':'';
+    let ctrl;
+    if(f.type==='textarea') ctrl=`<textarea data-k="${f.key}" placeholder="${esc(f.placeholder||'')}">${esc(v)}</textarea>`;
+    else if(f.type==='select'){
+      const optsArr = typeof f.options==='function' ? f.options() : (f.options||[]);
+      const opts = optsArr.map(o=>{const val=o.value??o; const lab=o.label??o; return `<option value="${esc(val)}" ${String(val)===String(v)?'selected':''}>${esc(lab)}</option>`;}).join('');
+      ctrl=`<select data-k="${f.key}">${f.placeholder?`<option value="">${esc(f.placeholder)}</option>`:''}${opts}</select>`;
+    }
+    else ctrl=`<input data-k="${f.key}" type="${f.type||'text'}" value="${esc(v)}" placeholder="${esc(f.placeholder||'')}" ${f.step?`step="${f.step}"`:''}>`;
+    return `<div class="field ${f.full?'full':''}"><label>${esc(f.label)} ${req}</label>${ctrl}${f.hint?`<span class="hint">${esc(f.hint)}</span>`:''}</div>`;
+  };
+  openModal({title,wide,
+    bodyHTML:`<div class="fgrid">${fields.map(inputHTML).join('')}</div>${extraHTML}`,
+    footer:[{label:'Cancel',cls:'ghost',act:closeModal},{label:'Save',cls:'gold',act:()=>{
+      const out={...values};
+      let ok=true;
+      fields.forEach(f=>{
+        const el=$(`[data-k="${f.key}"]`); if(!el) return;
+        let val=el.value;
+        if(f.type==='number') val = val===''?'':Number(val);
+        out[f.key]=val;
+        if(f.required && (val===''||val==null)){ el.style.borderColor='var(--red)'; ok=false; }
+      });
+      if(!ok){ toast('Please fill required fields'); return; }
+      onSave(out); closeModal();
+    }}]
+  });
+}
+
+/* ============================================================
+   GENERIC TABLE RENDERER
+   ============================================================ */
+function renderTable(columns, rows, opts={}){
+  if(!rows.length){
+    return `<div class="tbl-wrap"><div class="empty"><div class="big">${opts.emptyIcon||'∅'}</div>
+      <div class="msg">${esc(opts.emptyMsg||'Nothing here yet')}</div>
+      <div style="font-size:12.5px">${esc(opts.emptyHint||'Use the button above to add your first record.')}</div></div></div>`;
+  }
+  const head = columns.map(c=>`<th ${c.align==='right'?'style="text-align:right"':''}>${esc(c.label)}</th>`).join('');
+  const body = rows.map(r=>`<tr ${opts.rowClick?`data-row="${r.id}" style="cursor:pointer"`:''}>${
+    columns.map(c=>`<td class="${c.align==='right'?'num-cell':''} ${c.cls||''}">${c.render(r)}</td>`).join('')
+  }</tr>`).join('');
+  return `<div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div></div>`;
+}
+let CURVIEW='dashboard';
+function actBtns(id,{edit=true,del=true,extra=[]}={}){
+  const e = edit && canWrite(CURVIEW);
+  const d = del && canWrite(CURVIEW);
+  return `<div>${extra.map(x=>`<button class="${x.cls||''}" data-act="${x.act}" data-id="${id}" title="${esc(x.title||'')}">${x.icon}</button>`).join('')}
+    ${e?`<button data-act="edit" data-id="${id}" title="Edit">✎</button>`:''}
+    ${d?`<button class="del" data-act="del" data-id="${id}" title="Delete">🗑</button>`:''}</div>`;
+}
+
+/* ============================================================
+   ROUTES / NAV
+   ============================================================ */
+const NAV = [
+  {grp:'Overview', items:[ {k:'dashboard',label:'Dashboard',ic:'◈'} ]},
+  {grp:'Relationships', items:[
+    {k:'companies',label:'Companies',ic:'🏢'},
+    {k:'customers',label:'Customers',ic:'👤'},
+    {k:'agents',label:'Agents',ic:'🎯'},
+    {k:'followups',label:'Follow-ups',ic:'🔔'},
+  ]},
+  {grp:'Programs', items:[
+    {k:'courses',label:'Courses',ic:'📘'},
+    {k:'speakers',label:'Speakers',ic:'🎤'},
+    {k:'schedules',label:'Schedules',ic:'📅'},
+    {k:'attendance',label:'Attendance',ic:'✅'},
+  ]},
+  {grp:'Revenue', items:[ {k:'sales',label:'Sales',ic:'💳'} ]},
+  {grp:'Insights', items:[ {k:'reports',label:'Reports',ic:'📊'} ]},
+];
+const TITLES = {dashboard:['Dashboard','Real-time business overview'],companies:['Companies','Organisations & their contacts'],customers:['Customers','People you engage & sell to'],agents:['Agents','Your sales & account team'],followups:['Follow-ups','Reminders & interaction log'],courses:['Courses','Programs you deliver'],speakers:['Speakers','Trainers & their fees'],schedules:['Schedules','Sessions, costs & ROI'],attendance:['Attendance','Who showed up'],sales:['Sales','Revenue & payment tracking'],reports:['Reports','Performance & analytics']};
+
+function buildNav(){
+  const due = scoped('followups').filter(f=>f.status==='Pending' && f.dueDate<=today()).length;
+  $('#nav').innerHTML = NAV.map(g=>{
+    const items=g.items.filter(i=>canView(i.k));
+    if(!items.length) return '';
+    return `<div class="grp">${g.grp}</div>${
+      items.map(i=>{
+        const badge = i.k==='followups' && due ? `<span class="navbadge">${due}</span>` : '';
+        return `<a href="#/${i.k}" data-k="${i.k}"><span class="ic">${i.ic}</span>${i.label}${badge}</a>`;
+      }).join('')
+    }`;
+  }).join('');
+  $$('#nav a').forEach(a=>a.onclick=e=>{ e.preventDefault(); route(a.dataset.k); });
+}
+
+let uiState = { search:{}, filter:{} };
+function route(view){
+  if(!me) return;
+  if(view===undefined) view = (location.hash.replace('#/','')||CURVIEW||'dashboard');
+  if(!VIEWS[view]) view='dashboard';
+  if(!canView(view)) view='dashboard';
+  CURVIEW = view;
+  buildNav();
+  $$('#nav a').forEach(a=>a.classList.toggle('active', a.dataset.k===view));
+  const [t,c]=TITLES[view]; $('#page-title').textContent=t; $('#page-crumb').textContent=c;
+  $('#top-actions').innerHTML = (canWrite(view) ? (TOP_ACTIONS[view]||'') : '') + userChip();
+  $('#view').innerHTML = VIEWS[view]();
+  bindView(view);
+  bindTop();
+  $('#sidebar').classList.remove('open'); const sc=$('.scrim'); if(sc)sc.remove();
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+const VIEWS = {};
+const TOP_ACTIONS = {};
+
+/* ---------------- DASHBOARD ---------------- */
+VIEWS.dashboard = ()=>{
+  const mySales=scoped('sales'), myFollow=scoped('followups');
+  const totalSales = mySales.reduce((t,s)=>t+(+s.amount||0),0);
+  const revenue = mySales.reduce((t,s)=>t+(+s.paid||0),0);
+  const outstanding = totalSales-revenue;
+  const upcoming = db.schedules.filter(s=>s.date>=today()).sort((a,b)=>a.date.localeCompare(b.date));
+  const totalAtt = db.attendance.length;
+  const attended = db.attendance.filter(a=>a.status==='Attended').length;
+  const attRate = totalAtt? Math.round(attended/totalAtt*100):0;
+  const dueFollow = myFollow.filter(f=>f.status==='Pending' && f.dueDate<=today()).length;
+
+  const upcomingRows = upcoming.slice(0,5).map(s=>`<tr>
+      <td><div class="strong">${esc(courseTitle(s.courseId))}</div><div class="mut">${esc(s.venue||'')}</div></td>
+      <td>${fmtDate(s.date)} ${esc(s.time||'')}</td>
+      <td class="num-cell">${scheduleAttendees(s.id).length}</td>
+      <td class="num-cell">${RM(scheduleCost(s))}</td>
+    </tr>`).join('') || `<tr><td colspan="4" style="color:var(--t-faint);padding:20px">No upcoming sessions scheduled.</td></tr>`;
+
+  // ROI per past event
+  const past = db.schedules.filter(s=>s.date<today()).sort((a,b)=>b.date.localeCompare(a.date));
+  const roiRows = past.slice(0,5).map(s=>{
+    const roi=scheduleROI(s); const cls=roi>=0?'teal':'red';
+    return `<tr>
+      <td><div class="strong">${esc(courseTitle(s.courseId))}</div><div class="mut">${fmtDate(s.date)}</div></td>
+      <td class="num-cell">${RM(scheduleRevenue(s))}</td>
+      <td class="num-cell">${RM(scheduleCost(s))}</td>
+      <td class="num-cell"><span class="pill ${cls}">${roi>=0?'+':''}${roi}%</span></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="4" style="color:var(--t-faint);padding:20px">No completed events yet.</td></tr>`;
+
+  return `
+  <div class="kpi-grid">
+    <div class="kpi"><div class="lab">Total Sales</div><div class="num">${RM(totalSales)}</div><div class="note">${mySales.length} sale records</div></div>
+    <div class="kpi teal"><div class="lab">Revenue Collected</div><div class="num">${RM(revenue)}</div><div class="note">${RM(outstanding)} outstanding</div></div>
+    <div class="kpi ink"><div class="lab">Upcoming Sessions</div><div class="num">${upcoming.length}</div><div class="note">${db.schedules.length} total scheduled</div></div>
+    <div class="kpi ${dueFollow?'red':'teal'}"><div class="lab">Follow-ups Due</div><div class="num">${dueFollow}</div><div class="note">${attRate}% attendance rate</div></div>
+  </div>
+
+  <div class="dash-cols">
+    <div class="card pad">
+      <div class="panel-title">Upcoming Schedule</div>
+      <div class="panel-sub">Next sessions and their planned cost</div>
+      <div class="tbl-scroll"><table>
+        <thead><tr><th>Course</th><th>When</th><th style="text-align:right">Attendees</th><th style="text-align:right">Cost</th></tr></thead>
+        <tbody>${upcomingRows}</tbody></table></div>
+    </div>
+    <div class="card pad">
+      <div class="panel-title">Event ROI</div>
+      <div class="panel-sub">Return on completed sessions</div>
+      <div class="tbl-scroll"><table>
+        <thead><tr><th>Event</th><th style="text-align:right">Revenue</th><th style="text-align:right">Cost</th><th style="text-align:right">ROI</th></tr></thead>
+        <tbody>${roiRows}</tbody></table></div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:18px">
+    <div class="card pad" style="flex:1;min-width:240px">
+      <div class="panel-title">Quick Navigation</div>
+      <div class="panel-sub">Jump straight into a module</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">
+        ${['companies','customers','sales','schedules','followups','courses'].map(k=>`<a class="btn ghost" href="#/${k}" style="justify-content:center">${TITLES[k][0]}</a>`).join('')}
+      </div>
+    </div>
+  </div>`;
+};
+
+/* ---------------- AGENTS ---------------- */
+TOP_ACTIONS.agents = `<button class="btn gold" data-new="agent">+ New Agent</button>`;
+VIEWS.agents = ()=>{
+  const q=(uiState.search.agents||'').toLowerCase();
+  let rows = db.agents.filter(a=>!q || (a.name+a.email+a.role).toLowerCase().includes(q));
+  const cols=[
+    {label:'Agent',render:a=>`<div class="strong">${esc(a.name)}</div><div class="mut">${esc(a.email)}</div>`},
+    {label:'Role',render:a=>`<span class="pill ink">${esc(a.role||'—')}</span>`},
+    {label:'Phone',render:a=>esc(a.phone||'—')},
+    {label:'Customers',align:'right',render:a=>db.customers.filter(c=>c.agentId===a.id).length},
+    {label:'Sales',align:'right',render:a=>RM(db.sales.filter(s=>s.agentId===a.id).reduce((t,s)=>t+(+s.amount||0),0))},
+    {label:'Status',render:a=>`<span class="pill ${a.status==='Active'?'teal':'grey'}"><span class="dot" style="background:currentColor"></span>${esc(a.status)}</span>`},
+    {label:'',align:'right',cls:'actions-cell',render:a=>actBtns(a.id)},
+  ];
+  return searchbar('agents','Search agents…') + renderTable(cols,rows,{emptyIcon:'🎯',emptyMsg:'No agents yet'});
+};
+
+/* ---------------- COMPANIES ---------------- */
+TOP_ACTIONS.companies = `<button class="btn gold" data-new="company">+ New Company</button>`;
+VIEWS.companies = ()=>{
+  const q=(uiState.search.companies||'').toLowerCase();
+  const ind=uiState.filter.companies||'';
+  let rows = scoped('companies').filter(c=> (!q||(c.name+c.industry+c.contactPerson).toLowerCase().includes(q)) && (!ind||c.industry===ind));
+  const industries=[...new Set(db.companies.map(c=>c.industry).filter(Boolean))];
+  const cols=[
+    {label:'Company',render:c=>`<div class="strong">${esc(c.name)}</div><div class="mut">${esc(c.address||'')}</div>`},
+    {label:'Industry',render:c=>`<span class="pill grey">${esc(c.industry||'—')}</span>`},
+    {label:'Contact',render:c=>`${esc(c.contactPerson||'—')}<div class="mut">${esc(c.phone||'')}</div>`},
+    {label:'Customers',align:'right',render:c=>db.customers.filter(u=>u.companyId===c.id).length},
+    {label:'Agent',render:c=>esc(agentName(c.agentId))},
+    {label:'',align:'right',cls:'actions-cell',render:c=>actBtns(c.id,{extra:[{act:'view',icon:'👁',title:'View'}]})},
+  ];
+  const filterHTML=`<select class="filter" data-filter="companies"><option value="">All industries</option>${industries.map(i=>`<option ${ind===i?'selected':''}>${esc(i)}</option>`).join('')}</select>`;
+  return searchbar('companies','Search companies…',filterHTML) + renderTable(cols,rows,{rowClick:true,emptyIcon:'🏢',emptyMsg:'No companies yet'});
+};
+
+/* ---------------- CUSTOMERS ---------------- */
+TOP_ACTIONS.customers = `<button class="btn gold" data-new="customer">+ New Customer</button>`;
+VIEWS.customers = ()=>{
+  const q=(uiState.search.customers||'').toLowerCase();
+  const comp=uiState.filter.customers||'';
+  let rows = scoped('customers').filter(u=> (!q||(u.name+u.email+u.phone).toLowerCase().includes(q)) && (!comp||u.companyId===comp));
+  const cols=[
+    {label:'Customer',render:u=>`<div class="strong">${esc(u.name)}</div><div class="mut">${esc(u.email||'')}</div>`},
+    {label:'Company',render:u=>esc(companyName(u.companyId))},
+    {label:'Phone',render:u=>esc(u.phone||'—')},
+    {label:'Courses',align:'right',render:u=>coursesAttendedBy(u.id).length},
+    {label:'Agent',render:u=>esc(agentName(u.agentId))},
+    {label:'',align:'right',cls:'actions-cell',render:u=>actBtns(u.id,{extra:[{act:'view',icon:'👁',title:'View'}]})},
+  ];
+  const filterHTML=`<select class="filter" data-filter="customers"><option value="">All companies</option>${db.companies.map(c=>`<option value="${c.id}" ${comp===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select>`;
+  return searchbar('customers','Search customers…',filterHTML) + renderTable(cols,rows,{rowClick:true,emptyIcon:'👤',emptyMsg:'No customers yet'});
+};
+function coursesAttendedBy(custId){
+  const schIds = db.attendance.filter(a=>a.customerId===custId && a.status==='Attended').map(a=>a.scheduleId);
+  const courseIds = new Set(db.schedules.filter(s=>schIds.includes(s.id)).map(s=>s.courseId));
+  return [...courseIds];
+}
+
+/* ---------------- FOLLOW-UPS ---------------- */
+TOP_ACTIONS.followups = `<button class="btn gold" data-new="followup">+ New Follow-up</button>`;
+VIEWS.followups = ()=>{
+  const st=uiState.filter.followups||'';
+  const base=scoped('followups');
+  let rows = base.filter(f=>!st||f.status===st).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+  const total=base.length, done=base.filter(f=>f.status==='Completed').length;
+  const conv=base.filter(f=>f.outcome==='Converted').length;
+  const cols=[
+    {label:'Due',render:f=>{const over=f.status==='Pending'&&f.dueDate<today(); return `<span class="${over?'':''}" style="${over?'color:var(--red);font-weight:600':''}">${fmtDate(f.dueDate)}</span>${over?' <span class="pill red">Overdue</span>':''}`;}},
+    {label:'Customer',render:f=>`<div class="strong">${esc(customerName(f.customerId))}</div><div class="mut">${esc(companyName(byId(db.customers,f.customerId)?.companyId))}</div>`},
+    {label:'Note',render:f=>esc(f.note||'—')},
+    {label:'Agent',render:f=>esc(agentName(f.agentId))},
+    {label:'Status',render:f=>statusPill(f.status)},
+    {label:'Outcome',render:f=>f.outcome?`<span class="pill ${f.outcome==='Converted'?'teal':'grey'}">${esc(f.outcome)}</span>`:'—'},
+    {label:'',align:'right',cls:'actions-cell',render:f=>actBtns(f.id,{extra:f.status==='Pending'?[{act:'done',icon:'✔',title:'Mark complete'}]:[]})},
+  ];
+  const filterHTML=`<select class="filter" data-filter="followups"><option value="">All status</option>${['Pending','Completed','Cancelled'].map(s=>`<option ${st===s?'selected':''}>${s}</option>`).join('')}</select>`;
+  const kpi=`<div class="kpi-grid" style="margin-bottom:16px">
+    <div class="kpi"><div class="lab">Open Follow-ups</div><div class="num">${db.followups.filter(f=>f.status==='Pending').length}</div></div>
+    <div class="kpi teal"><div class="lab">Completion Rate</div><div class="num">${total?Math.round(done/total*100):0}%</div></div>
+    <div class="kpi ink"><div class="lab">Conversions</div><div class="num">${conv}</div><div class="note">from follow-ups</div></div>
+  </div>`;
+  return kpi + searchbar('followups','',filterHTML,true) + renderTable(cols,rows,{emptyIcon:'🔔',emptyMsg:'No follow-ups'});
+};
+
+/* ---------------- COURSES ---------------- */
+TOP_ACTIONS.courses = `<button class="btn gold" data-new="course">+ New Course</button>`;
+VIEWS.courses = ()=>{
+  const q=(uiState.search.courses||'').toLowerCase();
+  let rows=db.courses.filter(c=>!q||(c.title+c.description).toLowerCase().includes(q));
+  const cols=[
+    {label:'Course',render:c=>`<div class="strong">${esc(c.title)}</div><div class="mut">${esc(c.description||'')}</div>`},
+    {label:'Duration',render:c=>esc(c.duration||'—')},
+    {label:'Price',align:'right',render:c=>RM(c.price)},
+    {label:'Sessions',align:'right',render:c=>db.schedules.filter(s=>s.courseId===c.id).length},
+    {label:'Enrolled',align:'right',render:c=>db.sales.filter(s=>s.courseId===c.id).length},
+    {label:'Materials',render:c=>c.materials?`<span class="pill gold">📎 attached</span>`:'<span class="mut">—</span>'},
+    {label:'',align:'right',cls:'actions-cell',render:c=>actBtns(c.id)},
+  ];
+  return searchbar('courses','Search courses…') + renderTable(cols,rows,{emptyIcon:'📘',emptyMsg:'No courses yet'});
+};
+
+/* ---------------- SPEAKERS ---------------- */
+TOP_ACTIONS.speakers = `<button class="btn gold" data-new="speaker">+ New Speaker</button>`;
+VIEWS.speakers = ()=>{
+  const q=(uiState.search.speakers||'').toLowerCase();
+  let rows=db.speakers.filter(s=>!q||(s.name+s.expertise).toLowerCase().includes(q));
+  const cols=[
+    {label:'Speaker',render:s=>`<div class="strong">${esc(s.name)}</div><div class="mut">${esc(s.email||'')}</div>`},
+    {label:'Expertise',render:s=>esc(s.expertise||'—').split(',').map(t=>`<span class="tag">${esc(t.trim())}</span>`).join('')},
+    {label:'Availability',render:s=>esc(s.availability||'—')},
+    {label:'Fee / session',align:'right',render:s=>RM(s.fee)},
+    {label:'Sessions',align:'right',render:s=>db.schedules.filter(sc=>sc.speakerId===s.id).length},
+    {label:'',align:'right',cls:'actions-cell',render:s=>actBtns(s.id)},
+  ];
+  return searchbar('speakers','Search speakers…') + renderTable(cols,rows,{emptyIcon:'🎤',emptyMsg:'No speakers yet'});
+};
+
+/* ---------------- SCHEDULES ---------------- */
+TOP_ACTIONS.schedules = `<button class="btn gold" data-new="schedule">+ New Schedule</button>`;
+VIEWS.schedules = ()=>{
+  const f=uiState.filter.schedules||'';
+  let rows=db.schedules.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  if(f==='upcoming') rows=rows.filter(s=>s.date>=today());
+  if(f==='past') rows=rows.filter(s=>s.date<today());
+  const cols=[
+    {label:'Course',render:s=>`<div class="strong">${esc(courseTitle(s.courseId))}</div><div class="mut">${esc(speakerName(s.speakerId))}</div>`},
+    {label:'When',render:s=>`${fmtDate(s.date)}<div class="mut">${esc(s.time||'')} · ${esc(s.venue||'')}</div>`},
+    {label:'Attendees',align:'right',render:s=>scheduleAttendees(s.id).length},
+    {label:'Cost',align:'right',render:s=>RM(scheduleCost(s))},
+    {label:'Revenue',align:'right',render:s=>RM(scheduleRevenue(s))},
+    {label:'ROI',align:'right',render:s=>{const r=scheduleROI(s);return `<span class="pill ${r>=0?'teal':'red'}">${r>=0?'+':''}${r}%</span>`;}},
+    {label:'',align:'right',cls:'actions-cell',render:s=>actBtns(s.id,{extra:[{act:'attend',icon:'✅',title:'Attendance'},{act:'view',icon:'👁',title:'Cost breakdown'}]})},
+  ];
+  const filterHTML=`<select class="filter" data-filter="schedules"><option value="">All sessions</option><option value="upcoming" ${f==='upcoming'?'selected':''}>Upcoming</option><option value="past" ${f==='past'?'selected':''}>Past</option></select>`;
+  return searchbar('schedules','',filterHTML,true) + renderTable(cols,rows,{rowClick:true,emptyIcon:'📅',emptyMsg:'No schedules yet'});
+};
+
+/* ---------------- ATTENDANCE ---------------- */
+TOP_ACTIONS.attendance = `<button class="btn ghost" data-bulk="1">⬆ Bulk Upload</button>`;
+VIEWS.attendance = ()=>{
+  const sc=uiState.filter.attendance||'';
+  let rows=db.attendance.slice();
+  if(sc) rows=rows.filter(a=>a.scheduleId===sc);
+  rows.sort((a,b)=>{const sa=byId(db.schedules,a.scheduleId)?.date||'';const sb=byId(db.schedules,b.scheduleId)?.date||'';return sb.localeCompare(sa);});
+  const total=db.attendance.length, att=db.attendance.filter(a=>a.status==='Attended').length;
+  const cols=[
+    {label:'Customer',render:a=>`<div class="strong">${esc(customerName(a.customerId))}</div><div class="mut">${esc(companyName(byId(db.customers,a.customerId)?.companyId))}</div>`},
+    {label:'Session',render:a=>{const s=byId(db.schedules,a.scheduleId);return s?`${esc(courseTitle(s.courseId))}<div class="mut">${fmtDate(s.date)}</div>`:'—';}},
+    {label:'Status',render:a=>`<select class="filter" data-attstatus="${a.id}" style="padding:5px 8px">${['Registered','Attended','Absent'].map(o=>`<option ${a.status===o?'selected':''}>${o}</option>`).join('')}</select>`},
+    {label:'Converted?',render:a=>{const conv=db.sales.some(s=>s.customerId===a.customerId && s.courseId===byId(db.schedules,a.scheduleId)?.courseId); return conv?'<span class="pill teal">Yes</span>':'<span class="pill grey">No</span>';}},
+    {label:'',align:'right',cls:'actions-cell',render:a=>actBtns(a.id,{edit:false})},
+  ];
+  const filterHTML=`<select class="filter" data-filter="attendance"><option value="">All sessions</option>${db.schedules.map(s=>`<option value="${s.id}" ${sc===s.id?'selected':''}>${esc(courseTitle(s.courseId))} · ${fmtDate(s.date)}</option>`).join('')}</select>`;
+  const kpi=`<div class="kpi-grid" style="margin-bottom:16px">
+    <div class="kpi"><div class="lab">Total Records</div><div class="num">${total}</div></div>
+    <div class="kpi teal"><div class="lab">Attended</div><div class="num">${att}</div></div>
+    <div class="kpi ink"><div class="lab">Attendance Rate</div><div class="num">${total?Math.round(att/total*100):0}%</div></div>
+  </div>`;
+  return kpi + searchbar('attendance','',filterHTML,true) + renderTable(cols,rows,{emptyIcon:'✅',emptyMsg:'No attendance records',emptyHint:'Add a schedule, then record or bulk-upload attendance.'});
+};
+
+/* ---------------- SALES ---------------- */
+TOP_ACTIONS.sales = `<button class="btn ghost" data-export="1">⬇ Export to SQL Acc</button> <button class="btn gold" data-new="sale">+ New Sale</button>`;
+VIEWS.sales = ()=>{
+  const q=(uiState.search.sales||'').toLowerCase();
+  const cat=uiState.filter.sales||'';
+  const base=scoped('sales');
+  let rows=base.filter(s=>(!cat||s.category===cat)&&(!q||(s.description+customerName(s.customerId)).toLowerCase().includes(q))).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const totalSales=base.reduce((t,s)=>t+(+s.amount||0),0);
+  const collected=base.reduce((t,s)=>t+(+s.paid||0),0);
+  const cols=[
+    {label:'Date',render:s=>fmtDate(s.date)},
+    {label:'Customer',render:s=>`<div class="strong">${esc(customerName(s.customerId))}</div><div class="mut">${esc(s.description||'')}</div>`},
+    {label:'Category',render:s=>`<span class="pill ink">${esc(s.category)}</span>`},
+    {label:'Amount',align:'right',render:s=>RM(s.amount)},
+    {label:'Paid',align:'right',render:s=>{const pct=s.amount?Math.round((s.paid||0)/s.amount*100):0;return `${RM(s.paid)}<div class="bar gold" style="margin-top:4px"><i style="width:${pct}%"></i></div>`;}},
+    {label:'Status',render:s=>statusPill(s.status)},
+    {label:'Agent',render:s=>esc(agentName(s.agentId))},
+    {label:'',align:'right',cls:'actions-cell',render:s=>actBtns(s.id,{extra:[{act:'pay',icon:'💵',title:'Record payment'}]})},
+  ];
+  const cats=['Business Proposal','Coaching Service','Course Enrollment'];
+  const filterHTML=`<select class="filter" data-filter="sales"><option value="">All categories</option>${cats.map(c=>`<option ${cat===c?'selected':''}>${c}</option>`).join('')}</select>`;
+  const kpi=`<div class="kpi-grid" style="margin-bottom:16px">
+    <div class="kpi"><div class="lab">Total Sales</div><div class="num">${RM(totalSales)}</div></div>
+    <div class="kpi teal"><div class="lab">Collected</div><div class="num">${RM(collected)}</div></div>
+    <div class="kpi red"><div class="lab">Outstanding</div><div class="num">${RM(totalSales-collected)}</div></div>
+  </div>`;
+  return kpi + searchbar('sales','Search sales…',filterHTML) + renderTable(cols,rows,{emptyIcon:'💳',emptyMsg:'No sales yet'});
+};
+
+/* ---------- shared bits ---------- */
+function statusPill(s){
+  const map={Paid:'teal',Partial:'gold',Unpaid:'red',Pending:'gold',Completed:'teal',Cancelled:'grey'};
+  return `<span class="pill ${map[s]||'grey'}">${esc(s)}</span>`;
+}
+function searchbar(key,placeholder,extraHTML='',noSearch=false){
+  return `<div class="toolbar">
+    ${noSearch?'':`<div class="search"><span class="si">🔍</span><input data-search="${key}" value="${esc(uiState.search[key]||'')}" placeholder="${esc(placeholder)}"></div>`}
+    ${extraHTML}
+  </div>`;
+}
+
+/* ============================================================
+   DETAIL VIEWS (drill-down modals)
+   ============================================================ */
+function viewCompany(id){
+  const c=byId(db.companies,id); if(!c)return;
+  const custs=db.customers.filter(u=>u.companyId===id);
+  const custRows = custs.length? custs.map(u=>`<tr><td><div class="strong">${esc(u.name)}</div><div class="mut">${esc(u.email||'')}</div></td><td>${esc(u.phone||'—')}</td><td class="num-cell">${coursesAttendedBy(u.id).length} courses</td></tr>`).join('')
+    : `<tr><td colspan="3" style="color:var(--t-faint)">No customers linked yet.</td></tr>`;
+  openModal({title:c.name,wide:true,bodyHTML:`
+    <dl class="kv">
+      <dt>Industry</dt><dd>${esc(c.industry||'—')}</dd>
+      <dt>Contact person</dt><dd>${esc(c.contactPerson||'—')}</dd>
+      <dt>Phone</dt><dd>${esc(c.phone||'—')}</dd>
+      <dt>Email</dt><dd>${esc(c.email||'—')}</dd>
+      <dt>Address</dt><dd>${esc(c.address||'—')}</dd>
+      <dt>Account agent</dt><dd>${esc(agentName(c.agentId))}</dd>
+    </dl>
+    <div class="subhead">Linked customers (${custs.length})</div>
+    <div class="tbl-scroll"><table><thead><tr><th>Customer</th><th>Phone</th><th style="text-align:right">History</th></tr></thead><tbody>${custRows}</tbody></table></div>`,
+    footer:[{label:'Close',cls:'ghost',act:closeModal},{label:'Edit company',cls:'primary',act:()=>{closeModal();editEntity('company',id);}}]});
+}
+function viewCustomer(id){
+  const u=byId(db.customers,id); if(!u)return;
+  const courseIds=coursesAttendedBy(id);
+  const courseRows=courseIds.length?courseIds.map(cid=>`<span class="tag">${esc(courseTitle(cid))}</span>`).join(''):'<span class="mut">No courses attended yet.</span>';
+  const sales=db.sales.filter(s=>s.customerId===id);
+  const salesRows=sales.length?sales.map(s=>`<tr><td>${fmtDate(s.date)}</td><td>${esc(s.description||s.category)}</td><td class="num-cell">${RM(s.amount)}</td><td>${statusPill(s.status)}</td></tr>`).join('')
+    :`<tr><td colspan="4" style="color:var(--t-faint)">No sales yet.</td></tr>`;
+  const fups=db.followups.filter(f=>f.customerId===id);
+  openModal({title:u.name,wide:true,bodyHTML:`
+    <dl class="kv">
+      <dt>Company</dt><dd>${esc(companyName(u.companyId))}</dd>
+      <dt>Email</dt><dd>${esc(u.email||'—')}</dd>
+      <dt>Phone</dt><dd>${esc(u.phone||'—')}</dd>
+      <dt>Agent</dt><dd>${esc(agentName(u.agentId))}</dd>
+      <dt>Notes</dt><dd>${esc(u.notes||'—')}</dd>
+    </dl>
+    <div class="subhead">Courses attended</div><div>${courseRows}</div>
+    <div class="subhead">Sales history</div>
+    <div class="tbl-scroll"><table><thead><tr><th>Date</th><th>Item</th><th style="text-align:right">Amount</th><th>Status</th></tr></thead><tbody>${salesRows}</tbody></table></div>
+    <div class="subhead">Open follow-ups (${fups.filter(f=>f.status==='Pending').length})</div>
+    <div>${fups.length?fups.map(f=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)">${statusPill(f.status)} <b>${fmtDate(f.dueDate)}</b> — ${esc(f.note)}</div>`).join(''):'<span class="mut">None.</span>'}</div>`,
+    footer:[{label:'Close',cls:'ghost',act:closeModal},{label:'Edit customer',cls:'primary',act:()=>{closeModal();editEntity('customer',id);}}]});
+}
+function viewSchedule(id){
+  const s=byId(db.schedules,id); if(!s)return;
+  const cost=scheduleCost(s),rev=scheduleRevenue(s),roi=scheduleROI(s);
+  openModal({title:courseTitle(s.courseId)+' — '+fmtDate(s.date),wide:true,bodyHTML:`
+    <dl class="kv">
+      <dt>Speaker</dt><dd>${esc(speakerName(s.speakerId))}</dd>
+      <dt>Date / time</dt><dd>${fmtDate(s.date)} · ${esc(s.time||'—')}</dd>
+      <dt>Venue</dt><dd>${esc(s.venue||'—')}</dd>
+      <dt>Attendees</dt><dd>${scheduleAttendees(s.id).length}</dd>
+    </dl>
+    <div class="subhead">Cost breakdown</div>
+    <dl class="kv">
+      <dt>Venue</dt><dd>${RM(s.venueCost)}</dd>
+      <dt>Marketing</dt><dd>${RM(s.marketingCost)}</dd>
+      <dt>Speaker</dt><dd>${RM(s.speakerCost)}</dd>
+      <dt>Other</dt><dd>${RM(s.otherCost)}</dd>
+      <dt style="font-weight:700;color:var(--ink)">Total cost</dt><dd style="font-weight:700">${RM(cost)}</dd>
+    </dl>
+    <div class="subhead">Return on investment</div>
+    <dl class="kv">
+      <dt>Revenue (collected)</dt><dd>${RM(rev)}</dd>
+      <dt>Net</dt><dd style="color:${rev-cost>=0?'var(--teal)':'var(--red)'}">${RM(rev-cost)}</dd>
+      <dt>ROI</dt><dd><span class="pill ${roi>=0?'teal':'red'}">${roi>=0?'+':''}${roi}%</span></dd>
+    </dl>`,
+    footer:[{label:'Close',cls:'ghost',act:closeModal},{label:'Manage attendance',cls:'primary',act:()=>{closeModal();manageAttendance(id);}}]});
+}
+
+/* ============================================================
+   FORM SCHEMAS  (create / edit)
+   ============================================================ */
+const agentOpts = ()=>db.agents.map(a=>({value:a.id,label:a.name}));
+const companyOpts = ()=>db.companies.map(c=>({value:c.id,label:c.name}));
+const customerOpts = ()=>db.customers.map(c=>({value:c.id,label:c.name}));
+const courseOpts = ()=>db.courses.map(c=>({value:c.id,label:c.title}));
+const speakerOpts = ()=>db.speakers.map(s=>({value:s.id,label:s.name}));
+
+const SCHEMA = {
+  agent:{coll:'agents',title:'Agent',fields:()=>[
+    {key:'name',label:'Full name',required:true},
+    {key:'role',label:'Role',type:'select',options:['Sales Agent','Senior Sales','Account Manager','Team Lead','Admin'],default:'Sales Agent'},
+    {key:'email',label:'Email',type:'email'},
+    {key:'phone',label:'Phone'},
+    {key:'status',label:'Status',type:'select',options:['Active','Inactive'],default:'Active'},
+  ]},
+  company:{coll:'companies',title:'Company',fields:()=>[
+    {key:'name',label:'Company name',required:true,full:true},
+    {key:'industry',label:'Industry'},
+    {key:'contactPerson',label:'Contact person'},
+    {key:'phone',label:'Phone'},
+    {key:'email',label:'Email',type:'email'},
+    {key:'agentId',label:'Account agent',type:'select',options:agentOpts,placeholder:'Unassigned'},
+    {key:'address',label:'Address',type:'textarea',full:true},
+  ]},
+  customer:{coll:'customers',title:'Customer',fields:()=>[
+    {key:'name',label:'Full name',required:true},
+    {key:'companyId',label:'Company',type:'select',options:companyOpts,placeholder:'No company'},
+    {key:'email',label:'Email',type:'email'},
+    {key:'phone',label:'Phone'},
+    {key:'agentId',label:'Assigned agent',type:'select',options:agentOpts,placeholder:'Unassigned'},
+    {key:'notes',label:'Notes',type:'textarea',full:true},
+  ]},
+  course:{coll:'courses',title:'Course',fields:()=>[
+    {key:'title',label:'Course title',required:true,full:true},
+    {key:'duration',label:'Duration',placeholder:'e.g. 2 days'},
+    {key:'price',label:'Price (RM)',type:'number',step:'0.01'},
+    {key:'description',label:'Description',type:'textarea',full:true},
+    {key:'materials',label:'Materials / documents',full:true,placeholder:'e.g. Workbook, slide deck link'},
+  ]},
+  speaker:{coll:'speakers',title:'Speaker',fields:()=>[
+    {key:'name',label:'Full name',required:true},
+    {key:'expertise',label:'Expertise',placeholder:'comma separated',hint:'e.g. Leadership, Sales'},
+    {key:'email',label:'Email',type:'email'},
+    {key:'phone',label:'Phone'},
+    {key:'availability',label:'Availability',placeholder:'e.g. Weekdays'},
+    {key:'fee',label:'Fee per session (RM)',type:'number',step:'0.01'},
+  ]},
+  schedule:{coll:'schedules',title:'Schedule',wide:true,fields:()=>[
+    {key:'courseId',label:'Course',type:'select',options:courseOpts,required:true},
+    {key:'speakerId',label:'Speaker',type:'select',options:speakerOpts,placeholder:'TBD'},
+    {key:'date',label:'Date',type:'date',required:true},
+    {key:'time',label:'Time',type:'time'},
+    {key:'venue',label:'Venue',full:true},
+    {key:'venueCost',label:'Venue cost (RM)',type:'number',step:'0.01',default:0},
+    {key:'marketingCost',label:'Marketing cost (RM)',type:'number',step:'0.01',default:0},
+    {key:'speakerCost',label:'Speaker cost (RM)',type:'number',step:'0.01',default:0},
+    {key:'otherCost',label:'Other cost (RM)',type:'number',step:'0.01',default:0},
+  ]},
+  sale:{coll:'sales',title:'Sale',wide:true,fields:()=>[
+    {key:'customerId',label:'Customer',type:'select',options:customerOpts,required:true},
+    {key:'category',label:'Category',type:'select',options:['Course Enrollment','Coaching Service','Business Proposal'],required:true},
+    {key:'courseId',label:'Related course',type:'select',options:courseOpts,placeholder:'None'},
+    {key:'agentId',label:'Agent',type:'select',options:agentOpts,placeholder:'Unassigned'},
+    {key:'amount',label:'Total amount (RM)',type:'number',step:'0.01',required:true},
+    {key:'paid',label:'Paid so far (RM)',type:'number',step:'0.01',default:0},
+    {key:'date',label:'Sale date',type:'date',default:today()},
+    {key:'description',label:'Description',type:'textarea',full:true,placeholder:'Free text — custom service offering'},
+  ]},
+  followup:{coll:'followups',title:'Follow-up',fields:()=>[
+    {key:'customerId',label:'Customer',type:'select',options:customerOpts,required:true},
+    {key:'agentId',label:'Assign to agent',type:'select',options:agentOpts,placeholder:'Unassigned'},
+    {key:'dueDate',label:'Due date',type:'date',required:true,default:today()},
+    {key:'status',label:'Status',type:'select',options:['Pending','Completed','Cancelled'],default:'Pending'},
+    {key:'outcome',label:'Outcome',type:'select',options:['','Converted','Not interested','Reschedule'],placeholder:'—'},
+    {key:'note',label:'Note',type:'textarea',full:true,required:true},
+  ]},
+};
+
+function newEntity(type){
+  const sc=SCHEMA[type];
+  formModal({title:'New '+sc.title,wide:sc.wide,fields:sc.fields(),onSave:data=>{
+    const rec={id:uid(),...data};
+    if(type==='sale') rec.status=computeSaleStatus(rec), rec.installments=rec.installments||[];
+    db[sc.coll].push(rec); saveDB(); toast(sc.title+' added'); route();
+  }});
+}
+function editEntity(type,id){
+  const sc=SCHEMA[type]; const rec=byId(db[sc.coll],id); if(!rec)return;
+  formModal({title:'Edit '+sc.title,wide:sc.wide,fields:sc.fields(),values:rec,onSave:data=>{
+    Object.assign(rec,data);
+    if(type==='sale') rec.status=computeSaleStatus(rec);
+    saveDB(); toast(sc.title+' updated'); route();
+  }});
+}
+function delEntity(type,id){
+  const sc=SCHEMA[type]; const rec=byId(db[sc.coll],id); if(!rec)return;
+  const label = rec.name||rec.title||rec.description||'this record';
+  confirmDelete(label,()=>{ db[sc.coll]=db[sc.coll].filter(x=>x.id!==id); saveDB(); toast('Deleted'); route(); });
+}
+function computeSaleStatus(s){
+  const a=+s.amount||0,p=+s.paid||0;
+  if(p<=0) return 'Unpaid'; if(p>=a) return 'Paid'; return 'Partial';
+}
+
+/* ---------- payment / installment ---------- */
+function recordPayment(id){
+  const s=byId(db.sales,id); if(!s)return;
+  const due=(+s.amount||0)-(+s.paid||0);
+  openModal({title:'Record payment',bodyHTML:`
+    <dl class="kv" style="margin-bottom:16px"><dt>Customer</dt><dd>${esc(customerName(s.customerId))}</dd>
+    <dt>Total</dt><dd>${RM(s.amount)}</dd><dt>Paid</dt><dd>${RM(s.paid)}</dd>
+    <dt>Outstanding</dt><dd style="font-weight:700;color:var(--red)">${RM(due)}</dd></dl>
+    <div class="field"><label>Payment amount (RM)</label><input type="number" step="0.01" data-pay value="${due}"></div>
+    <div class="subhead">Installment history</div>
+    <div>${(s.installments||[]).length?s.installments.map(i=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)">${fmtDate(i.date)} — ${RM(i.amount)}</div>`).join(''):'<span class="mut">No installments recorded.</span>'}</div>`,
+    footer:[{label:'Cancel',cls:'ghost',act:closeModal},{label:'Add payment',cls:'gold',act:()=>{
+      const amt=Number($('[data-pay]').value)||0; if(amt<=0){toast('Enter an amount');return;}
+      s.installments=s.installments||[]; s.installments.push({date:today(),amount:amt});
+      s.paid=(+s.paid||0)+amt; s.status=computeSaleStatus(s); saveDB(); toast('Payment recorded'); route();
+    }}]});
+}
+
+/* ---------- attendance management ---------- */
+function manageAttendance(scId){
+  const sc=byId(db.schedules,scId); if(!sc)return;
+  const present=db.attendance.filter(a=>a.scheduleId===scId);
+  const presentIds=present.map(a=>a.customerId);
+  const available=db.customers.filter(c=>!presentIds.includes(c.id));
+  openModal({title:'Attendance — '+courseTitle(sc.courseId),wide:true,bodyHTML:`
+    <div class="panel-sub">${fmtDate(sc.date)} · ${esc(sc.venue||'')}</div>
+    <div class="field full"><label>Add customer to this session</label>
+      <select data-addcust><option value="">Select customer…</option>${available.map(c=>`<option value="${c.id}">${esc(c.name)} — ${esc(companyName(c.companyId))}</option>`).join('')}</select></div>
+    <div class="subhead">Registered (${present.length})</div>
+    <div id="att-list">${present.length?present.map(a=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)">
+        <div><b>${esc(customerName(a.customerId))}</b></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="filter" data-as="${a.id}" style="padding:5px 8px">${['Registered','Attended','Absent'].map(o=>`<option ${a.status===o?'selected':''}>${o}</option>`).join('')}</select>
+          <button class="btn sm ghost" data-rmatt="${a.id}">Remove</button>
+        </div></div>`).join(''):'<span class="mut">No one registered yet.</span>'}</div>`,
+    footer:[{label:'Done',cls:'primary',act:()=>{closeModal();route();}}],
+    onMount:()=>{
+      $('[data-addcust]').onchange=e=>{const cid=e.target.value; if(!cid)return;
+        db.attendance.push({id:uid(),scheduleId:scId,customerId:cid,status:'Registered'}); saveDB(); manageAttendance(scId);};
+      $$('[data-as]').forEach(s=>s.onchange=e=>{const a=byId(db.attendance,s.dataset.as); a.status=e.target.value; saveDB();});
+      $$('[data-rmatt]').forEach(b=>b.onclick=()=>{db.attendance=db.attendance.filter(x=>x.id!==b.dataset.rmatt); saveDB(); manageAttendance(scId);});
+    }});
+}
+function bulkUpload(){
+  openModal({title:'Bulk attendance upload',wide:true,bodyHTML:`
+    <div class="field full"><label>Session <span class="req">*</span></label>
+      <select data-bsc><option value="">Select session…</option>${db.schedules.map(s=>`<option value="${s.id}">${esc(courseTitle(s.courseId))} · ${fmtDate(s.date)}</option>`).join('')}</select></div>
+    <div class="field full"><label>Customer names (one per line)</label>
+      <textarea data-bnames placeholder="Yeoh Wei Ming&#10;Nadia Hassan&#10;New Person Name" style="min-height:140px"></textarea>
+      <span class="hint">Existing customers are matched by name. Unknown names are created as new customers and marked Attended.</span></div>`,
+    footer:[{label:'Cancel',cls:'ghost',act:closeModal},{label:'Upload',cls:'gold',act:()=>{
+      const scId=$('[data-bsc]').value; if(!scId){toast('Pick a session');return;}
+      const names=$('[data-bnames]').value.split('\n').map(n=>n.trim()).filter(Boolean);
+      if(!names.length){toast('Enter at least one name');return;}
+      let created=0;
+      names.forEach(nm=>{
+        let cust=db.customers.find(c=>c.name.toLowerCase()===nm.toLowerCase());
+        if(!cust){cust={id:uid(),name:nm,email:'',phone:'',companyId:'',agentId:'',notes:''};db.customers.push(cust);created++;}
+        const exists=db.attendance.find(a=>a.scheduleId===scId&&a.customerId===cust.id);
+        if(exists) exists.status='Attended';
+        else db.attendance.push({id:uid(),scheduleId:scId,customerId:cust.id,status:'Attended'});
+      });
+      saveDB(); toast(`${names.length} processed · ${created} new customers`); closeModal(); route();
+    }}]});
+}
+function exportSQL(){
+  const rows=[['Date','Customer','Company','Category','Description','Amount','Paid','Status','Agent']];
+  scoped('sales').forEach(s=>rows.push([s.date,customerName(s.customerId),companyName(byId(db.customers,s.customerId)?.companyId),s.category,s.description||'',s.amount,s.paid,s.status,agentName(s.agentId)]));
+  const csv=rows.map(r=>r.map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='sql_accounting_export_'+today()+'.csv'; a.click(); URL.revokeObjectURL(url);
+  toast('Exported for SQL Accounting');
+}
+
+/* ============================================================
+   REPORTS  (managers only)
+   ============================================================ */
+const PALETTE=['#D4A12C','#1F9D8F','#14202E','#D1495B','#6B7785','#B8861A'];
+function hbars(items, fmt=RM){
+  const max=Math.max(1,...items.map(i=>i.value));
+  if(!items.length||!items.some(i=>i.value)) return `<div class="mut" style="padding:10px 0">No data yet.</div>`;
+  return items.map((i,idx)=>`<div class="rep-row">
+    <span class="rep-lab" title="${esc(i.label)}">${esc(i.label)}</span>
+    <div class="bar" style="flex:1"><i style="width:${Math.round(i.value/max*100)}%;background:${i.color||PALETTE[idx%PALETTE.length]}"></i></div>
+    <span class="rep-val">${fmt(i.value)}</span></div>`).join('');
+}
+function vbars(items, fmt=RM){
+  const max=Math.max(1,...items.map(i=>i.value));
+  return `<div class="vbars">${items.map(i=>`<div class="vcol">
+    <div class="vbar-track"><div class="vbar" style="height:${Math.round(i.value/max*100)}%" title="${fmt(i.value)}"></div></div>
+    <div class="vlab">${esc(i.label)}</div></div>`).join('')}</div>`;
+}
+
+TOP_ACTIONS.reports = `<button class="btn ghost" data-print="1">🖨 Print</button>`;
+VIEWS.reports = ()=>{
+  const sales=db.sales;
+  const total=sales.reduce((t,s)=>t+(+s.amount||0),0);
+  const collected=sales.reduce((t,s)=>t+(+s.paid||0),0);
+  const avg=sales.length?total/sales.length:0;
+
+  const catAgg=['Course Enrollment','Coaching Service','Business Proposal'].map(c=>({label:c,value:sales.filter(s=>s.category===c).reduce((t,s)=>t+(+s.amount||0),0)}));
+  const agentAgg=db.agents.map(a=>({label:a.name,value:sales.filter(s=>s.agentId===a.id).reduce((t,s)=>t+(+s.amount||0),0)})).filter(x=>x.value>0).sort((x,y)=>y.value-x.value);
+
+  const months=[]; const now=new Date();
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({key:d.toISOString().slice(0,7),label:d.toLocaleDateString('en',{month:'short'}),value:0});}
+  sales.forEach(s=>{const m=months.find(x=>x.key===(s.date||'').slice(0,7));if(m)m.value+=(+s.amount||0);});
+
+  const att=db.attendance;
+  const aAtt=att.filter(a=>a.status==='Attended').length, aReg=att.filter(a=>a.status==='Registered').length, aAbs=att.filter(a=>a.status==='Absent').length;
+  const attRate=att.length?Math.round(aAtt/att.length*100):0;
+
+  const spk=db.speakers.map(sp=>{const ss=db.schedules.filter(x=>x.speakerId===sp.id);
+    const roi=ss.length?Math.round(ss.reduce((t,x)=>t+scheduleROI(x),0)/ss.length):0;
+    return {name:sp.name,sessions:ss.length,fees:ss.reduce((t,x)=>t+(+x.speakerCost||0),0),roi};}).sort((x,y)=>y.sessions-x.sessions);
+  const spkRows=spk.length?spk.map(s=>`<tr><td class="strong">${esc(s.name)}</td><td class="num-cell">${s.sessions}</td><td class="num-cell">${RM(s.fees)}</td><td class="num-cell"><span class="pill ${s.roi>=0?'teal':'red'}">${s.roi>=0?'+':''}${s.roi}%</span></td></tr>`).join('')
+    : `<tr><td colspan="4" class="mut">No speaker engagements yet.</td></tr>`;
+
+  return `
+  <div class="kpi-grid">
+    <div class="kpi"><div class="lab">Total Sales</div><div class="num">${RM(total)}</div><div class="note">${sales.length} records</div></div>
+    <div class="kpi teal"><div class="lab">Collected</div><div class="num">${RM(collected)}</div><div class="note">${total?Math.round(collected/total*100):0}% of sales</div></div>
+    <div class="kpi red"><div class="lab">Outstanding</div><div class="num">${RM(total-collected)}</div></div>
+    <div class="kpi ink"><div class="lab">Avg Deal Size</div><div class="num">${RM(avg)}</div></div>
+  </div>
+  <div class="dash-cols">
+    <div class="card pad"><div class="panel-title">Sales Trend</div><div class="panel-sub">Last 6 months by sale date</div>${vbars(months)}</div>
+    <div class="card pad"><div class="panel-title">By Category</div><div class="panel-sub">Revenue mix across service lines</div><div class="rep-list">${hbars(catAgg)}</div></div>
+  </div>
+  <div class="dash-cols" style="margin-top:18px">
+    <div class="card pad"><div class="panel-title">Agent Performance</div><div class="panel-sub">Total sales booked per agent</div><div class="rep-list">${hbars(agentAgg)}</div></div>
+    <div class="card pad"><div class="panel-title">Attendance Insights</div><div class="panel-sub">Engagement across all sessions · ${attRate}% attendance rate</div>
+      <div class="rep-list">${hbars([{label:'Attended',value:aAtt,color:'#1F9D8F'},{label:'Registered',value:aReg,color:'#D4A12C'},{label:'Absent',value:aAbs,color:'#D1495B'}], n=>n+'')}</div></div>
+  </div>
+  <div class="card pad" style="margin-top:18px">
+    <div class="panel-title">Speaker Performance</div><div class="panel-sub">Engagements, fees and average event ROI</div>
+    <div class="tbl-scroll"><table><thead><tr><th>Speaker</th><th style="text-align:right">Sessions</th><th style="text-align:right">Total Fees</th><th style="text-align:right">Avg ROI</th></tr></thead><tbody>${spkRows}</tbody></table></div>
+  </div>`;
+};
+
+/* ============================================================
+   USER CHIP · BACKUP · LOGIN
+   ============================================================ */
+function userChip(){
+  const mgr=isMgr();
+  return `<div class="uchip">
+    ${mgr?`<button class="btn sm ghost" data-backup="1" title="Download backup">⬇ Backup</button>
+           <button class="btn sm ghost" data-restore="1" title="Restore from backup">⬆ Restore</button>`:''}
+    <div class="uinfo"><div class="uname">${esc(me.name)}</div><div class="urole">${esc(me.role)}</div></div>
+    <button class="btn sm ghost" data-logout="1">Sign out</button>
+  </div>`;
+}
+function bindTop(){
+  const ta=$('#top-actions');
+  const b=s=>$(`[data-${s}]`,ta);
+  if(b('logout')) b('logout').onclick=logout;
+  if(b('backup')) b('backup').onclick=backupData;
+  if(b('restore')) b('restore').onclick=restoreData;
+  if(b('print')) b('print').onclick=()=>window.print();
+}
+function backupData(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='apex_crm_backup_'+today()+'.json';a.click();URL.revokeObjectURL(url);
+  toast('Backup downloaded');
+}
+function restoreData(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
+  inp.onchange=()=>{const f=inp.files[0];if(!f)return;const r=new FileReader();
+    r.onload=()=>{ try{ const data=JSON.parse(r.result);
+      if(!data.customers||!data.sales){toast('That does not look like a CRM backup');return;}
+      if(!confirm('Restore will replace all current data. Continue?'))return;
+      db=data; if(!db.users)db.users=seed().users; saveDB(); toast('Data restored'); route();
+    }catch(e){toast('Could not read that file');} };
+    r.readAsText(f); };
+  inp.click();
+}
+function showLogin(){
+  $('#app').style.display='none';
+  $('#login-root').innerHTML=`<div class="login-wrap"><div class="login-card">
+    <div class="login-brand">Apex<b>CRM</b></div>
+    <div class="login-sub">Courses &amp; Coaching · Sign in</div>
+    <div class="field full"><label>Username</label><input data-lu placeholder="e.g. admin" autocomplete="username"></div>
+    <div class="field full"><label>Password</label><input data-lp type="password" placeholder="••••••" autocomplete="current-password"></div>
+    <div class="login-err" data-lerr></div>
+    <button class="btn gold" data-login style="width:100%;justify-content:center;margin-top:8px">Sign in</button>
+    <div class="login-demo"><b>Demo logins</b><br>admin / admin &nbsp;·&nbsp; manager / manager<br>sarah / 1234 &nbsp;·&nbsp; daniel / 1234</div>
+  </div></div>`;
+  const tryLogin=()=>{
+    const u=$('[data-lu]').value.trim().toLowerCase(), p=$('[data-lp]').value;
+    const user=db.users.find(x=>x.username.toLowerCase()===u && x.password===p);
+    if(!user){ $('[data-lerr]').textContent='Wrong username or password.'; return; }
+    me=user; saveSession(); $('#login-root').innerHTML=''; $('#app').style.display='flex';
+    route('dashboard'); toast('Welcome, '+me.name.split(' ')[0]);
+  };
+  $('[data-login]').onclick=tryLogin;
+  $('[data-lp]').onkeydown=e=>{ if(e.key==='Enter') tryLogin(); };
+  $('[data-lu]').focus();
+}
+function logout(){ me=null; saveSession(); $('#modal-root').innerHTML=''; showLogin(); }
+
+/* ============================================================
+   EVENT BINDING
+   ============================================================ */
+function bindView(view){
+  // in-view navigation links (e.g. dashboard quick nav)
+  $$('#view a').forEach(a=>{ const h=a.getAttribute('href')||''; if(h.startsWith('#/')) a.onclick=e=>{ e.preventDefault(); route(h.replace('#/','')); }; });
+  // search
+  $$('[data-search]').forEach(inp=>{
+    inp.oninput=()=>{ uiState.search[inp.dataset.search]=inp.value;
+      const pos=inp.selectionStart; route();
+      const ni=$(`[data-search="${inp.dataset.search}"]`); if(ni){ni.focus();ni.setSelectionRange(pos,pos);} };
+  });
+  // filter
+  $$('[data-filter]').forEach(sel=>{ sel.onchange=()=>{ uiState.filter[sel.dataset.filter]=sel.value; route(); }; });
+  // attendance inline status (main table)
+  $$('[data-attstatus]').forEach(sel=>{ sel.onchange=()=>{ const a=byId(db.attendance,sel.dataset.attstatus); if(a){a.status=sel.value;saveDB();route();} }; });
+  // row clicks
+  $$('[data-row]').forEach(tr=>{ tr.onclick=e=>{ if(e.target.closest('button,select'))return;
+    const id=tr.dataset.row;
+    if(view==='companies')viewCompany(id); else if(view==='customers')viewCustomer(id); else if(view==='schedules')viewSchedule(id); }; });
+  // action buttons
+  $$('[data-act]').forEach(b=>{ b.onclick=e=>{ e.stopPropagation(); const id=b.dataset.id, act=b.dataset.act;
+    const typeMap={agents:'agent',companies:'company',customers:'customer',courses:'course',speakers:'speaker',schedules:'schedule',sales:'sale',followups:'followup'};
+    const type=typeMap[view];
+    if(act==='edit')editEntity(type,id);
+    else if(act==='del'){ if(view==='attendance'){confirmDelete('this attendance record',()=>{db.attendance=db.attendance.filter(x=>x.id!==id);saveDB();route();});} else delEntity(type,id); }
+    else if(act==='view'){ if(view==='companies')viewCompany(id); else if(view==='customers')viewCustomer(id); else if(view==='schedules')viewSchedule(id); }
+    else if(act==='attend')manageAttendance(id);
+    else if(act==='pay')recordPayment(id);
+    else if(act==='done'){const f=byId(db.followups,id);f.status='Completed';saveDB();toast('Follow-up completed');route();}
+  };});
+  // top actions
+  const ta=$('#top-actions');
+  $$('[data-new]',ta).forEach(b=>b.onclick=()=>newEntity(b.dataset.new));
+  $$('[data-bulk]',ta).forEach(b=>b.onclick=bulkUpload);
+  $$('[data-export]',ta).forEach(b=>b.onclick=exportSQL);
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.body.insertAdjacentHTML('beforeend','<div id="login-root"></div>');
+$('#ham').onclick=()=>{ const sb=$('#sidebar'); sb.classList.toggle('open');
+  if(sb.classList.contains('open')){const s=document.createElement('div');s.className='scrim';s.onclick=()=>{sb.classList.remove('open');s.remove();};document.body.appendChild(s);} };
+window.addEventListener('hashchange',()=>route());
+me = loadSession();
+if(me){ $('#app').style.display='flex'; route('dashboard'); }
+else { showLogin(); }
+</script>
+</body>
+</html>
