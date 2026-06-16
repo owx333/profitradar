@@ -28,21 +28,27 @@ input,textarea{font-family:inherit}
 :focus-visible{outline:2px solid var(--champ);outline-offset:3px;border-radius:8px}
 .app{display:flex;min-height:100vh;position:relative;z-index:1}
 
-.rail{width:84px;flex-shrink:0;position:sticky;top:0;height:100vh;padding:24px 0;display:flex;flex-direction:column;align-items:center;gap:5px;border-right:1px solid var(--line);background:linear-gradient(180deg,rgba(12,16,30,.6),rgba(6,8,15,.3));overflow-y:auto}
+.rail{width:236px;flex-shrink:0;position:sticky;top:0;height:100vh;padding:22px 14px;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--line);background:linear-gradient(180deg,rgba(12,16,30,.6),rgba(6,8,15,.3));overflow-y:auto}
 .rail::-webkit-scrollbar{display:none}
-.mark{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;margin-bottom:18px;flex-shrink:0;background:linear-gradient(140deg,var(--champ),#fff6 60%,var(--champ-2));box-shadow:0 8px 28px rgba(228,201,152,.3)}
-.mark span{font-family:'Fraunces',serif;font-weight:600;font-size:24px;color:#1a1408}
-.rnav{display:flex;flex-direction:column;gap:4px;align-items:center;width:100%}
-.rsep{width:32px;height:1px;background:var(--line);margin:7px 0}
-.rb{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:var(--muted);transition:.2s;position:relative}
-.rb svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 8px 18px}
+.mark{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;flex-shrink:0;background:linear-gradient(140deg,var(--champ),#fff6 60%,var(--champ-2));box-shadow:0 8px 28px rgba(228,201,152,.3)}
+.mark span{font-family:'Fraunces',serif;font-weight:600;font-size:23px;color:#1a1408}
+.brand .bn{font-family:'Fraunces',serif;font-weight:600;font-size:20px;letter-spacing:.5px;line-height:1}
+.brand .bs{font-size:10px;letter-spacing:2.5px;color:var(--muted-2);text-transform:uppercase;margin-top:3px}
+.rnav{display:flex;flex-direction:column;gap:3px;width:100%}
+.rgrp{font-size:10px;letter-spacing:2px;color:var(--muted-2);text-transform:uppercase;padding:15px 14px 6px;font-weight:700}
+.schoolsw{display:inline-flex;align-items:center;gap:5px;margin-top:7px;font-size:11.5px;color:var(--champ);background:var(--champ-soft);border:1px solid color-mix(in srgb,var(--champ) 30%,transparent);padding:4px 11px;border-radius:20px;font-weight:600;width:fit-content;transition:.2s}
+.schoolsw:hover{background:color-mix(in srgb,var(--champ) 22%,transparent)}
+.schoolsw svg{width:12px;height:12px;stroke:var(--champ);fill:none;stroke-width:2}
+.rsep{height:1px;background:var(--line);margin:9px 10px}
+.rb{display:flex;align-items:center;gap:13px;width:100%;padding:11px 13px;border-radius:13px;color:var(--muted);transition:.2s;position:relative;text-align:left}
+.rb svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.rb .lbl{font-size:14px;font-weight:500;white-space:nowrap}
 .rb:hover{background:rgba(255,255,255,.05);color:var(--txt)}
 .rb.on{color:var(--txt);background:var(--champ-soft)}
-.rb.on::before{content:"";position:absolute;left:-1px;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--champ)}
-.rb .tip{position:absolute;left:60px;white-space:nowrap;background:var(--panel-solid);border:1px solid var(--line-2);padding:6px 11px;border-radius:9px;font-size:12px;opacity:0;pointer-events:none;transform:translateX(-6px);transition:.18s;z-index:30}
-.rb:hover .tip{opacity:1;transform:none}
-.rb .ai{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--champ);box-shadow:0 0 8px var(--champ)}
-.rb .bdg{position:absolute;top:5px;right:5px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font-size:9px;font-weight:700;display:grid;place-items:center}
+.rb.on::before{content:"";position:absolute;left:-1px;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--champ)}
+.rb .ai{margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--champ);box-shadow:0 0 8px var(--champ);flex-shrink:0}
+.rb .bdg{margin-left:auto;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--bad);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
 
 .main{flex:1;min-width:0;padding:26px 40px 80px;max-width:1340px}
 .topbar{display:flex;align-items:center;gap:18px;margin-bottom:28px;flex-wrap:wrap}
@@ -321,7 +327,7 @@ input,textarea{font-family:inherit}
   <aside class="rail"><div class="mark"><span>T</span></div><nav class="rnav" id="rnav"></nav></aside>
   <main class="main">
     <div class="topbar">
-      <div class="tb-left"><span class="crumb">TUNAS · EDU OS</span><span class="nm" id="centreName">星辰教育中心</span></div>
+      <div class="tb-left"><span class="crumb">TUNAS · EDU OS</span><span class="nm" id="centreName">星辰教育中心 · 总部</span><button class="schoolsw" onclick="switchSchool()"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3M9 9v.01M9 12v.01M9 15v.01"/></svg><span id="schoolSwLbl">切换分校</span></button></div>
       <div class="progchips" id="progchips"></div>
       <button class="activate" onclick="openStudio()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span id="actLbl">开通项目</span></button>
       <div class="lang" id="lang"></div>
@@ -351,9 +357,9 @@ input,textarea{font-family:inherit}
 
 <script>
 const I18N={
- zh:{dash:'总览',students:'学员',attend:'签到',daily:'每日记录',curriculum:'课程',classes:'班级',timetable:'排课',sessions:'堂数',crm:'招生',billing:'收费',staff:'员工',comms:'沟通',reports:'报表',settings:'设置',activate:'开通项目'},
- ms:{dash:'Ringkasan',students:'Pelajar',attend:'Daftar',daily:'Laporan',curriculum:'Kurikulum',classes:'Kelas',timetable:'Jadual',sessions:'Sesi',crm:'Kemasukan',billing:'Yuran',staff:'Kakitangan',comms:'Komunikasi',reports:'Laporan',settings:'Tetapan',activate:'Aktifkan'},
- en:{dash:'Overview',students:'Students',attend:'Check-in',daily:'Daily Log',curriculum:'Curriculum',classes:'Classes',timetable:'Timetable',sessions:'Sessions',crm:'Admissions',billing:'Billing',staff:'Staff',comms:'Comms',reports:'Reports',settings:'Settings',activate:'Activate'}
+ zh:{dash:'总览',students:'学员',attend:'签到',daily:'每日记录',progress:'学员进度',classes:'班级',timetable:'排课',venue:'场地',curriculum:'课程',package:'配套',sessions:'堂数',crm:'招生',billing:'收费',recurring:'循环账单',payroll:'薪资',staff:'员工',replacement:'补课',holiday:'假期',comms:'沟通',reports:'报表',settings:'设置',activate:'开通项目',switchSchool:'切换分校',gOps:'营运',gTeach:'教学',gGrow:'增长',gFin:'财务',gTeam:'团队',gAdmin:'行政',gSys:'系统'},
+ ms:{dash:'Ringkasan',students:'Pelajar',attend:'Daftar',daily:'Laporan',progress:'Kemajuan',classes:'Kelas',timetable:'Jadual',venue:'Lokasi',curriculum:'Kurikulum',package:'Pakej',sessions:'Sesi',crm:'Kemasukan',billing:'Yuran',recurring:'Invois Auto',payroll:'Gaji',staff:'Kakitangan',replacement:'Ganti Kelas',holiday:'Cuti',comms:'Komunikasi',reports:'Laporan',settings:'Tetapan',activate:'Aktifkan',switchSchool:'Tukar Sekolah',gOps:'Operasi',gTeach:'Pengajaran',gGrow:'Pertumbuhan',gFin:'Kewangan',gTeam:'Pasukan',gAdmin:'Pentadbiran',gSys:'Sistem'},
+ en:{dash:'Overview',students:'Students',attend:'Check-in',daily:'Daily Log',progress:'Progress',classes:'Classes',timetable:'Timetable',venue:'Venue',curriculum:'Curriculum',package:'Package',sessions:'Sessions',crm:'Admissions',billing:'Billing',recurring:'Recurring',payroll:'Payroll',staff:'Staff',replacement:'Replacement',holiday:'Holiday',comms:'Comms',reports:'Reports',settings:'Settings',activate:'Activate',switchSchool:'Switch School',gOps:'Operations',gTeach:'Teaching',gGrow:'Growth',gFin:'Finance',gTeam:'Team',gAdmin:'Admin',gSys:'System'}
 };
 let LANG='zh';const t=k=>I18N[LANG][k]||k;
 
@@ -374,7 +380,14 @@ const IC={dash:'<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>',
  alert:'<path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
  money:'<circle cx="12" cy="12" r="9"/><path d="M14.5 9a2.5 2 0 0 0-2.5-1.5c-1.4 0-2.5.7-2.5 1.8 0 2.7 5 1.3 5 4 0 1.1-1.1 1.9-2.5 1.9A2.5 2 0 0 1 9.5 15M12 6v1.5M12 16.5V18"/>',
  user:'<circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>',
- clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ progress:'<path d="M3 12h4l2 6 4-12 2 6h6"/>',
+ venue:'<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>',
+ package:'<path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/>',
+ recurring:'<path d="M21 12a9 9 0 1 1-2.6-6.3M21 3v5h-5"/>',
+ payroll:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/>',
+ replacement:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 16l2 2 4-4"/>',
+ holiday:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M8 15h3"/>'};
 const SPARK='<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>';
 const WA=()=>'<svg viewBox="0 0 24 24" fill="#04331c"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.4A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.5c-.1.2-.3.3-.1.6.1.3.7 1.1 1.4 1.7.9.8 1.6 1 1.9 1.2.2.1.4.1.5-.1l.7-.8c.2-.2.3-.2.5-.1l1.8.9c.2.1.4.2.4.3.1.1.1.5-.1 1z"/></svg>';
 
@@ -470,8 +483,9 @@ const av=i=>AV[i%AV.length];
 const ini=n=>{const c=n.replace(/[^A-Za-z\u4e00-\u9fa5 ]/g,'').trim();const p=c.split(/\s+/);return /[\u4e00-\u9fa5]/.test(c)?c.slice(0,1):(p[0][0]||'')+(p[1]?p[1][0]:'');};
 const hash=s=>{let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;};
 
-const MODSPEC={dash:null,students:null,attend:null,daily:['taska','tadika','after'],curriculum:['tadika'],classes:null,timetable:['tuition','enrich'],sessions:['tuition','enrich'],crm:null,billing:null,staff:null,comms:null,reports:null,settings:null};
-const NAVORDER=['dash','students','attend','daily','curriculum','classes','timetable','sessions','crm','billing','staff','comms','reports','settings'];
+const MODSPEC={dash:null,students:null,attend:null,daily:['taska','tadika','after'],progress:null,classes:null,timetable:['tuition','enrich'],venue:null,curriculum:['tadika'],package:null,sessions:['tuition','enrich'],crm:null,billing:null,recurring:null,payroll:null,staff:null,replacement:['tuition','enrich','after'],holiday:null,comms:null,reports:null,settings:null};
+const NAVORDER=['dash','students','attend','daily','progress','classes','timetable','venue','curriculum','package','sessions','crm','billing','recurring','payroll','staff','replacement','holiday','comms','reports','settings'];
+const NAVGROUPS=[['gOps',['dash','students','attend','daily','progress']],['gTeach',['classes','timetable','venue','curriculum','package','sessions']],['gGrow',['crm']],['gFin',['billing','recurring','payroll']],['gTeam',['staff']],['gAdmin',['replacement','holiday','comms']],['gSys',['reports','settings']]];
 const NAVSEP={crm:true,reports:true};
 
 let VIEW='dash',FILTER='all';
@@ -483,11 +497,15 @@ function setAmbient(){const a=actives();const pos=[['18%','-6%'],['100%','12%'],
  L.push('radial-gradient(700px 500px at 50% -20%, var(--champ-soft), transparent 70%)');
  document.getElementById('ambient').style.background=L.join(',');}
 
-function renderRail(){const mods=navMods();
- document.getElementById('rnav').innerHTML=mods.map(m=>{const star=m==='daily';const sep=NAVSEP[m]?'<div class="rsep"></div>':'';
-  let bdg='';if(m==='crm')bdg=`<span class="bdg">${LEADS.filter(l=>l.stage!=='won'&&PROGRAMS[l.prog].active).length}</span>`;
-  return `${sep}<button class="rb ${m===VIEW?'on':''}" onclick="go('${m}')"><svg viewBox="0 0 24 24">${IC[m]}</svg>${star?'<span class="ai"></span>':''}${bdg}<span class="tip">${t(m)}</span></button>`;}).join('');
- document.getElementById('mbar').innerHTML=mods.map(m=>`<button class="${m===VIEW?'on':''}" onclick="go('${m}')"><svg viewBox="0 0 24 24">${IC[m]}</svg>${t(m)}</button>`).join('');}
+function renderRail(){const vis=navMods();let html='';
+ NAVGROUPS.forEach(([gk,mods])=>{const items=mods.filter(m=>vis.includes(m));if(!items.length)return;
+  html+=`<div class="rgrp">${t(gk)}</div>`;
+  html+=items.map(m=>{const star=m==='daily';let bdg='';
+   if(m==='crm'){const c=LEADS.filter(l=>l.stage!=='won'&&PROGRAMS[l.prog].active).length;if(c)bdg=`<span class="bdg">${c}</span>`;}
+   if(m==='replacement'){const c=REPLACE.filter(r=>r.st==='待批'&&PROGRAMS[r.prog].active).length;if(c)bdg=`<span class="bdg">${c}</span>`;}
+   return `<button class="rb ${m===VIEW?'on':''}" onclick="go('${m}')"><svg viewBox="0 0 24 24">${IC[m]}</svg><span class="lbl">${t(m)}</span>${star?'<span class="ai"></span>':''}${bdg}</button>`;}).join('');});
+ document.getElementById('rnav').innerHTML=html;
+ document.getElementById('mbar').innerHTML=vis.map(m=>`<button class="${m===VIEW?'on':''}" onclick="go('${m}')"><svg viewBox="0 0 24 24">${IC[m]}</svg>${t(m)}</button>`).join('');}
 function renderChips(){document.getElementById('progchips').innerHTML=actives().map(k=>{const p=PROGRAMS[k];
   return `<span class="pc"><span class="d" style="background:${p.hue};color:${p.hue}"></span>${p.label}</span>`;}).join('');
  document.getElementById('lang').innerHTML=['zh','ms','en'].map(l=>`<button class="${l===LANG?'on':''}" onclick="setLang('${l}')">${{zh:'中',ms:'BM',en:'EN'}[l]}</button>`).join('');
@@ -495,7 +513,7 @@ function renderChips(){document.getElementById('progchips').innerHTML=actives().
 function go(v){VIEW=v;FILTER='all';renderRail();renderView();window.scrollTo({top:0,behavior:'smooth'});}
 function setLang(l){LANG=l;renderAll();}
 function renderAll(){setAmbient();renderChips();renderRail();renderView();}
-function renderView(){const v=document.getElementById('view');const V={dash:vDash,students:vStudents,attend:vAttend,daily:vDaily,curriculum:vCurriculum,classes:vClasses,timetable:vTimetable,sessions:vSessions,crm:vCRM,billing:vBilling,staff:vStaff,comms:vComms,reports:vReports,settings:vSettings};
+function renderView(){const v=document.getElementById('view');const V={dash:vDash,students:vStudents,attend:vAttend,daily:vDaily,progress:vProgress,classes:vClasses,timetable:vTimetable,venue:vVenue,curriculum:vCurriculum,package:vPackage,sessions:vSessions,crm:vCRM,billing:vBilling,recurring:vRecurring,payroll:vPayroll,staff:vStaff,replacement:vReplacement,holiday:vHoliday,comms:vComms,reports:vReports,settings:vSettings};
  v.innerHTML=`<div class="view">${(V[VIEW]||vDash)()}</div>`;
  v.querySelectorAll('[data-count]').forEach(animCount);
  setTimeout(()=>{v.querySelectorAll('.track i').forEach(i=>i.style.width=i.dataset.w+'%');
@@ -759,6 +777,58 @@ function vSettings(){const a=actives();
   <div class="sh"><h2>角色权限</h2></div><div class="card">${[['老板 / 集团','全部权限 · 财务 · 薪资 · 跨分校',1],['经理 / 园长','营运管理 · 不含老板私人财务',3],['老师 / 保育员','点名 · 每日记录 · 上传照片',8],['家长','查看记录 · 缴费 · 请假',312]].map(r=>`<div class="rolerow"><div><div class="rn">${r[0]}</div><div class="rp">${r[1]}</div></div><span class="cnt">${r[2]} 人</span></div>`).join('')}</div>
   <div class="sh"><h2>集成</h2><span class="hint">本地深度对接</span></div><div class="card">${[['🧾','MyInvois 电子发票','LHDN 实时验证 · UIN + QR',1],['💳','支付 · FPX / DuitNow / RinggitPay','线上收费自动核销',1],['💬','WhatsApp Business API','三语推送 · 公告 · 提醒',1],['📁','Google Drive','文件 · 备份',0]].map(g=>`<div class="intg"><div class="ico">${g[0]}</div><div><div class="nm">${g[1]}</div><div class="sub">${g[2]}</div></div><div class="sw ${g[3]?'on':''}" onclick="this.classList.toggle('on')"></div></div>`).join('')}</div>
   <div class="sh"><h2>项目与方案</h2></div><div class="card" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div><div style="font-size:14px;font-weight:600">当前 ${a.length} 个项目运行中</div><div style="font-size:12.5px;color:var(--muted);margin-top:3px">${a.map(k=>PROGRAMS[k].label).join(' · ')}</div></div><button class="activate" style="margin-left:auto" onclick="openStudio()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>管理项目</button></div>`;}
+
+/* ===== EXTRA MODULES ===== */
+const VENUES=[['课室 A',25,80,'白板 · 投影'],['课室 B',20,65,'白板'],['幼幼活动室',15,90,'游戏区 · 午睡床'],['音乐室',12,45,'钢琴 · 镜墙'],['户外场',40,30,'游乐设施'],['电脑室',18,55,'18 台电脑']];
+const PACKAGES={taska:[['全日托管','RM 350','/月','含照护·午睡·两点',24],['半日托管','RM 250','/月','上午班',9],['餐食加配','RM 60','/月','三餐两点',30]],
+ tadika:[['半日课程','RM 280','/月','含教材',48],['全日课程','RM 480','/月','含午餐·安亲',24],['校车','RM 80','/月','单趟·分区',18]],
+ tuition:[['20 堂配套','RM 800','一次','单科 · 3个月效期',64],['10 堂配套','RM 450','一次','单科',28],['双科月配套','RM 600','/月','两科无限',32]],
+ after:[['安亲全配套','RM 420','/月','功课辅导·餐食',40],['仅接送','RM 180','/月','校车',14]],
+ enrich:[['钢琴 16 堂','RM 640','一次','含考级辅导',22],['美术 8 堂','RM 320','一次','含材料',31],['芭蕾月费','RM 200','/月','每周 2 节',28]]};
+const RECUR=[{n:'陈乐乐',prog:'taska',pkg:'全日托管',amt:490},{n:'李小明',prog:'taska',pkg:'全日托管+校车',amt:430},{n:'林晓彤',prog:'tadika',pkg:'半日课程',amt:580},{n:'Grace Wong',prog:'tadika',pkg:'全日课程',amt:480},{n:'周明轩',prog:'tuition',pkg:'双科月配套',amt:600},{n:'王梓睿',prog:'after',pkg:'安亲全配套',amt:480},{n:'李欣怡',prog:'enrich',pkg:'芭蕾月费',amt:200}];
+let REPLACE=[{n:'Lim Wei Jie',prog:'tuition',miss:'6/10 中五物理',rsn:'病假',req:'6/14 18:00',st:'待批'},{n:'周明轩',prog:'tuition',miss:'6/8 中三数学',rsn:'家庭事务',req:'6/15 16:00',st:'已排'},{n:'Arjun Kumar',prog:'tuition',miss:'6/5 双科',rsn:'生病',req:'已补',st:'已完成'},{n:'李欣怡',prog:'enrich',miss:'6/9 钢琴',rsn:'比赛',req:'6/16 14:00',st:'待批'},{n:'王梓睿',prog:'after',miss:'6/11 功课班',rsn:'看医生',req:'6/14 16:00',st:'待批'}];
+const HOLIDAYS=[['6 月 17 日','Hari Raya Haji','公假',true],['6 月 28–30 日','中心年中假期','学校假期',true],['7 月 12 日','家长日 Open Day','中心活动',false],['8 月 31 日','国庆日 Merdeka','公假',true],['9 月 16 日','马来西亚日','公假',true],['10 月 20 日','屠妖节 Deepavali','公假',true]];
+let BRANCH=0;const BRANCHES=['星辰教育中心 · 总部','星辰教育中心 · KL 分校','星辰教育中心 · JB 分校'];
+function switchSchool(){BRANCH=(BRANCH+1)%BRANCHES.length;document.getElementById('centreName').textContent=BRANCHES[BRANCH];if(VIEW==='dash')renderView();toast('已切换分校',BRANCHES[BRANCH],'#E4C998');}
+
+function vVenue(){return `<div class="sh"><h2>场地</h2><span class="hint">教室 · 占用率 · 设备</span></div>
+ <div class="stud">${VENUES.map((v,i)=>`<div class="scard" style="--sh2:var(--champ)"><div class="av" style="background:${av(i)}">${v[0].replace(/[^A-Za-z\u4e00-\u9fa5]/g,'').slice(0,1)}</div><div class="nm">${v[0]}</div><div class="mt">容量 ${v[1]} 人 · ${v[3]}</div><div style="margin-top:13px"><div style="font-size:11px;color:var(--muted);margin-bottom:5px">本周占用 ${v[2]}%</div><div class="track" style="height:7px"><i data-w="${v[2]}" style="background:${v[2]>85?'var(--bad)':v[2]>60?'var(--warn)':'var(--ok)'};width:0"></i></div></div></div>`).join('')}</div>
+ <div class="card" style="margin-top:18px;font-size:12.5px;color:var(--muted);line-height:1.6">排课自动检查教室占用与冲突，避免两班同时段同教室。占用率超 85% 标红，提示扩容或调班。</div>`;}
+
+function vPackage(){const a=actives();return `<div class="sh"><h2>配套</h2><span class="hint">可售配套 · 定价 · 订阅数</span></div>`+
+ a.map(k=>{const p=PROGRAMS[k];return `<div class="sh" style="margin:22px 0 12px"><h2 style="font-size:17px"><span class="pd" style="display:inline-block;background:${p.hue};color:${p.hue};margin-right:8px"></span>${p.label}</h2></div><div class="grid g3">${(PACKAGES[k]||[]).map(pk=>`<div class="card"><div style="font-weight:600;font-size:15px">${pk[0]}</div><div style="margin:8px 0"><span class="num" style="font-size:26px;font-weight:600;color:${p.hue}">${pk[1]}</span><span style="font-size:12px;color:var(--muted)"> ${pk[2]}</span></div><div style="font-size:12.5px;color:var(--muted)">${pk[3]}</div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)">订阅中 <b style="color:var(--txt);font-family:Space Grotesk">${pk[4]}</b> 人</div></div>`).join('')}</div>`;}).join('')+
+ `<div class="card" style="margin-top:18px;font-size:12.5px;color:var(--muted);line-height:1.6">配套是系统的「商品」——账单、循环开单、堂数都引用这里的定价。改价一次，全部生效。</div>`;}
+
+function vRecurring(){const rows=RECUR.filter(r=>PROGRAMS[r.prog].active);const total=rows.reduce((s,r)=>s+r.amt,0);
+ return `<div class="sh"><h2>循环账单</h2><span class="tag">自动</span><span class="hint">每月 1 号自动批量开单</span></div>
+  <div class="grid g3" style="margin-bottom:18px"><div class="card"><div style="font-size:12px;color:var(--muted)">下次批量</div><div class="num" style="font-size:26px;font-weight:600">${rows.length} 张</div></div><div class="card"><div style="font-size:12px;color:var(--muted)">预计金额</div><div class="num" style="font-size:26px;font-weight:600;color:var(--champ)">RM ${total.toLocaleString()}</div></div><div class="card"><div style="font-size:12px;color:var(--muted)">开单日</div><div class="num" style="font-size:26px;font-weight:600">7月1日</div></div></div>
+  <div class="list">${rows.map((r,i)=>`<div class="li"><span class="pd" style="background:${PROGRAMS[r.prog].hue};color:${PROGRAMS[r.prog].hue}"></span><div class="av" style="background:${av(i)}">${ini(r.n)}</div><div><div class="nm">${r.n}</div><div class="mt">${PROGRAMS[r.prog].label} · ${r.pkg} · 每月 1 号</div></div><div class="right"><span class="amt">RM ${r.amt}</span><span class="badge b-ok">自动</span></div></div>`).join('')}</div>
+  <button class="gen" style="margin-top:16px;max-width:300px" onclick="toast('已生成本月账单','${rows.length} 张 · 已推送家长','#46DDA6')">${SPARK}立即生成本月账单</button>`;}
+
+function vPayroll(){const staff=STAFF.filter(s=>s.progs.some(p=>PROGRAMS[p].active));
+ const calc=s=>typeof s.hrs==='number'?2000+s.hrs*8:3600;
+ const rows=staff.map(s=>{const g=calc(s),epf=Math.round(g*.11),socso=Math.round(g*.005);return {s,g,epf,net:g-epf-socso};});
+ const tG=rows.reduce((x,r)=>x+r.g,0),tN=rows.reduce((x,r)=>x+r.net,0);
+ return `<div class="sh"><h2>薪资</h2><span class="hint">EPF · SOCSO · EIS 自动计算</span></div>
+  <div class="grid g3" style="margin-bottom:18px"><div class="card"><div style="font-size:12px;color:var(--muted)">本月薪资总额</div><div class="num" style="font-size:24px;font-weight:600">RM ${tG.toLocaleString()}</div></div><div class="card"><div style="font-size:12px;color:var(--muted)">实发总额</div><div class="num" style="font-size:24px;font-weight:600;color:var(--ok)">RM ${tN.toLocaleString()}</div></div><div class="card"><div style="font-size:12px;color:var(--muted)">状态</div><div class="num" style="font-size:24px;font-weight:600;color:var(--warn)">待发放</div></div></div>
+  <div class="list">${rows.map((r,i)=>`<div class="li"><div class="av" style="background:${av(i)}">${ini(r.s.n)}</div><div style="min-width:120px"><div class="nm">${r.s.n}</div><div class="mt">${r.s.r} · 课时 ${r.s.hrs}</div></div><div class="right"><span style="font-size:11px;color:var(--muted)">EPF −${r.epf}</span><span style="font-size:12px;color:var(--muted)">毛 RM ${r.g}</span><span class="amt">RM ${r.net}</span></div></div>`).join('')}</div>
+  <div class="card" style="margin-top:16px;font-size:12.5px;color:var(--muted);line-height:1.6">课时自动汇入 · 一键生成 payslip · 直接对接你现有的 <b style="color:var(--champ)">AWARA Payroll 系统</b>（EPF / SOCSO / EIS、试用期延扣、KPI / KFI）。</div>`;}
+
+function vReplacement(){const rows=REPLACE.filter(r=>PROGRAMS[r.prog].active);const pend=rows.filter(r=>r.st==='待批').length;
+ return `<div class="sh"><h2>补课</h2>${pend?`<span class="tag" style="background:rgba(255,116,136,.16);color:var(--bad)">${pend} 待批</span>`:''}<span class="hint">缺席补课申请 · 审批排课</span></div>
+  <div class="list">${rows.map((r,i)=>`<div class="li"><span class="pd" style="background:${PROGRAMS[r.prog].hue};color:${PROGRAMS[r.prog].hue}"></span><div class="av" style="background:${av(i)}">${ini(r.n)}</div><div style="min-width:140px"><div class="nm">${r.n}</div><div class="mt">缺席 ${r.miss} · ${r.rsn}</div></div><div class="right"><span style="font-size:12px;color:var(--muted)">补 ${r.req}</span>${r.st==='待批'?`<button class="btn-o" style="padding:7px 13px" onclick="approveRep(${i})">批准排课</button>`:`<span class="badge ${r.st==='已完成'?'b-ok':'b-warn'}">${r.st}</span>`}</div></div>`).join('')}</div>
+  <div class="card" style="margin-top:16px;font-size:12.5px;color:var(--muted);line-height:1.6">学员缺席可在家长端申请补课 → 系统按老师与教室空档建议时段 → 一键批准并自动通知。补课不另收费可设规则。</div>`;}
+function approveRep(i){const rows=REPLACE.filter(r=>PROGRAMS[r.prog].active);const tg=rows[i];const idx=REPLACE.indexOf(tg);if(idx>-1)REPLACE[idx].st='已排';renderView();toast('补课已批准排课',tg.n+' · '+tg.req,PROGRAMS[tg.prog].hue);}
+
+function vHoliday(){return `<div class="sh"><h2>假期</h2><span class="hint">公假 · 停课 · 影响排课与计费</span></div>
+  <div class="list">${HOLIDAYS.map(h=>`<div class="li"><div class="ai2" style="width:42px;height:42px;border-radius:12px;background:${h[3]?'rgba(255,116,136,.14)':'rgba(70,221,166,.14)'};display:grid;place-items:center;flex-shrink:0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${h[3]?'var(--bad)':'var(--ok)'}" stroke-width="1.9">${IC.holiday}</svg></div><div><div class="nm">${h[1]}</div><div class="mt">${h[0]} · ${h[2]}</div></div><div class="right"><span class="badge ${h[3]?'b-bad':'b-ok'}">${h[3]?'停课':'照常'}</span></div></div>`).join('')}</div>
+  <div class="card" style="margin-top:16px;font-size:12.5px;color:var(--muted);line-height:1.6">停课日自动从排课与师生比计算中排除；月费可设「停课不计费」或顺延。公假自动同步马来西亚官方日历。</div>`;}
+
+function vProgress(){const a=actives();let rows=[];a.forEach(k=>PROGRAMS[k].students.forEach(s=>rows.push({s,k,hue:PROGRAMS[k].hue})));
+ return `<div class="sh"><h2>学员进度</h2><span class="hint">成绩 / 发展追踪 · 趋势</span></div>
+  <div class="list">${rows.map((r,i)=>{const h=hash(r.s[0]);const base=68+h%26;const trend=Array.from({length:6},(_,j)=>Math.max(40,Math.min(99,base-6+((h>>j)%14))));const mx=Math.max(...trend);const pts=trend.map((x,j)=>`${j/5*68+2},${30-(x/mx)*24}`).join(' ');const delta=trend[5]-trend[4];const young=PROGRAMS[r.k].young;
+   return `<div class="li"><div class="av" style="background:${av(i)}">${ini(r.s[0])}</div><div style="min-width:130px"><div class="nm">${r.s[0]}</div><div class="mt">${PROGRAMS[r.k].label} · ${r.s[1]}</div></div><div class="right"><svg width="72" height="32" viewBox="0 0 72 32"><polyline points="${pts}" fill="none" stroke="${r.hue}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><div style="text-align:right;min-width:54px"><div class="num" style="font-weight:600">${young?trend[5]+'%':trend[5]+' 分'}</div><div style="font-size:11px;color:${delta>=0?'var(--ok)':'var(--bad)'}">${delta>=0?'▲':'▼'} ${Math.abs(delta)}</div></div></div></div>`;}).join('')}</div>
+  <div class="card" style="margin-top:16px;font-size:12.5px;color:var(--muted);line-height:1.6">补习看科目成绩趋势；幼教看 KSPK 发展领域；托儿看成长里程碑。每次评估自动更新，家长端实时可见。</div>`;}
 
 /* counters */
 function animCount(el){const end=parseFloat(el.dataset.count);if(isNaN(end))return;let s=null;
