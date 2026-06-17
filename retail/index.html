@@ -32,7 +32,7 @@
   .navitem{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:9px;color:var(--navtext);font-size:14px;font-weight:500;margin-bottom:2px;transition:.14s;width:100%;text-align:left}
   .navitem:hover{background:var(--nav2);color:#fff;transform:translateX(2px)}
   .navitem.on{background:var(--accent);color:#fff}
-  .navitem .ic{width:18px;text-align:center;font-size:15px}
+  .navitem .ic{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
   .navfoot{padding:14px;border-top:1px solid rgba(255,255,255,.07);font-size:12px;color:var(--navtext);line-height:1.6}
 
   .main{flex:1;display:flex;flex-direction:column;min-width:0}
@@ -146,20 +146,30 @@
   .receipt .rrow{display:flex;justify-content:space-between}
   .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--nav);color:#fff;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:rise .25s}
 
+  /* 深色模式 */
+  body.dark{--canvas:#0F1620;--card:#16212E;--line:#26323F;--text:#E6EDF3;--muted:#8A98A8;--nav:#0B131C;--nav2:#1A2735}
+  /* 打印小票 */
+  @media print{body *{visibility:hidden}#printArea,#printArea *{visibility:visible}#printArea{position:absolute;left:0;top:0;width:100%}}
+
   @media(max-width:880px){
     .app{flex-direction:column}
-    .nav{width:100%;height:auto;flex-direction:row;align-items:center;position:sticky;top:0;z-index:40;overflow-x:auto}
-    .brand{display:none}
-    .navfoot{display:none}
-    .navlist{display:flex;flex-direction:row;gap:4px;padding:8px;flex:1}
-    .navitem{flex:0 0 auto;white-space:nowrap;padding:9px 13px;margin-bottom:0}
-    .navitem span:not(.ic){display:inline}
-    .navitem:hover{transform:none}
-    .topbar{position:static;padding:10px 14px;gap:8px}
-    .pill{padding:6px 10px;font-size:12px}
-    .pill select{max-width:none}
+    /* 菜单 → 底部固定 Tab 栏，可横向滑动，始终可见 */
+    .nav{position:fixed;left:0;right:0;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;z-index:60;
+      border-top:1px solid rgba(255,255,255,.08);box-shadow:0 -4px 16px rgba(0,0,0,.22);overflow-x:auto;overflow-y:hidden}
+    .brand,.navfoot{display:none}
+    .navlist{display:flex;flex-direction:row;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));flex:1}
+    .navitem{flex:0 0 auto;flex-direction:column;gap:3px;align-items:center;white-space:nowrap;padding:7px 12px;margin:0;min-width:58px;font-size:11px;font-weight:600}
+    .navitem .ic{width:24px;height:24px}
+    .navitem span:not(.ic){display:block;font-size:11px}
+    .navitem:hover{transform:none;background:transparent;color:var(--navtext)}
+    .navitem.on{background:transparent;color:#fff}
+    .navitem.on .ic{transform:scale(1.1);color:var(--accent)}
+    .navitem.on span:not(.ic){color:var(--accent)}
+    .main{min-height:100vh}
+    .content{padding:14px 14px 96px}   /* 给底部栏留出空间 */
+    .topbar{position:sticky;top:0;padding:10px 14px;gap:8px}
+    .pill{padding:6px 10px;font-size:12px}.pill select{max-width:none}
     .tagline,#clock{display:none}
-    .content{padding:14px}
     .kpis{grid-template-columns:repeat(2,1fr)}
     .pos{grid-template-columns:1fr;height:auto}
     .opt-grid{grid-template-columns:repeat(2,1fr)}
@@ -308,7 +318,22 @@ const DB = {
 const S = { view:'dash', store:'S1', role:'manager', industry:'all', cart:[], member:null, shift:null, _enter:false, _pay:'duitnow', _einv:false, _redeem:0 };
 const BIZ_COLORS=['b-info','b-ok','b-gold','b-dan','b-acc'];
 const bizBadge=(()=>{const m={};let i=0;return b=>{if(!(b in m))m[b]=BIZ_COLORS[i++%BIZ_COLORS.length];return m[b];};})();
-const MENU=[{k:'dash',ic:'📊',t:'看板'},{k:'pos',ic:'🧾',t:'收银'},{k:'sale',ic:'🧮',t:'销售/退货'},{k:'inv',ic:'📦',t:'库存'},{k:'buy',ic:'🚚',t:'采购'},{k:'promo',ic:'🎁',t:'促销'},{k:'mem',ic:'💳',t:'会员'},{k:'ai',ic:'🤖',t:'智能洞察'},{k:'shift',ic:'🧰',t:'交班'},{k:'rpt',ic:'📈',t:'报表'},{k:'einv',ic:'🏛️',t:'e-Invoice'}];
+const MENU=[{k:'dash',ic:'📊',t:'看板'},{k:'pos',ic:'🧾',t:'收银'},{k:'sale',ic:'🧮',t:'销售/退货'},{k:'inv',ic:'📦',t:'库存'},{k:'buy',ic:'🚚',t:'采购'},{k:'promo',ic:'🎁',t:'促销'},{k:'mem',ic:'💳',t:'会员'},{k:'ai',ic:'🤖',t:'智能洞察'},{k:'shift',ic:'🧰',t:'交班'},{k:'rpt',ic:'📈',t:'报表'},{k:'einv',ic:'🏛️',t:'e-Invoice'},{k:'set',ic:'⚙️',t:'设置'}];
+const ICONS={
+  dash:'<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M21 20H3"/>',
+  pos:'<path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><path d="M9 7h6M9 11h6"/>',
+  sale:'<path d="M3 7h11a5 5 0 0 1 0 10H9"/><path d="M7 3 3 7l4 4"/>',
+  inv:'<rect x="3" y="7" width="18" height="13" rx="1"/><path d="M3 11h18M9 7V4h6v3"/>',
+  buy:'<path d="M3 6h11v9H3z"/><path d="M14 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/>',
+  promo:'<path d="M3 11 11 3h8v8l-8 8z"/><circle cx="15" cy="9" r="1.3"/>',
+  mem:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>',
+  ai:'<rect x="7" y="7" width="10" height="10" rx="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+  shift:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 9V6a2 2 0 0 1 2-2h11"/><path d="M16 13h2"/>',
+  rpt:'<path d="M3 17l5-5 4 4 8-8"/><path d="M16 8h5v5"/>',
+  einv:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 14h6M10 17h6"/>',
+  set:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'
+};
+function icon(k){return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]||''}</svg>`;}
 
 /* 工具 */
 const $=s=>document.querySelector(s);
@@ -352,11 +377,11 @@ function seedOrders(){
 /* ============================================================
    渲染
    ============================================================ */
-function renderNav(){ $('#nav').innerHTML=MENU.map(m=>`<button class="navitem ${S.view===m.k?'on':''}" onclick="go('${m.k}')"><span class="ic">${m.ic}</span><span>${m.t}</span></button>`).join(''); }
+function renderNav(){ $('#nav').innerHTML=MENU.map(m=>`<button class="navitem ${S.view===m.k?'on':''}" onclick="go('${m.k}')"><span class="ic">${icon(m.k)}</span><span>${m.t}</span></button>`).join(''); }
 function go(k){ S.view=k; S._enter=true; renderNav(); $('#title').textContent=MENU.find(m=>m.k===k).t; render(); }
 function render(){
   const v=$('#view');
-  const map={dash:viewDash,pos:viewPos,sale:viewSale,inv:viewInv,buy:viewBuy,promo:viewPromo,mem:viewMem,ai:viewAI,shift:viewShift,rpt:viewRpt,einv:viewEinv};
+  const map={dash:viewDash,pos:viewPos,sale:viewSale,inv:viewInv,buy:viewBuy,promo:viewPromo,mem:viewMem,ai:viewAI,shift:viewShift,rpt:viewRpt,einv:viewEinv,set:viewSettings};
   v.innerHTML=(map[S.view]||viewDash)();
   if(S._enter){ v.classList.add('enter'); animateCounts(); animateBars(); setTimeout(()=>v.classList.remove('enter'),700); S._enter=false; }
 }
@@ -404,7 +429,15 @@ function viewDash(){
       <table><thead><tr><th>单号</th><th>${isFnb()?'品项':'商品'}</th><th>会员</th><th>方式</th><th class="right">金额</th></tr></thead><tbody id="txbody">
       ${os.slice().reverse().map(txRow).join('')||'<tr><td colspan=5 class="center muted">本店今日暂无交易</td></tr>'}
       </tbody></table>
-    </div>`;
+    </div>
+    ${S.role==='boss'?bossCompare():''}`;
+}
+function bossCompare(){
+  const rows=DB.stores.map(st=>{const os=DB.orders.filter(o=>o.store===st.id&&o.total>0);const sl=os.reduce((s,o)=>s+o.total,0);return {st,sl,n:os.length};});
+  const max=Math.max(...rows.map(r=>r.sl),1);
+  return `<div class="card blk"><div class="card-h"><h3>多店对比（老板视角）</h3><span class="spacer"></span><span class="badge b-gold">👑 Boss</span></div>
+    <div class="card-b">${rows.map(r=>`<div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="font-weight:600">${r.st.name}</span><span class="num">${money(r.sl)} · ${r.n}单</span></div><div style="background:var(--canvas);border-radius:6px;height:10px;overflow:hidden"><div class="bar-fill" data-w="${(r.sl/max*100).toFixed(0)}" style="height:100%;width:0;background:var(--accent);border-radius:6px"></div></div></div>`).join('')}
+      <div class="muted" style="font-size:12px">合计 ${money(rows.reduce((s,r)=>s+r.sl,0))} · 切换上方门店可查看各店明细</div></div></div>`;
 }
 function txRow(o){return `<tr><td class="num">${o.id}</td>
   <td>${o.lines.map(l=>l.name+' ×'+l.qty).join('<br>')}</td>
@@ -489,6 +522,8 @@ function cartPanel(){
       ${r.names.map(n=>`<div class="ftrow" style="color:var(--accent-d)"><span>🎁 ${n}</span><span></span></div>`).join('')}
       ${r.promoDisc>0?`<div class="ftrow" style="color:var(--accent-d)"><span>促销优惠</span><span class="num">−${money(r.promoDisc)}</span></div>`:''}
       ${r.tierDisc>0?`<div class="ftrow" style="color:var(--accent-d)"><span>${m.tier}会员折扣</span><span class="num">−${money(r.tierDisc)}</span></div>`:''}
+      ${r.sst>0?`<div class="ftrow"><span class="muted">SST ${DB.settings.sst}%</span><span class="num">${money(r.sst)}</span></div>`:''}
+      ${r.service>0?`<div class="ftrow"><span class="muted">服务费 ${DB.settings.service}%</span><span class="num">${money(r.service)}</span></div>`:''}
       <div class="ftrow tot"><span>应收</span><span class="num">${money(r.total)}</span></div>
       <button class="btn btn-pri" style="width:100%;margin-top:12px;padding:13px;font-size:15px" ${S.cart.length?'':'disabled style="opacity:.4;width:100%;margin-top:12px;padding:13px;font-size:15px"'} onclick="openCheckout()">收款 ${money(r.total)}</button>
     </div></div>`;
@@ -527,7 +562,7 @@ function commitSale(){
     einv={tin:tin||'EI00000000000',name:bn,uin:'MYI-'+new Date().getFullYear()+'-'+String(Date.now()).slice(-9),validated:true};}
   const order={id:'O-'+(1044+DB.orders.length),store:S.store,ts:Date.now(),
     lines:S.cart.map(c=>({sku:c.sku,name:c.name+' '+c.dim,qty:c.qty,price:c.price,cost:c.cost})),
-    sub:r.sub,promoDisc:r.promoDisc,tierDisc:r.tierDisc,redeem:r.redeem,total,method:S._pay,memberId:S.member,einv};
+    sub:r.sub,promoDisc:r.promoDisc,tierDisc:r.tierDisc,sst:r.sst,service:r.service,redeem:r.redeem,total,method:S._pay,memberId:S.member,einv};
   DB.orders.push(order);
   if(m){ m.points+=Math.floor(total)-redeemPts; if(S._pay==='balance')m.balance-=total;
     const spent=DB.orders.filter(o=>o.memberId===m.id&&o.total>0).reduce((s,o)=>s+o.total,0);
@@ -536,17 +571,23 @@ function commitSale(){
   showReceipt(order,m,total); S.cart=[];S.member=null;S._redeem=0;
 }
 function showReceipt(o,m,total){
-  modal('收款成功 ✅',`<div class="receipt">
+  modal('收款成功 ✅',`<div class="receipt" id="printArea">
     <div style="text-align:center;font-weight:700">${DB.stores.find(s=>s.id===o.store).name}</div>
     <div style="text-align:center" class="muted">RetailDesk 收据</div><hr>
     <div class="rrow"><span>${o.id}</span><span>${new Date(o.ts).toLocaleTimeString('zh',{hour:'2-digit',minute:'2-digit'})}</span></div><hr>
     ${o.lines.map(l=>`<div class="rrow"><span>${l.name}</span></div><div class="rrow"><span>&nbsp;&nbsp;${l.qty} × ${money(l.price)}</span><span>${money(l.qty*l.price)}</span></div>`).join('')}
-    <hr><div class="rrow" style="font-weight:700;font-size:14px"><span>合计</span><span>${money(total)}</span></div>
+    <hr><div class="rrow"><span>小计</span><span>${money(o.sub||total)}</span></div>
+    ${o.promoDisc>0?`<div class="rrow"><span>促销优惠</span><span>−${money(o.promoDisc)}</span></div>`:''}
+    ${o.tierDisc>0?`<div class="rrow"><span>会员折扣</span><span>−${money(o.tierDisc)}</span></div>`:''}
+    ${o.sst>0?`<div class="rrow"><span>SST</span><span>${money(o.sst)}</span></div>`:''}
+    ${o.service>0?`<div class="rrow"><span>服务费</span><span>${money(o.service)}</span></div>`:''}
+    ${o.redeem>0?`<div class="rrow"><span>积分抵现</span><span>−${money(o.redeem)}</span></div>`:''}
+    <div class="rrow" style="font-weight:700;font-size:14px"><span>合计</span><span>${money(total)}</span></div>
     <div class="rrow"><span>支付</span><span>${payLabel(o.method)}</span></div>
     ${m?`<div class="rrow"><span>会员</span><span>${m.name} (积分 ${m.points})</span></div>`:''}
     ${o.einv?`<hr><div class="rrow" style="color:#1f7a4d"><span>e-Invoice</span><span>已验证</span></div><div class="rrow" style="font-size:11px"><span>UIN</span><span>${o.einv.uin}</span></div><div class="rrow" style="font-size:11px"><span>买方TIN</span><span>${o.einv.tin}</span></div><div style="text-align:center;margin-top:6px;letter-spacing:2px">▦ ▦ ▦ QR ▦ ▦ ▦</div>`:`<div class="rrow muted" style="font-size:11px"><span>e-Invoice</span><span>计入月度合并发票</span></div>`}
     <hr><div style="text-align:center" class="muted">谢谢惠顾 · Terima Kasih</div></div>
-    <button class="btn btn-dark" style="width:100%;margin-top:14px;padding:12px" onclick="closeModal();go('pos')">完成 · 下一单</button>`);
+    <div style="display:flex;gap:8px;margin-top:14px"><button class="btn" style="flex:1;padding:12px" onclick="window.print()">🖨️ 打印</button><button class="btn btn-dark" style="flex:2;padding:12px" onclick="closeModal();go('pos')">完成 · 下一单</button></div>`);
 }
 
 /* ---------- 进销存 ---------- */
@@ -666,9 +707,11 @@ function calcCart(){
   });
   const afterPromo=Math.max(sub-promoDisc,0);
   const tierDisc=m?(m.tier==='金卡'?afterPromo*0.1:m.tier==='银卡'?afterPromo*0.05:0):0;
-  const beforePts=afterPromo-tierDisc;
-  const redeem=Math.min(S._redeem||0,beforePts);
-  return {sub,promoDisc,names,tierDisc,redeem,total:+Math.max(beforePts-redeem,0).toFixed(2),m};
+  const taxBase=afterPromo-tierDisc;
+  const sst=taxBase*(DB.settings.sst||0)/100, service=taxBase*(DB.settings.service||0)/100;
+  const grand=taxBase+sst+service;
+  const redeem=Math.min(S._redeem||0,grand);
+  return {sub,promoDisc,names,tierDisc,sst,service,redeem,total:+Math.max(grand-redeem,0).toFixed(2),m};
 }
 function holdSale(){ if(!S.cart.length)return; const m=S.member?memberById(S.member):null;
   DB.held.push({id:'H'+Date.now(),label:(m?m.name:'散客')+' · '+new Date().toLocaleTimeString('zh',{hour:'2-digit',minute:'2-digit'}),cart:S.cart,member:S.member});
@@ -823,7 +866,7 @@ function viewAI(){
       ${kpi('黄金时段','⏰',peak?peak[0]+':00':'—',peak?money(+peak[1].toFixed(0))+' 销售':'数据不足')}
     </div>
     <div class="grid blk" style="grid-template-columns:1fr 1fr">
-      <div class="card"><div class="card-h"><h3>🤖 智能补货建议</h3></div><div class="card-b" style="padding:0">
+      <div class="card"><div class="card-h"><h3>🤖 智能补货建议</h3><span class="spacer"></span>${reorder.length?`<button class="btn btn-sm btn-pri" onclick="aiRestockPO()">一键生成采购单</button>`:''}</div><div class="card-b" style="padding:0">
         ${reorder.length?reorder.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--line)"><div style="flex:1"><div style="font-weight:600">${r.u.p.name}</div><div class="muted" style="font-size:12px">${r.u.label} · 现 ${unitStock(r.u)} / 补货点 ${r.u.p.reorder}</div></div><span class="badge b-warn">建议进 ${r.qty}</span></div>`).join(''):'<div class="muted center" style="padding:30px">库存充足 ✅</div>'}
       </div></div>
       <div class="card"><div class="card-h"><h3>🛒 连带购买分析</h3></div><div class="card-b">
@@ -832,6 +875,45 @@ function viewAI(){
     </div>
     ${slow.length?`<div class="card blk"><div class="card-h"><h3>🐌 滞销预警</h3></div><div class="card-b"><div style="display:flex;flex-wrap:wrap;gap:8px">${slow.map(u=>`<span class="badge b-grey">${u.p.name} ${u.label}（存 ${unitStock(u)}）</span>`).join('')}</div><div class="muted" style="font-size:12px;margin-top:12px">💡 建议促销清仓或调拨到热销门店</div></div></div>`:''}
     <div class="muted" style="font-size:12px">※ 洞察基于本店交易实时计算。开「实时演示」喂入更多订单，连带分析与高峰时段会更准。</div>`;
+}
+
+/* ---------- 设置 ---------- */
+function viewSettings(){
+  return `<div class="grid blk" style="grid-template-columns:1fr 1fr">
+    <div class="card"><div class="card-h"><h3>税务设置</h3></div><div class="card-b">
+      <div class="field"><label>SST 销售与服务税 (%)</label><input class="inp num" id="setSst" type="number" min="0" value="${DB.settings.sst}"></div>
+      <div class="field"><label>服务费 Service Charge (%)</label><input class="inp num" id="setSvc" type="number" min="0" value="${DB.settings.service}"></div>
+      <button class="btn btn-pri" onclick="setTax()">保存税率</button>
+      <div class="muted" style="font-size:12px;margin-top:10px">设为 0 即不收取；设定后收银台自动计入应收并打印在小票上。</div>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>外观 & 数据</h3></div><div class="card-b">
+      <div class="field"><label>主题</label><button class="btn" onclick="toggleDark()">🌓 切换 深色 / 浅色</button></div>
+      <div class="field"><label>数据备份</label><button class="btn btn-dark" onclick="exportData()">⬇️ 导出全部数据 (JSON)</button></div>
+      <div class="muted" style="font-size:12px">导出商品/订单/会员/采购/促销等，迁移或接 Firebase 前留底。</div>
+    </div></div>
+  </div>
+  <div class="card blk"><div class="card-h"><h3>门店管理</h3><span class="spacer"></span><button class="btn btn-dark" onclick="addStore()">+ 新增门店</button></div>
+    <table><thead><tr><th>ID</th><th>名称（点击可改）</th></tr></thead><tbody>
+    ${DB.stores.map(s=>`<tr><td class="num">${s.id}</td><td><input class="inp" value="${s.name}" onchange="renameStore('${s.id}',this.value)"></td></tr>`).join('')}
+    </tbody></table></div>
+  <div class="muted" style="font-size:12px">RetailDesk v0.3 · 自适应零售平台 · ${MENU.length} 模块 · 当前行业：${INDUSTRIES[S.industry].name}</div>`;
+}
+function setTax(){DB.settings.sst=+$('#setSst').value||0;DB.settings.service=+$('#setSvc').value||0;toast('税率已保存');}
+function toggleDark(){document.body.classList.toggle('dark');toast(document.body.classList.contains('dark')?'已切换深色':'已切换浅色');}
+function exportData(){
+  try{const blob=new Blob([JSON.stringify({stores:DB.stores,products:DB.products,orders:DB.orders,members:DB.members,suppliers:DB.suppliers,purchaseOrders:DB.purchaseOrders,promotions:DB.promotions,shifts:DB.shifts,settings:DB.settings},null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='retaildesk-backup-'+Date.now()+'.json';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),100);toast('已导出备份');}
+  catch(e){toast('导出受限，请在浏览器中打开');}
+}
+function refreshStoreSel(){$('#storeSel').innerHTML=DB.stores.map(s=>`<option value="${s.id}" ${s.id===S.store?'selected':''}>${s.name}</option>`).join('');}
+function addStore(){const id='S'+(DB.stores.length+1);DB.stores.push({id,name:'新门店 '+id});refreshStoreSel();toast('已新增门店 '+id);go('set');}
+function renameStore(id,name){const s=DB.stores.find(x=>x.id===id);if(s){s.name=name.trim()||s.name;refreshStoreSel();toast('门店名已更新');}}
+function aiRestockPO(){
+  const lines=allUnits().filter(u=>!isFnb()&&unitStock(u)<=u.p.reorder).map(u=>({sku:u.sku,name:u.p.name+' '+u.label,qty:Math.max(u.p.reorder*2-unitStock(u),u.p.reorder),cost:u.cost||0}));
+  if(!lines.length){toast('当前无需补货 ✅');return;}
+  const total=+lines.reduce((s,l)=>s+l.qty*l.cost,0).toFixed(2);
+  DB.purchaseOrders.push({id:'PO-'+(1001+DB.purchaseOrders.length),supplier:DB.suppliers[0].id,store:S.store,lines,total,status:'pending',ts:Date.now()});
+  toast('已生成采购单：'+lines.length+' 项 / '+money(total));go('buy');
 }
 
 /* ---------- Modal / Toast ---------- */
