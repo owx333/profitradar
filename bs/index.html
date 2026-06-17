@@ -155,15 +155,10 @@ td .mut{color:var(--t-faint);font-size:12.5px}
 @keyframes tin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 
 /* ---------- Responsive ---------- */
+.hamburger{display:none!important}
 @media(max-width:880px){
-  #sidebar{transform:translateX(-100%);transition:.2s;box-shadow:0 0 40px rgba(0,0,0,.3)}
-  #sidebar.open{transform:none}
-  #main{margin-left:0}
-  .hamburger{display:block}
   .dash-cols{grid-template-columns:1fr}
   .fgrid{grid-template-columns:1fr}
-  .view{padding:18px 14px}
-  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35}
 }
 .tbl-scroll{overflow-x:auto}
 
@@ -267,9 +262,9 @@ function seed(){
       {id:'c2',name:'Lotus Tech Solutions',industry:'Technology',contactPerson:'Ms. Chong',phone:'03-99887766',email:'admin@lotustech.my',address:'Menara KL, Kuala Lumpur',agentId:'a2'},
     ],
     customers:[
-      {id:'u1',name:'Yeoh Wei Ming',email:'wm.yeoh@sunrise.my',phone:'012-1112222',companyId:'c1',agentId:'a1',notes:'Decision maker, interested in leadership programs.'},
-      {id:'u2',name:'Nadia Hassan',email:'nadia@sunrise.my',phone:'013-4445555',companyId:'c1',agentId:'a1',notes:''},
-      {id:'u3',name:'Chong Kar Wai',email:'kw.chong@lotustech.my',phone:'017-6667777',companyId:'c2',agentId:'a2',notes:'Looking for team coaching.'},
+      {id:'u1',name:'Yeoh Wei Ming',email:'wm.yeoh@sunrise.my',phone:'012-1112222',companyId:'c1',agentId:'a1',stage:'Attending',source:'Ads',notes:'Decision maker, interested in leadership programs.'},
+      {id:'u2',name:'Nadia Hassan',email:'nadia@sunrise.my',phone:'013-4445555',companyId:'c1',agentId:'a1',stage:'Contacted',source:'Referral',notes:''},
+      {id:'u3',name:'Chong Kar Wai',email:'kw.chong@lotustech.my',phone:'017-6667777',companyId:'c2',agentId:'a2',stage:'Upsell',source:'Ads',notes:'Looking for team coaching.'},
     ],
     courses:[
       {id:'co1',title:'Leadership Mastery',description:'2-day intensive on team leadership and influence.',duration:'2 days',price:1800,materials:'Workbook, slide deck'},
@@ -281,8 +276,8 @@ function seed(){
       {id:'s2',name:'Jessica Wong',expertise:'Sales, Negotiation',phone:'018-3344556',email:'jess@speak.my',availability:'Flexible',fee:2200},
     ],
     schedules:[
-      {id:'sc1',courseId:'co1',speakerId:'s1',date:offset(7),time:'09:00',venue:'Eastin Hotel, Penang',venueCost:2500,marketingCost:1500,speakerCost:3000,otherCost:600},
-      {id:'sc2',courseId:'co2',speakerId:'s2',date:offset(-14),time:'10:00',venue:'Online (Zoom)',venueCost:0,marketingCost:1200,speakerCost:2200,otherCost:300},
+      {id:'sc1',courseId:'co1',speakerId:'s1',type:'Paid Course',date:offset(7),time:'09:00',venue:'Eastin Hotel, Penang',venueCost:2500,marketingCost:1500,speakerCost:3000,callCost:200,otherCost:600},
+      {id:'sc2',courseId:'co2',speakerId:'s2',type:'Preview',date:offset(-14),time:'10:00',venue:'Online (Zoom)',venueCost:0,marketingCost:1200,speakerCost:2200,callCost:150,otherCost:300},
     ],
     attendance:[
       {id:'at1',scheduleId:'sc2',customerId:'u3',status:'Attended'},
@@ -304,12 +299,20 @@ function seed(){
       {id:'us3',username:'sarah',password:'1234',name:'Sarah Tan',role:'Agent',agentId:'a1'},
       {id:'us4',username:'daniel',password:'1234',name:'Daniel Lim',role:'Agent',agentId:'a2'},
     ],
+    settings:{
+      sources:['Ads','Referral','Walk-in','Social','Other'],
+      categories:['Course Enrollment','Coaching Service','Business Proposal'],
+      roles:['Sales Agent','Senior Sales','Account Manager','Team Lead','Admin'],
+      sessionTypes:['Paid Course','Preview'],
+      require:{ customerEmail:false, customerPhone:false, customerSource:false }
+    },
   };
 }
 function offset(d){const t=new Date();t.setDate(t.getDate()+d);return t.toISOString().slice(0,10);}
 
 db = loadDB() || seed();
 if(!db.users) db.users = seed().users;   // migrate older saves
+if(!db.settings) db.settings = seed().settings;
 saveDB();
 
 /* ============================================================
@@ -353,7 +356,7 @@ const courseTitle = id => byId(db.courses,id)?.title || '—';
 const speakerName = id => byId(db.speakers,id)?.name || '—';
 
 /* ---------- derived metrics ---------- */
-function scheduleCost(s){return (+s.venueCost||0)+(+s.marketingCost||0)+(+s.speakerCost||0)+(+s.otherCost||0);}
+function scheduleCost(s){return (+s.venueCost||0)+(+s.marketingCost||0)+(+s.speakerCost||0)+(+s.callCost||0)+(+s.otherCost||0);}
 function scheduleAttendees(scId){return db.attendance.filter(a=>a.scheduleId===scId);}
 function scheduleRevenue(s){
   // revenue = sales for this schedule's course, by customers who attended this schedule
@@ -456,23 +459,25 @@ function actBtns(id,{edit=true,del=true,extra=[]}={}){
    ROUTES / NAV
    ============================================================ */
 const NAV = [
-  {grp:'Overview', items:[ {k:'dashboard',label:'Dashboard',ic:'◈'} ]},
-  {grp:'Relationships', items:[
-    {k:'companies',label:'Companies',ic:'🏢'},
-    {k:'customers',label:'Customers',ic:'👤'},
-    {k:'agents',label:'Agents',ic:'🎯'},
-    {k:'followups',label:'Follow-ups',ic:'🔔'},
+  {grp:'Modules', items:[
+    {k:'dashboard',label:'Dashboard',ic:'◈'},
+    {k:'agents',label:'Agent Management',ic:'🎯'},
+    {k:'companies',label:'Company Management',ic:'🏢'},
+    {k:'customers',label:'Customer Management',ic:'👤'},
+    {k:'followups',label:'Follow-up Management',ic:'🔔'},
+    {k:'courses',label:'Course Management',ic:'📘'},
+    {k:'speakers',label:'Speaker Management',ic:'🎤'},
+    {k:'schedules',label:'Schedule Management',ic:'📅'},
+    {k:'sales',label:'Sales Management',ic:'💳'},
+    {k:'attendance',label:'Attendance Management',ic:'✅'},
   ]},
-  {grp:'Programs', items:[
-    {k:'courses',label:'Courses',ic:'📘'},
-    {k:'speakers',label:'Speakers',ic:'🎤'},
-    {k:'schedules',label:'Schedules',ic:'📅'},
-    {k:'attendance',label:'Attendance',ic:'✅'},
+  {grp:'Extras', items:[
+    {k:'finance',label:'Finance 财务',ic:'💰'},
+    {k:'reports',label:'Reports & Analytics',ic:'📊'},
+    {k:'settings',label:'Settings 设置',ic:'⚙'},
   ]},
-  {grp:'Revenue', items:[ {k:'sales',label:'Sales',ic:'💳'} ]},
-  {grp:'Insights', items:[ {k:'reports',label:'Reports',ic:'📊'} ]},
 ];
-const TITLES = {dashboard:['Dashboard','Real-time business overview'],companies:['Companies','Organisations & their contacts'],customers:['Customers','People you engage & sell to'],agents:['Agents','Your sales & account team'],followups:['Follow-ups','Reminders & interaction log'],courses:['Courses','Programs you deliver'],speakers:['Speakers','Trainers & their fees'],schedules:['Schedules','Sessions, costs & ROI'],attendance:['Attendance','Who showed up'],sales:['Sales','Revenue & payment tracking'],reports:['Reports','Performance & analytics']};
+const TITLES = {dashboard:['Dashboard','Real-time business overview'],agents:['Agent Management','Profiles, roles & performance'],companies:['Company Management','Organisations & their contacts'],customers:['Customer Management','People you engage & sell to'],followups:['Follow-up Management','Reminders & interaction log'],courses:['Course Management','Programs you deliver'],speakers:['Speaker Management','Trainers & their fees'],schedules:['Schedule Management','Sessions, costs & ROI'],attendance:['Attendance Management','Who showed up'],sales:['Sales Management','Revenue & payment tracking'],reports:['Reports & Analytics','Performance across the business'],finance:['Finance 财务','成交额 · 成本 · 利润'],settings:['Settings 设置','Configure options, required fields & data']};
 
 function buildNav(){
   const due = scoped('followups').filter(f=>f.status==='Pending' && f.dueDate<=today()).length;
@@ -525,6 +530,15 @@ VIEWS.dashboard = ()=>{
   const attRate = totalAtt? Math.round(attended/totalAtt*100):0;
   const dueFollow = myFollow.filter(f=>f.status==='Pending' && f.dueDate<=today()).length;
 
+  // funnel
+  const myCust = scoped('customers');
+  const stageCount={}; STAGES.forEach(s=>stageCount[s]=0);
+  myCust.forEach(c=>{const st=c.stage||'Lead'; stageCount[st]=(stageCount[st]||0)+1;});
+  const wonPlus = myCust.filter(c=>['Won','Attending','Post-Follow','Upsell'].includes(c.stage)).length;
+  const convRate = myCust.length? Math.round(wonPlus/myCust.length*100):0;
+  const stageBarColor={Lead:'#6B7785',Contacted:'#14202E',Preview:'#D4A12C',Won:'#1F9D8F',Attending:'#1F9D8F','Post-Follow':'#D4A12C',Upsell:'#1F9D8F',Lost:'#D1495B'};
+  const funnelItems = STAGES.map(s=>({label:s, value:stageCount[s], color:stageBarColor[s]}));
+
   const upcomingRows = upcoming.slice(0,5).map(s=>`<tr>
       <td><div class="strong">${esc(courseTitle(s.courseId))}</div><div class="mut">${esc(s.venue||'')}</div></td>
       <td>${fmtDate(s.date)} ${esc(s.time||'')}</td>
@@ -566,6 +580,14 @@ VIEWS.dashboard = ()=>{
       <div class="tbl-scroll"><table>
         <thead><tr><th>Event</th><th style="text-align:right">Revenue</th><th style="text-align:right">Cost</th><th style="text-align:right">ROI</th></tr></thead>
         <tbody>${roiRows}</tbody></table></div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:18px">
+    <div class="card pad" style="flex:1;min-width:280px">
+      <div class="panel-title">Customer Funnel 客户漏斗</div>
+      <div class="panel-sub">Where every customer sits in your journey · ${convRate}% reached Won or beyond</div>
+      <div class="rep-list">${hbars(funnelItems, n=>n+'')}</div>
     </div>
   </div>
 
@@ -621,16 +643,20 @@ TOP_ACTIONS.customers = `<button class="btn gold" data-new="customer">+ New Cust
 VIEWS.customers = ()=>{
   const q=(uiState.search.customers||'').toLowerCase();
   const comp=uiState.filter.customers||'';
-  let rows = scoped('customers').filter(u=> (!q||(u.name+u.email+u.phone).toLowerCase().includes(q)) && (!comp||u.companyId===comp));
+  const stg=uiState.filter.customers_stage||'';
+  let rows = scoped('customers').filter(u=> (!q||(u.name+u.email+u.phone).toLowerCase().includes(q)) && (!comp||u.companyId===comp) && (!stg||(u.stage||'Lead')===stg));
   const cols=[
     {label:'Customer',render:u=>`<div class="strong">${esc(u.name)}</div><div class="mut">${esc(u.email||'')}</div>`},
+    {label:'Stage',render:u=>stagePill(u.stage)},
+    {label:'Source',render:u=>`<span class="tag">${esc(u.source||'—')}</span>`},
     {label:'Company',render:u=>esc(companyName(u.companyId))},
-    {label:'Phone',render:u=>esc(u.phone||'—')},
     {label:'Courses',align:'right',render:u=>coursesAttendedBy(u.id).length},
     {label:'Agent',render:u=>esc(agentName(u.agentId))},
     {label:'',align:'right',cls:'actions-cell',render:u=>actBtns(u.id,{extra:[{act:'view',icon:'👁',title:'View'}]})},
   ];
-  const filterHTML=`<select class="filter" data-filter="customers"><option value="">All companies</option>${db.companies.map(c=>`<option value="${c.id}" ${comp===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select>`;
+  const filterHTML=`
+    <select class="filter" data-filter="customers_stage"><option value="">All stages</option>${STAGES.map(s=>`<option value="${s}" ${stg===s?'selected':''}>${esc(STAGE_LABEL[s])}</option>`).join('')}</select>
+    <select class="filter" data-filter="customers"><option value="">All companies</option>${db.companies.map(c=>`<option value="${c.id}" ${comp===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select>`;
   return searchbar('customers','Search customers…',filterHTML) + renderTable(cols,rows,{rowClick:true,emptyIcon:'👤',emptyMsg:'No customers yet'});
 };
 function coursesAttendedBy(custId){
@@ -707,6 +733,7 @@ VIEWS.schedules = ()=>{
   if(f==='past') rows=rows.filter(s=>s.date<today());
   const cols=[
     {label:'Course',render:s=>`<div class="strong">${esc(courseTitle(s.courseId))}</div><div class="mut">${esc(speakerName(s.speakerId))}</div>`},
+    {label:'Type',render:s=>s.type==='Preview'?`<span class="pill gold">Preview 试听</span>`:`<span class="pill ink">Paid</span>`},
     {label:'When',render:s=>`${fmtDate(s.date)}<div class="mut">${esc(s.time||'')} · ${esc(s.venue||'')}</div>`},
     {label:'Attendees',align:'right',render:s=>scheduleAttendees(s.id).length},
     {label:'Cost',align:'right',render:s=>RM(scheduleCost(s))},
@@ -761,7 +788,7 @@ VIEWS.sales = ()=>{
     {label:'Agent',render:s=>esc(agentName(s.agentId))},
     {label:'',align:'right',cls:'actions-cell',render:s=>actBtns(s.id,{extra:[{act:'pay',icon:'💵',title:'Record payment'}]})},
   ];
-  const cats=['Business Proposal','Coaching Service','Course Enrollment'];
+  const cats=db.settings.categories;
   const filterHTML=`<select class="filter" data-filter="sales"><option value="">All categories</option>${cats.map(c=>`<option ${cat===c?'selected':''}>${c}</option>`).join('')}</select>`;
   const kpi=`<div class="kpi-grid" style="margin-bottom:16px">
     <div class="kpi"><div class="lab">Total Sales</div><div class="num">${RM(totalSales)}</div></div>
@@ -772,6 +799,13 @@ VIEWS.sales = ()=>{
 };
 
 /* ---------- shared bits ---------- */
+const STAGES = ['Lead','Contacted','Preview','Won','Attending','Post-Follow','Upsell','Lost'];
+const STAGE_LABEL = {Lead:'Lead 潜在',Contacted:'Contacted 客服跟进',Preview:'Preview 试听',Won:'Won 成交',Attending:'Attending 上课中','Post-Follow':'Post-Follow 课后跟进',Upsell:'Upsell 升单复购',Lost:'Lost 流失'};
+const SOURCES = ['Ads','Referral','Walk-in','Social','Other'];
+function stagePill(s){
+  const map={Lead:'grey',Contacted:'ink',Preview:'gold',Won:'teal',Attending:'teal','Post-Follow':'gold',Upsell:'teal',Lost:'red'};
+  return `<span class="pill ${map[s]||'grey'}">${esc(s||'Lead')}</span>`;
+}
 function statusPill(s){
   const map={Paid:'teal',Partial:'gold',Unpaid:'red',Pending:'gold',Completed:'teal',Cancelled:'grey'};
   return `<span class="pill ${map[s]||'grey'}">${esc(s)}</span>`;
@@ -788,9 +822,15 @@ function searchbar(key,placeholder,extraHTML='',noSearch=false){
    ============================================================ */
 function viewCompany(id){
   const c=byId(db.companies,id); if(!c)return;
+  const canMgC = canWrite('customers');
   const custs=db.customers.filter(u=>u.companyId===id);
-  const custRows = custs.length? custs.map(u=>`<tr><td><div class="strong">${esc(u.name)}</div><div class="mut">${esc(u.email||'')}</div></td><td>${esc(u.phone||'—')}</td><td class="num-cell">${coursesAttendedBy(u.id).length} courses</td></tr>`).join('')
-    : `<tr><td colspan="3" style="color:var(--t-faint)">No customers linked yet.</td></tr>`;
+  const custRows = custs.length? custs.map(u=>`<tr>
+      <td><div class="strong">${esc(u.name)}</div><div class="mut">${esc(u.email||'')}</div></td>
+      <td>${esc(u.phone||'—')}</td>
+      <td class="num-cell">${coursesAttendedBy(u.id).length} courses</td>
+      <td class="actions-cell">${canMgC?`<button data-cedit="${u.id}" title="Edit">✎</button><button class="del" data-cdel="${u.id}" title="Remove">🗑</button>`:'<span class="mut">—</span>'}</td>
+    </tr>`).join('')
+    : `<tr><td colspan="4" style="color:var(--t-faint)">No customers linked yet.</td></tr>`;
   openModal({title:c.name,wide:true,bodyHTML:`
     <dl class="kv">
       <dt>Industry</dt><dd>${esc(c.industry||'—')}</dd>
@@ -800,9 +840,18 @@ function viewCompany(id){
       <dt>Address</dt><dd>${esc(c.address||'—')}</dd>
       <dt>Account agent</dt><dd>${esc(agentName(c.agentId))}</dd>
     </dl>
-    <div class="subhead">Linked customers (${custs.length})</div>
-    <div class="tbl-scroll"><table><thead><tr><th>Customer</th><th>Phone</th><th style="text-align:right">History</th></tr></thead><tbody>${custRows}</tbody></table></div>`,
-    footer:[{label:'Close',cls:'ghost',act:closeModal},{label:'Edit company',cls:'primary',act:()=>{closeModal();editEntity('company',id);}}]});
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px">
+      <div class="subhead" style="margin:0">Customers under this company (${custs.length})</div>
+      ${canMgC?`<button class="btn sm gold" data-caddhere>+ Add customer</button>`:''}
+    </div>
+    <div class="tbl-scroll"><table><thead><tr><th>Customer</th><th>Phone</th><th style="text-align:right">History</th><th></th></tr></thead><tbody>${custRows}</tbody></table></div>`,
+    footer:[{label:'Close',cls:'ghost',act:closeModal},{label:'Edit company',cls:'primary',act:()=>{closeModal();editEntity('company',id);}}],
+    onMount:()=>{
+      const add=$('[data-caddhere]'); if(add) add.onclick=()=>{ closeModal(); newEntity('customer',{companyId:id,agentId:c.agentId},()=>viewCompany(id)); };
+      $$('[data-cedit]').forEach(b=>b.onclick=()=>{ closeModal(); editEntity('customer',b.dataset.cedit,()=>viewCompany(id)); });
+      $$('[data-cdel]').forEach(b=>b.onclick=()=>{ const u=byId(db.customers,b.dataset.cdel);
+        confirmDelete(u?u.name:'this customer',()=>{ db.customers=db.customers.filter(x=>x.id!==b.dataset.cdel); saveDB(); viewCompany(id); }); });
+    }});
 }
 function viewCustomer(id){
   const u=byId(db.customers,id); if(!u)return;
@@ -814,6 +863,8 @@ function viewCustomer(id){
   const fups=db.followups.filter(f=>f.customerId===id);
   openModal({title:u.name,wide:true,bodyHTML:`
     <dl class="kv">
+      <dt>Stage</dt><dd>${stagePill(u.stage)} <span class="mut">${esc(STAGE_LABEL[u.stage]||'')}</span></dd>
+      <dt>Source 来源</dt><dd>${esc(u.source||'—')}</dd>
       <dt>Company</dt><dd>${esc(companyName(u.companyId))}</dd>
       <dt>Email</dt><dd>${esc(u.email||'—')}</dd>
       <dt>Phone</dt><dd>${esc(u.phone||'—')}</dd>
@@ -832,6 +883,7 @@ function viewSchedule(id){
   const cost=scheduleCost(s),rev=scheduleRevenue(s),roi=scheduleROI(s);
   openModal({title:courseTitle(s.courseId)+' — '+fmtDate(s.date),wide:true,bodyHTML:`
     <dl class="kv">
+      <dt>Type</dt><dd>${s.type==='Preview'?'Preview 试听':'Paid Course'}</dd>
       <dt>Speaker</dt><dd>${esc(speakerName(s.speakerId))}</dd>
       <dt>Date / time</dt><dd>${fmtDate(s.date)} · ${esc(s.time||'—')}</dd>
       <dt>Venue</dt><dd>${esc(s.venue||'—')}</dd>
@@ -840,8 +892,9 @@ function viewSchedule(id){
     <div class="subhead">Cost breakdown</div>
     <dl class="kv">
       <dt>Venue</dt><dd>${RM(s.venueCost)}</dd>
-      <dt>Marketing</dt><dd>${RM(s.marketingCost)}</dd>
+      <dt>Ad / marketing</dt><dd>${RM(s.marketingCost)}</dd>
       <dt>Speaker</dt><dd>${RM(s.speakerCost)}</dd>
+      <dt>Call / phone 话费</dt><dd>${RM(s.callCost)}</dd>
       <dt>Other</dt><dd>${RM(s.otherCost)}</dd>
       <dt style="font-weight:700;color:var(--ink)">Total cost</dt><dd style="font-weight:700">${RM(cost)}</dd>
     </dl>
@@ -866,7 +919,7 @@ const speakerOpts = ()=>db.speakers.map(s=>({value:s.id,label:s.name}));
 const SCHEMA = {
   agent:{coll:'agents',title:'Agent',fields:()=>[
     {key:'name',label:'Full name',required:true},
-    {key:'role',label:'Role',type:'select',options:['Sales Agent','Senior Sales','Account Manager','Team Lead','Admin'],default:'Sales Agent'},
+    {key:'role',label:'Role',type:'select',options:()=>db.settings.roles,default:'Sales Agent'},
     {key:'email',label:'Email',type:'email'},
     {key:'phone',label:'Phone'},
     {key:'status',label:'Status',type:'select',options:['Active','Inactive'],default:'Active'},
@@ -883,8 +936,10 @@ const SCHEMA = {
   customer:{coll:'customers',title:'Customer',fields:()=>[
     {key:'name',label:'Full name',required:true},
     {key:'companyId',label:'Company',type:'select',options:companyOpts,placeholder:'No company'},
-    {key:'email',label:'Email',type:'email'},
-    {key:'phone',label:'Phone'},
+    {key:'stage',label:'Stage (funnel)',type:'select',options:STAGES.map(s=>({value:s,label:STAGE_LABEL[s]})),default:'Lead'},
+    {key:'source',label:'Source 来源',type:'select',options:()=>db.settings.sources,default:'Ads',required:db.settings.require.customerSource},
+    {key:'email',label:'Email',type:'email',required:db.settings.require.customerEmail},
+    {key:'phone',label:'Phone',required:db.settings.require.customerPhone},
     {key:'agentId',label:'Assigned agent',type:'select',options:agentOpts,placeholder:'Unassigned'},
     {key:'notes',label:'Notes',type:'textarea',full:true},
   ]},
@@ -905,18 +960,20 @@ const SCHEMA = {
   ]},
   schedule:{coll:'schedules',title:'Schedule',wide:true,fields:()=>[
     {key:'courseId',label:'Course',type:'select',options:courseOpts,required:true},
+    {key:'type',label:'Session type',type:'select',options:()=>db.settings.sessionTypes,default:'Paid Course',hint:'Preview = 试听 / free session'},
     {key:'speakerId',label:'Speaker',type:'select',options:speakerOpts,placeholder:'TBD'},
     {key:'date',label:'Date',type:'date',required:true},
     {key:'time',label:'Time',type:'time'},
     {key:'venue',label:'Venue',full:true},
     {key:'venueCost',label:'Venue cost (RM)',type:'number',step:'0.01',default:0},
-    {key:'marketingCost',label:'Marketing cost (RM)',type:'number',step:'0.01',default:0},
+    {key:'marketingCost',label:'Ad / marketing (RM)',type:'number',step:'0.01',default:0},
     {key:'speakerCost',label:'Speaker cost (RM)',type:'number',step:'0.01',default:0},
+    {key:'callCost',label:'Call / phone (RM) 话费',type:'number',step:'0.01',default:0},
     {key:'otherCost',label:'Other cost (RM)',type:'number',step:'0.01',default:0},
   ]},
   sale:{coll:'sales',title:'Sale',wide:true,fields:()=>[
     {key:'customerId',label:'Customer',type:'select',options:customerOpts,required:true},
-    {key:'category',label:'Category',type:'select',options:['Course Enrollment','Coaching Service','Business Proposal'],required:true},
+    {key:'category',label:'Category',type:'select',options:()=>db.settings.categories,required:true},
     {key:'courseId',label:'Related course',type:'select',options:courseOpts,placeholder:'None'},
     {key:'agentId',label:'Agent',type:'select',options:agentOpts,placeholder:'Unassigned'},
     {key:'amount',label:'Total amount (RM)',type:'number',step:'0.01',required:true},
@@ -934,20 +991,20 @@ const SCHEMA = {
   ]},
 };
 
-function newEntity(type){
+function newEntity(type,preset={},after){
   const sc=SCHEMA[type];
-  formModal({title:'New '+sc.title,wide:sc.wide,fields:sc.fields(),onSave:data=>{
+  formModal({title:'New '+sc.title,wide:sc.wide,fields:sc.fields(),values:preset,onSave:data=>{
     const rec={id:uid(),...data};
     if(type==='sale') rec.status=computeSaleStatus(rec), rec.installments=rec.installments||[];
-    db[sc.coll].push(rec); saveDB(); toast(sc.title+' added'); route();
+    db[sc.coll].push(rec); saveDB(); toast(sc.title+' added'); after?after():route();
   }});
 }
-function editEntity(type,id){
+function editEntity(type,id,after){
   const sc=SCHEMA[type]; const rec=byId(db[sc.coll],id); if(!rec)return;
   formModal({title:'Edit '+sc.title,wide:sc.wide,fields:sc.fields(),values:rec,onSave:data=>{
     Object.assign(rec,data);
     if(type==='sale') rec.status=computeSaleStatus(rec);
-    saveDB(); toast(sc.title+' updated'); route();
+    saveDB(); toast(sc.title+' updated'); after?after():route();
   }});
 }
 function delEntity(type,id){
@@ -1060,7 +1117,7 @@ VIEWS.reports = ()=>{
   const collected=sales.reduce((t,s)=>t+(+s.paid||0),0);
   const avg=sales.length?total/sales.length:0;
 
-  const catAgg=['Course Enrollment','Coaching Service','Business Proposal'].map(c=>({label:c,value:sales.filter(s=>s.category===c).reduce((t,s)=>t+(+s.amount||0),0)}));
+  const catAgg=db.settings.categories.map(c=>({label:c,value:sales.filter(s=>s.category===c).reduce((t,s)=>t+(+s.amount||0),0)}));
   const agentAgg=db.agents.map(a=>({label:a.name,value:sales.filter(s=>s.agentId===a.id).reduce((t,s)=>t+(+s.amount||0),0)})).filter(x=>x.value>0).sort((x,y)=>y.value-x.value);
 
   const months=[]; const now=new Date();
@@ -1099,14 +1156,114 @@ VIEWS.reports = ()=>{
   </div>`;
 };
 
+/* ---------------- FINANCE 财务 (managers only) ---------------- */
+TOP_ACTIONS.finance = `<button class="btn ghost" data-print="1">🖨 Print</button>`;
+VIEWS.finance = ()=>{
+  const sales=db.sales;
+  const booked=sales.reduce((t,s)=>t+(+s.amount||0),0);     // 成交额
+  const collected=sales.reduce((t,s)=>t+(+s.paid||0),0);    // 已收
+  const cost=db.schedules.reduce((t,s)=>t+scheduleCost(s),0); // 成本
+  const profit=booked-cost;                                  // 利润
+  const margin=booked?Math.round(profit/booked*100):0;
+
+  // cost categories
+  const cc=[
+    {label:'Venue 场地',value:db.schedules.reduce((t,s)=>t+(+s.venueCost||0),0)},
+    {label:'Ad / Marketing 广告',value:db.schedules.reduce((t,s)=>t+(+s.marketingCost||0),0)},
+    {label:'Speaker 导师',value:db.schedules.reduce((t,s)=>t+(+s.speakerCost||0),0)},
+    {label:'Call 话费',value:db.schedules.reduce((t,s)=>t+(+s.callCost||0),0)},
+    {label:'Other 其他',value:db.schedules.reduce((t,s)=>t+(+s.otherCost||0),0)},
+  ];
+
+  // monthly profit
+  const months=[]; const now=new Date();
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({key:d.toISOString().slice(0,7),label:d.toLocaleDateString('en',{month:'short'}),rev:0,cost:0});}
+  sales.forEach(s=>{const m=months.find(x=>x.key===(s.date||'').slice(0,7));if(m)m.rev+=(+s.amount||0);});
+  db.schedules.forEach(s=>{const m=months.find(x=>x.key===(s.date||'').slice(0,7));if(m)m.cost+=scheduleCost(s);});
+  const profitItems=months.map(m=>({label:m.label,value:m.rev-m.cost}));
+
+  // per-event P&L
+  const evRows=db.schedules.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(s=>{
+    const r=scheduleRevenue(s),c=scheduleCost(s),p=r-c;
+    return `<tr>
+      <td><div class="strong">${esc(courseTitle(s.courseId))}</div><div class="mut">${fmtDate(s.date)} · ${s.type==='Preview'?'Preview':'Paid'}</div></td>
+      <td class="num-cell">${RM(r)}</td><td class="num-cell">${RM(c)}</td>
+      <td class="num-cell" style="color:${p>=0?'var(--teal)':'var(--red)'};font-weight:600">${RM(p)}</td>
+      <td class="num-cell"><span class="pill ${scheduleROI(s)>=0?'teal':'red'}">${scheduleROI(s)>=0?'+':''}${scheduleROI(s)}%</span></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="5" class="mut">No events yet.</td></tr>`;
+
+  return `
+  <div class="kpi-grid">
+    <div class="kpi"><div class="lab">成交额 Booked Sales</div><div class="num">${RM(booked)}</div><div class="note">${RM(collected)} collected</div></div>
+    <div class="kpi red"><div class="lab">成本 Total Cost</div><div class="num">${RM(cost)}</div><div class="note">all event costs</div></div>
+    <div class="kpi ${profit>=0?'teal':'red'}"><div class="lab">利润 Profit</div><div class="num">${RM(profit)}</div><div class="note">${margin}% margin</div></div>
+    <div class="kpi ink"><div class="lab">Events</div><div class="num">${db.schedules.length}</div></div>
+  </div>
+  <div class="dash-cols">
+    <div class="card pad"><div class="panel-title">Monthly Profit 月度利润</div><div class="panel-sub">Revenue − cost, last 6 months</div>${vbars(profitItems)}</div>
+    <div class="card pad"><div class="panel-title">Cost Breakdown 成本结构</div><div class="panel-sub">Where the money goes across all events</div><div class="rep-list">${hbars(cc)}</div></div>
+  </div>
+  <div class="card pad" style="margin-top:18px">
+    <div class="panel-title">Profit &amp; Loss by Event 每场盈亏</div><div class="panel-sub">成交额 − 成本 = 利润, per session</div>
+    <div class="tbl-scroll"><table><thead><tr><th>Event</th><th style="text-align:right">Revenue</th><th style="text-align:right">Cost</th><th style="text-align:right">Profit</th><th style="text-align:right">ROI</th></tr></thead><tbody>${evRows}</tbody></table></div>
+  </div>`;
+};
+
+/* ---------------- SETTINGS 设置 (managers only) ---------------- */
+VIEWS.settings = ()=>{
+  const lists=[
+    {key:'sources',label:'Lead Sources 客户来源'},
+    {key:'categories',label:'Sale Categories 销售分类'},
+    {key:'roles',label:'Agent Roles 角色'},
+    {key:'sessionTypes',label:'Session Types 课程类型'},
+  ];
+  const listCard=l=>`<div class="card pad" style="flex:1;min-width:260px">
+    <div class="panel-title">${esc(l.label)}</div>
+    <div class="panel-sub">Options used in this module's dropdown</div>
+    <div style="margin:4px 0 12px;display:flex;flex-wrap:wrap;gap:6px">${(db.settings[l.key]||[]).map(o=>`<span class="tag" style="padding:4px 8px;display:inline-flex;align-items:center;gap:6px">${esc(o)} <button data-optdel="${l.key}|${esc(o)}" title="Remove" style="color:var(--red);font-weight:700">×</button></span>`).join('')||'<span class="mut">None yet</span>'}</div>
+    <div style="display:flex;gap:8px">
+      <input data-optinput="${l.key}" placeholder="New option…" style="flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:8px">
+      <button class="btn sm gold" data-optadd="${l.key}">+ Add</button>
+    </div></div>`;
+  const reqs=[
+    {key:'customerPhone',label:'Require Phone when adding a customer'},
+    {key:'customerEmail',label:'Require Email when adding a customer'},
+    {key:'customerSource',label:'Require Source 来源 when adding a customer'},
+  ];
+  return `
+  <div class="sec-head"><div class="lead">Freely configure the dropdown options and field requirements across the system. Changes apply everywhere immediately.</div></div>
+  <div class="row">${lists.map(listCard).join('')}</div>
+  <div class="card pad" style="margin-top:18px">
+    <div class="panel-title">Required Fields 填写要求</div>
+    <div class="panel-sub">Force these to be filled before a record can be saved</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+      ${reqs.map(r=>`<label style="display:flex;align-items:center;gap:11px;font-weight:500;cursor:pointer">
+        <input type="checkbox" data-reqtoggle="${r.key}" ${db.settings.require[r.key]?'checked':''} style="width:18px;height:18px;accent-color:var(--gold)"> ${esc(r.label)}</label>`).join('')}
+    </div>
+  </div>
+  <div class="card pad" style="margin-top:18px">
+    <div class="panel-title">Data Backup 数据备份</div>
+    <div class="panel-sub">Download a full backup, or restore from a file. Do this before clearing your browser or switching device.</div>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn gold" data-setting-backup>⬇ Download Backup</button>
+      <button class="btn ghost" data-setting-restore>⬆ Restore from File</button>
+    </div>
+  </div>
+  <div class="card pad" style="margin-top:18px">
+    <div class="panel-title">Login Accounts 登录账号</div>
+    <div class="panel-sub">Seeded demo accounts — change these before going live</div>
+    <div class="tbl-scroll"><table><thead><tr><th>Username</th><th>Password</th><th>Role</th><th>Linked agent</th></tr></thead><tbody>
+      ${db.users.map(u=>`<tr><td class="strong">${esc(u.username)}</td><td>${esc(u.password)}</td><td><span class="pill ink">${esc(u.role)}</span></td><td>${esc(u.agentId?agentName(u.agentId):'—')}</td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+};
+
 /* ============================================================
    USER CHIP · BACKUP · LOGIN
    ============================================================ */
 function userChip(){
-  const mgr=isMgr();
   return `<div class="uchip">
-    ${mgr?`<button class="btn sm ghost" data-backup="1" title="Download backup">⬇ Backup</button>
-           <button class="btn sm ghost" data-restore="1" title="Restore from backup">⬆ Restore</button>`:''}
     <div class="uinfo"><div class="uname">${esc(me.name)}</div><div class="urole">${esc(me.role)}</div></div>
     <button class="btn sm ghost" data-logout="1">Sign out</button>
   </div>`;
@@ -1165,6 +1322,17 @@ function logout(){ me=null; saveSession(); $('#modal-root').innerHTML=''; showLo
 function bindView(view){
   // in-view navigation links (e.g. dashboard quick nav)
   $$('#view a').forEach(a=>{ const h=a.getAttribute('href')||''; if(h.startsWith('#/')) a.onclick=e=>{ e.preventDefault(); route(h.replace('#/','')); }; });
+  // settings controls
+  if(view==='settings'){
+    $$('[data-optadd]').forEach(b=>b.onclick=()=>{ const k=b.dataset.optadd; const inp=$(`[data-optinput="${k}"]`); const v=(inp.value||'').trim();
+      if(!v){toast('Type an option first');return;} if(!db.settings[k].includes(v)) db.settings[k].push(v); saveDB(); toast('Added'); route(); });
+    $$('[data-optinput]').forEach(inp=>inp.onkeydown=e=>{ if(e.key==='Enter'){ const b=$(`[data-optadd="${inp.dataset.optinput}"]`); if(b)b.click(); } });
+    $$('[data-optdel]').forEach(b=>b.onclick=()=>{ const i=b.dataset.optdel.indexOf('|'); const k=b.dataset.optdel.slice(0,i), v=b.dataset.optdel.slice(i+1);
+      if((db.settings[k]||[]).length<=1){toast('Keep at least one option');return;} db.settings[k]=db.settings[k].filter(x=>x!==v); saveDB(); route(); });
+    $$('[data-reqtoggle]').forEach(c=>c.onchange=()=>{ db.settings.require[c.dataset.reqtoggle]=c.checked; saveDB(); toast('Saved'); });
+    const bk=$('[data-setting-backup]'); if(bk) bk.onclick=backupData;
+    const rs=$('[data-setting-restore]'); if(rs) rs.onclick=restoreData;
+  }
   // search
   $$('[data-search]').forEach(inp=>{
     inp.oninput=()=>{ uiState.search[inp.dataset.search]=inp.value;
