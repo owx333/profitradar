@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绩效考核系统 · Performance Appraisal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#102A4C; --navy-d:#0B1E38; --navy-l:#1C3A63;
+  --gold:#C9A24B; --gold-d:#A8842F; --gold-soft:#EFE3C4;
+  --ivory:#F6F4EF; --card:#FFFFFF; --slate:#243042; --muted:#7A8290;
+  --line:#E7E3D8; --line-2:#EFEDE5;
+  --green:#2E7D5B; --green-bg:#E5F1EB;
+  --amber:#C8862A; --amber-bg:#FBF0DE;
+  --red:#B3433B; --red-bg:#F8E7E5;
+  --blue:#2F5C9E; --blue-bg:#E7EEF7;
+  --shadow:0 1px 2px rgba(16,42,76,.06),0 8px 24px rgba(16,42,76,.07);
+  --shadow-lg:0 12px 48px rgba(11,30,56,.18);
+  --r:14px; --r-sm:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Noto Sans SC","Inter",system-ui,sans-serif;
+  background:var(--ivory); color:var(--slate);
+  -webkit-font-smoothing:antialiased; font-size:14px; line-height:1.5;
+}
+h1,h2,h3,h4,.serif{font-family:"Noto Serif SC",serif}
+.num{font-family:"Inter",sans-serif;font-variant-numeric:tabular-nums}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;font-size:14px}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#cfd4dc;border-radius:9px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- LOGIN ---------- */
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(1200px 600px at 70% -10%,#1C3A63 0%,var(--navy) 45%,var(--navy-d) 100%);padding:20px;z-index:100}
+.login-card{width:100%;max-width:410px;background:var(--card);border-radius:18px;
+  box-shadow:var(--shadow-lg);overflow:hidden}
+.login-head{background:linear-gradient(160deg,var(--navy-l),var(--navy));padding:38px 34px 30px;color:#fff;position:relative}
+.login-head::after{content:"";position:absolute;left:34px;bottom:22px;width:46px;height:3px;background:var(--gold)}
+.login-badge{font-family:"Inter";font-size:11px;letter-spacing:3px;color:var(--gold-soft);text-transform:uppercase}
+.login-head h1{font-size:25px;font-weight:700;margin-top:9px;letter-spacing:1px}
+.login-head p{color:#A9BBD4;font-size:12.5px;margin-top:7px}
+.login-body{padding:30px 34px 34px}
+.login-body label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px;font-weight:500}
+.login-body .field{margin-bottom:18px}
+.login-body input,.login-body select{width:100%;padding:12px 14px;border:1.5px solid var(--line);
+  border-radius:var(--r-sm);background:#fbfaf7;transition:.15s}
+.login-body input:focus,.login-body select:focus{outline:none;border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(201,162,75,.15)}
+.btn-login{width:100%;padding:13px;background:var(--navy);color:#fff;border-radius:var(--r-sm);
+  font-weight:600;font-size:15px;letter-spacing:1px;transition:.15s;margin-top:4px}
+.btn-login:hover{background:var(--navy-d)}
+.login-err{color:var(--red);font-size:12.5px;margin-top:12px;text-align:center;min-height:16px}
+.login-hint{margin-top:18px;padding-top:16px;border-top:1px solid var(--line-2);font-size:11.5px;color:var(--muted);line-height:1.7}
+.login-hint b{color:var(--slate)}
+
+/* ---------- APP SHELL ---------- */
+#app{display:none;min-height:100vh}
+.shell{display:flex;min-height:100vh}
+.sidebar{width:248px;background:var(--navy);color:#cdd8e8;flex-shrink:0;
+  display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:40;transition:transform .25s}
+.sb-brand{padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-brand .badge{font-family:"Inter";font-size:10px;letter-spacing:2.5px;color:var(--gold)}
+.sb-brand h2{color:#fff;font-size:17px;font-weight:700;margin-top:5px;letter-spacing:.5px}
+.sb-nav{flex:1;overflow-y:auto;padding:12px 12px 20px}
+.sb-group{font-size:10.5px;letter-spacing:1.5px;color:#6f86a8;text-transform:uppercase;padding:14px 12px 7px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;
+  color:#bccadc;font-size:13.5px;font-weight:500;cursor:pointer;transition:.13s;margin-bottom:2px}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.on{background:var(--gold);color:var(--navy-d);font-weight:700}
+.nav-item .ic{width:18px;height:18px;flex-shrink:0;stroke-width:1.9}
+.nav-item.on .ic{stroke:var(--navy-d)}
+.sb-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#7d92b3}
+
+.main{flex:1;margin-left:248px;display:flex;flex-direction:column;min-width:0}
+.topbar{height:62px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;
+  gap:14px;padding:0 24px;position:sticky;top:0;z-index:30}
+.menu-btn{display:none;font-size:22px;color:var(--navy)}
+.topbar .pagetitle{font-family:"Noto Serif SC";font-size:18px;font-weight:600;color:var(--navy)}
+.topbar .spacer{flex:1}
+.cycle-pick{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--ivory);
+  border:1px solid var(--line);border-radius:9px;font-size:12.5px;color:var(--slate)}
+.cycle-pick select{border:none;background:none;font-weight:600;color:var(--navy);cursor:pointer;max-width:160px}
+.cycle-pick select:focus{outline:none}
+.user-chip{display:flex;align-items:center;gap:10px;cursor:pointer}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(140deg,var(--gold),var(--gold-d));
+  color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.user-chip .un{font-size:13px;font-weight:600;line-height:1.2}
+.user-chip .ur{font-size:11px;color:var(--muted)}
+.content{padding:26px 28px 60px;max-width:1240px;width:100%}
+
+/* ---------- COMPONENTS ---------- */
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.grid{display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.card-pad{padding:20px 22px}
+.card h3{font-size:15px;color:var(--navy);margin-bottom:3px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+.section-head .sub{font-size:12.5px;color:var(--muted);margin-top:4px}
+.eyebrow{font-family:"Inter";font-size:11px;letter-spacing:2px;color:var(--gold-d);text-transform:uppercase;font-weight:600}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:13px;
+  font-weight:600;transition:.13s;border:1.5px solid transparent;white-space:nowrap}
+.btn .ic{width:16px;height:16px;stroke-width:2}
+.btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{background:var(--navy-d)}
+.btn-gold{background:var(--gold);color:var(--navy-d)}.btn-gold:hover{background:var(--gold-d);color:#fff}
+.btn-ghost{background:#fff;color:var(--slate);border-color:var(--line)}.btn-ghost:hover{border-color:var(--gold);color:var(--navy)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-danger{background:var(--red-bg);color:var(--red)}.btn-danger:hover{background:var(--red);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold)}
+.stat .lbl{font-size:12px;color:var(--muted);font-weight:500}
+.stat .val{font-family:"Inter";font-size:30px;font-weight:700;color:var(--navy);margin-top:6px;line-height:1}
+.stat .val small{font-size:14px;color:var(--muted);font-weight:500}
+.stat .delta{font-size:11.5px;margin-top:7px;color:var(--green);font-weight:600}
+
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;font-size:11.5px;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;
+  font-weight:600;padding:11px 14px;border-bottom:1.5px solid var(--line);white-space:nowrap}
+tbody td{padding:13px 14px;border-bottom:1px solid var(--line-2);font-size:13.5px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fbfaf6}
+.t-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--line);background:#fff;box-shadow:var(--shadow)}
+
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600}
+.tag-gray{background:#eef0f3;color:#5c6675}
+.tag-blue{background:var(--blue-bg);color:var(--blue)}
+.tag-green{background:var(--green-bg);color:var(--green)}
+.tag-amber{background:var(--amber-bg);color:var(--amber)}
+.tag-red{background:var(--red-bg);color:var(--red)}
+.tag-gold{background:var(--gold-soft);color:var(--gold-d)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+
+.grade-pill{font-family:"Inter";font-weight:800;font-size:13px;width:30px;height:30px;border-radius:8px;
+  display:inline-flex;align-items:center;justify-content:center}
+.g-S{background:#3b2f6e;color:#fff}.g-A{background:var(--green);color:#fff}
+.g-B{background:var(--blue);color:#fff}.g-C{background:var(--amber);color:#fff}.g-D{background:var(--red);color:#fff}
+
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty .ic{width:42px;height:42px;stroke:var(--line);stroke-width:1.5;margin-bottom:12px}
+.empty p{font-size:14px;font-weight:500;color:var(--slate)}.empty span{font-size:12.5px}
+
+/* progress / pipeline */
+.pipe{display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.pipe-step{display:flex;align-items:center;gap:8px}
+.pipe-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;background:#eef0f3;color:#9aa3b0;border:2px solid transparent}
+.pipe-step.done .pipe-dot{background:var(--green);color:#fff}
+.pipe-step.active .pipe-dot{background:var(--gold);color:var(--navy-d);box-shadow:0 0 0 4px rgba(201,162,75,.18)}
+.pipe-step .lab{font-size:12px;color:var(--muted);font-weight:500}
+.pipe-step.done .lab,.pipe-step.active .lab{color:var(--slate);font-weight:600}
+.pipe-line{width:34px;height:2px;background:var(--line);margin:0 4px}
+.pipe-step.done + .pipe-line{background:var(--green)}
+
+/* progress bar */
+.bar{height:7px;background:#eef0f3;border-radius:6px;overflow:hidden}
+.bar > i{display:block;height:100%;border-radius:6px;background:var(--gold);transition:width .5s}
+
+/* score ring */
+.ring-wrap{display:flex;align-items:center;gap:22px}
+.ring{position:relative;width:128px;height:128px;flex-shrink:0}
+.ring svg{transform:rotate(-90deg)}
+.ring .ctr{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .ctr .sc{font-family:"Inter";font-size:30px;font-weight:800;color:var(--navy);line-height:1}
+.ring .ctr .lb{font-size:10.5px;color:var(--muted);letter-spacing:1px;margin-top:3px}
+
+/* forms */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:12px;color:var(--muted);font-weight:600}
+.fg input,.fg select,.fg textarea{padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fbfaf7;transition:.15s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--gold);background:#fff;box-shadow:0 0 0 3px rgba(201,162,75,.13)}
+.fg textarea{resize:vertical;min-height:70px}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(11,30,56,.45);display:none;align-items:flex-start;justify-content:center;
+  z-index:80;padding:30px 16px;overflow-y:auto;backdrop-filter:blur(2px)}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:640px;box-shadow:var(--shadow-lg);animation:pop .2s}
+.modal.wide{max-width:880px}
+@keyframes pop{from{transform:translateY(14px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.modal-head{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-size:17px;color:var(--navy)}
+.modal-head .x{font-size:22px;color:var(--muted);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.modal-head .x:hover{background:var(--ivory);color:var(--slate)}
+.modal-body{padding:22px 24px;max-height:66vh;overflow-y:auto}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;background:#fbfaf7;border-radius:0 0 16px 16px}
+
+/* rating */
+.rate{display:flex;gap:6px}
+.rate button{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--line);background:#fff;font-weight:700;
+  font-family:"Inter";color:var(--muted);transition:.12s}
+.rate button:hover{border-color:var(--gold)}
+.rate button.on{background:var(--gold);border-color:var(--gold);color:var(--navy-d)}
+.score-line{display:grid;grid-template-columns:1.3fr 1fr auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line-2)}
+.score-line:last-child{border-bottom:none}
+.score-line .nm{font-size:13.5px;font-weight:600;color:var(--slate)}
+.score-line .desc{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+/* chart */
+.chart-bars{display:flex;align-items:flex-end;gap:14px;height:170px;padding-top:10px}
+.cb{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+.cb .bar-v{width:100%;max-width:46px;background:linear-gradient(180deg,var(--navy-l),var(--navy));border-radius:7px 7px 0 0;
+  position:relative;transition:height .6s;min-height:4px}
+.cb .bar-v span{position:absolute;top:-20px;left:0;right:0;text-align:center;font-family:"Inter";font-size:12px;font-weight:700;color:var(--navy)}
+.cb .cb-lab{font-size:11.5px;color:var(--muted);text-align:center}
+.dist-row{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+.dist-row .gl{width:26px}.dist-row .db{flex:1}.dist-row .dn{width:40px;text-align:right;font-family:"Inter";font-weight:700;font-size:13px}
+
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy-d);color:#fff;
+  padding:12px 22px;border-radius:10px;font-size:13.5px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;
+  transition:.25s;z-index:200;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast.ok{background:var(--green)}.toast.err{background:var(--red)}
+
+.muted{color:var(--muted)}.mono{font-family:"Inter"}
+.mb0{margin-bottom:0}.mt16{margin-top:16px}.mt24{margin-top:24px}
+.flex{display:flex}.between{justify-content:space-between}.aic{align-items:center}.gap8{gap:8px}.gap12{gap:12px}
+.right{text-align:right}.center{text-align:center}.w100{width:100%}
+.hide{display:none!important}
+
+@media(max-width:980px){
+  .form-grid{grid-template-columns:1fr}
+}
+@media(max-width:860px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:none;box-shadow:var(--shadow-lg)}
+  .main{margin-left:0}
+  .menu-btn{display:block}
+  .content{padding:18px 16px 60px}
+  .topbar{padding:0 16px}
+  .cycle-pick .lbx{display:none}
+  .user-chip .uinfo{display:none}
+  .sb-backdrop{position:fixed;inset:0;background:rgba(11,30,56,.4);z-index:35;display:none}
+  .sb-backdrop.show{display:block}
+}
+/* ===== V2: 9-BOX ===== */
+.ninebox{display:grid;grid-template-columns:auto repeat(3,1fr);grid-template-rows:auto repeat(3,1fr);gap:8px}
+.nb-axis-x{grid-column:2/5;text-align:center;font-size:12px;font-weight:700;color:var(--navy);letter-spacing:2px;padding-top:6px}
+.nb-corner{}
+.nb-ylab{display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);font-weight:600;writing-mode:vertical-rl;transform:rotate(180deg)}
+.nb-cell{border-radius:12px;padding:11px;min-height:118px;border:1.5px solid var(--line);position:relative;transition:.15s}
+.nb-cell .cell-t{font-size:11.5px;font-weight:700;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center}
+.nb-cell .cell-n{font-size:10px;color:var(--muted);font-weight:600;background:#fff;border-radius:20px;padding:1px 7px}
+.nb-chip{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:3px 9px 3px 4px;font-size:11.5px;font-weight:600;margin:0 4px 4px 0;cursor:pointer;box-shadow:0 1px 2px rgba(16,42,76,.06)}
+.nb-chip:hover{border-color:var(--gold)}
+.nb-chip .av{width:18px;height:18px;border-radius:50%;background:var(--navy);color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;font-family:"Inter"}
+.nb-star{background:#efe9fb;border-color:#d9cdf2}.nb-good{background:var(--green-bg);border-color:#cfe6da}
+.nb-core{background:#fffaf0;border-color:#f0e4c8}.nb-watch{background:var(--amber-bg);border-color:#f2e2c4}
+.nb-risk{background:var(--red-bg);border-color:#f0d4d1}.nb-pro{background:var(--blue-bg);border-color:#cfdcef}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:18px;font-size:12px;color:var(--muted)}
+.legend i{width:12px;height:12px;border-radius:4px;display:inline-block;margin-right:6px;vertical-align:-1px}
+/* ===== V2: OKR ===== */
+.okr-node{border:1.5px solid var(--line);border-radius:12px;background:#fff;margin-bottom:12px;overflow:hidden}
+.okr-head{padding:14px 16px;display:flex;align-items:center;gap:12px}
+.okr-head .ot{flex:1;min-width:0}.okr-head .ot .lvl{font-size:10.5px;letter-spacing:1px;font-weight:700;text-transform:uppercase}
+.okr-head .ot h4{font-size:14.5px;color:var(--slate);margin-top:3px}
+.okr-head .op{width:120px;flex-shrink:0}
+.lvl-company{color:#3b2f6e}.lvl-dept{color:var(--blue)}.lvl-individual{color:var(--gold-d)}
+.okr-bar-l{border-left:3px solid var(--gold)}
+.kr{padding:10px 16px;border-top:1px dashed var(--line-2);display:flex;align-items:center;gap:12px;font-size:13px}
+.kr .krn{flex:1}.kr .krp{width:150px;display:flex;align-items:center;gap:8px}.kr input[type=range]{width:100%}
+.okr-children{padding:0 0 4px 12px;border-left:2px solid var(--line-2);margin:0 0 6px 22px}
+/* ===== V2: 360 ===== */
+.gap-row{display:grid;grid-template-columns:96px 1fr 46px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line-2);font-size:12.5px}
+.gap-row .gname{font-weight:600}
+.minibar{height:9px;background:#eef0f3;border-radius:6px;position:relative}
+.minibar i{position:absolute;left:0;top:0;height:100%;border-radius:6px;background:var(--gold)}
+.minibar .mk{position:absolute;top:-3px;width:3px;height:15px;background:var(--navy-d);border-radius:2px}
+.rel-tab{padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:600;background:#eef0f3;color:#5c6675;display:inline-block;margin:0 6px 6px 0}
+/* ===== V2: Kudos ===== */
+.kudo{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line-2)}
+.kudo .kic{width:38px;height:38px;border-radius:10px;background:var(--gold-soft);color:var(--gold-d);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kudo .kic svg{width:19px;height:19px}
+.kudo .kb{flex:1}.kudo .kmeta{font-size:12.5px}.kudo .kmeta b{color:var(--navy)}
+.kudo .kmsg{font-size:13.5px;margin-top:4px;color:var(--slate)}
+.kudo .kt{font-size:11px;color:var(--muted);white-space:nowrap}
+/* ===== V2: check-in ===== */
+.mood{display:flex;gap:7px}
+.mood button{width:42px;height:42px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:20px}
+.mood button.on{border-color:var(--gold);background:var(--gold-soft)}
+.ci-card{border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:12px;background:#fff}
+.ci-card .ci-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+/* ===== V2: AI assistant ===== */
+.ai-fab{position:fixed;right:24px;bottom:24px;z-index:60;display:flex;align-items:center;gap:9px;padding:13px 20px;border-radius:30px;background:linear-gradient(135deg,var(--gold),var(--gold-d));color:#fff;font-weight:700;font-size:14px;box-shadow:0 8px 28px rgba(168,132,47,.45);transition:.15s}
+.ai-fab:hover{transform:translateY(-2px)}.ai-fab svg{width:19px;height:19px}
+.ai-panel{position:fixed;right:0;top:0;bottom:0;width:420px;max-width:92vw;background:#fff;z-index:90;box-shadow:-12px 0 48px rgba(11,30,56,.2);display:none;flex-direction:column;transform:translateX(100%);transition:transform .28s}
+.ai-panel.open{display:flex;transform:none}
+.ai-head{padding:18px 20px;background:linear-gradient(135deg,var(--navy),var(--navy-l));color:#fff;display:flex;align-items:center;gap:10px}
+.ai-head .at{flex:1}.ai-head .at .ab{font-size:10.5px;letter-spacing:2px;color:var(--gold-soft);font-weight:700}
+.ai-head .at h3{color:#fff;font-size:16px;margin-top:3px}
+.ai-head .x{color:#cdd8e8;font-size:24px;cursor:pointer}
+.ai-msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--ivory)}
+.ai-msg{max-width:88%;padding:11px 14px;border-radius:14px;font-size:13.5px;line-height:1.6;white-space:pre-wrap}
+.ai-msg.u{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px}
+.ai-msg.a{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
+.ai-sugg{display:flex;flex-wrap:wrap;gap:7px;padding:0 18px 12px;background:var(--ivory)}
+.ai-sugg button{font-size:12px;padding:7px 12px;border-radius:18px;background:#fff;border:1px solid var(--line);color:var(--slate)}
+.ai-sugg button:hover{border-color:var(--gold);color:var(--navy)}
+.ai-input{padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:9px;align-items:flex-end;background:#fff}
+.ai-input textarea{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;resize:none;max-height:90px;background:#fbfaf7}
+.ai-input textarea:focus{outline:none;border-color:var(--gold)}
+.ai-send{width:42px;height:42px;border-radius:10px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-send:disabled{opacity:.4}
+.dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--muted);margin:0 2px;animation:bd 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes bd{0%,60%,100%{opacity:.3}30%{opacity:1}}
+.btn-ai{background:var(--gold-soft);color:var(--gold-d);font-size:12px;padding:6px 11px;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.btn-ai svg{width:14px;height:14px}.btn-ai:hover{background:var(--gold);color:#fff}
+@media(max-width:560px){.ai-fab{right:16px;bottom:16px;padding:11px 16px}}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="login">
+  <div class="login-card">
+    <div class="login-head">
+      <div class="login-badge">Performance Appraisal</div>
+      <h1>绩效考核系统</h1>
+      <p>综合型绩效管理 · KPI · 能力 · 态度</p>
+    </div>
+    <div class="login-body">
+      <div class="field">
+        <label>登录身份</label>
+        <select id="loginRole">
+          <option value="admin">管理层 / 系统管理员</option>
+          <option value="hr">人力资源 (HR)</option>
+          <option value="manager">部门主管</option>
+          <option value="staff">员工</option>
+        </select>
+      </div>
+      <div class="field" id="empPickWrap" style="display:none">
+        <label>选择你的姓名</label>
+        <select id="loginEmp"></select>
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <input type="password" id="loginPw" placeholder="请输入密码" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn-login" onclick="doLogin()">登 录 系 统</button>
+      <div class="login-err" id="loginErr"></div>
+      <div class="login-hint">
+        预设密码 · <b>1313</b><br>
+        管理层/HR 可管理全公司 · 主管评分本部门 · 员工填写自评
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app">
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="badge">PERFORMANCE</div>
+      <h2>绩效考核系统</h2>
+    </div>
+    <nav class="sb-nav" id="navList"></nav>
+    <div class="sb-foot">
+      <div id="cloudState">● 本地模式</div>
+      <div style="margin-top:6px"><a href="#" onclick="logout();return false" style="color:#9bb0d0;text-decoration:none">退出登录 →</a></div>
+    </div>
+  </aside>
+  <div class="sb-backdrop" id="sbBackdrop" onclick="toggleSidebar(false)"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="pagetitle" id="pageTitle">仪表板</div>
+      <div class="spacer"></div>
+      <div class="cycle-pick">
+        <span class="lbx muted">考核周期</span>
+        <select id="cycleSelect" onchange="setCycle(this.value)"></select>
+      </div>
+      <div class="user-chip" onclick="renderView('me')">
+        <div class="avatar" id="uAvatar">A</div>
+        <div class="uinfo">
+          <div class="un" id="uName">—</div>
+          <div class="ur" id="uRole">—</div>
+        </div>
+      </div>
+    </header>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+</div>
+
+<button class="ai-fab" id="aiFab" style="display:none" onclick="openAI()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 10l-5.5 2L12 18l-2.5-6L4 10l6.1-1.2z"/></svg>
+  <span>AI 助手</span>
+</button>
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-head">
+    <div class="at"><div class="ab">CLAUDE · 智能分析</div><h3>绩效 AI 助手</h3></div>
+    <div class="x" onclick="closeAI()">×</div>
+  </div>
+  <div class="ai-msgs" id="aiMsgs"></div>
+  <div class="ai-sugg" id="aiSugg"></div>
+  <div class="ai-input">
+    <textarea id="aiInput" rows="1" placeholder="问我任何关于绩效数据的问题…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"></textarea>
+    <button class="ai-send" id="aiSend" onclick="sendAI()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></button>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ICON helper */
+const IC={
+  dash:'M3 13h8V3H3v10zm10 8h8V11h-8v10zM3 21h8v-6H3v6zM13 3v6h8V3h-8z',
+  users:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+  cycle:'M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3M21 3v5h-5M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3M3 21v-5h5',
+  target:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
+  clip:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2',
+  chart:'M3 3v18h18M18 17V9M13 17V5M8 17v-4',
+  cog:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',
+  user:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+  plus:'M12 5v14M5 12h14',
+  edit:'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z',
+  trash:'M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2',
+  check:'M20 6L9 17l-5-5',
+  doc:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6M16 13H8M16 17H8M10 9H8',
+  dl:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
+  inbox:'M22 12h-6l-2 3h-4l-2-3H2M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z',
+  award:'M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM8.21 13.89L7 23l5-3 5 3-1.21-9.12',
+  okr:'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
+  grid:'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+  rotate:'M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16',
+  calibrate:'M21 4H3M21 12H3M21 20H3M8 4v3M16 12v3M11 20v-3',
+  kudos:'M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3',
+  chat:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+  spark:'M12 3l1.9 5.8L20 10l-5.5 2L12 18l-2.5-6L4 10l6.1-1.2zM19 16l.8 2.4L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.4-.8z',
+  trend:'M22 7l-8.5 8.5-4-4L2 19M16 7h6v6',
+  zap:'M13 2L3 14h9l-1 8 10-12h-9z'
+};
+function icon(n,cls){return `<svg class="${cls||'ic'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="${IC[n]||''}"/></svg>`}
+</script>
+
+<script>
+/* ===================================================================
+   绩效考核系统  ·  Performance Appraisal System
+   单档 HTML · 可部署 GitHub Pages · 预设 localStorage,支援 Firebase
+   =================================================================== */
+
+/* ----------- FIREBASE 接口 (选用) -------------------------------------
+   要启用云端同步:填入下方 config 并取消注解,系统会自动切换到云端模式。
+   未填则使用本机 localStorage(部署到 GitHub Pages 后每台装置独立存储)。
+const firebaseConfig = { apiKey:"", authDomain:"", projectId:"", ... };
+--------------------------------------------------------------------- */
+const FIREBASE_ENABLED = false;
+
+/* ----------- 数据层 ----------- */
+const KEY='perf_appraisal_v1';
+let DB={departments:[],employees:[],cycles:[],templates:[],appraisals:[],settings:{}};
+let MEM=false;
+function load(){
+  try{ const r=localStorage.getItem(KEY); if(r){DB=JSON.parse(r);return true;} }
+  catch(e){ MEM=true; }
+  return false;
+}
+function save(){
+  if(MEM) return;
+  try{ localStorage.setItem(KEY,JSON.stringify(DB)); }
+  catch(e){ MEM=true; }
+}
+const uid=p=>(p||'id')+'_'+Math.random().toString(36).slice(2,9);
+
+/* ----------- 预设资料 (Seed) ----------- */
+function seed(){
+  DB.departments=[
+    {id:'d1',name:'销售部'},{id:'d2',name:'客服部'},{id:'d3',name:'行政财务部'}
+  ];
+  DB.employees=[
+    {id:'e1',no:'M001',name:'陈志强',dept:'d1',pos:'销售经理',level:'经理',mgr:'',join:'2021-03-01',status:'在职'},
+    {id:'e2',no:'S101',name:'林美玲',dept:'d1',pos:'销售主任',level:'员工',mgr:'e1',join:'2022-06-15',status:'在职'},
+    {id:'e3',no:'S102',name:'黄俊豪',dept:'d1',pos:'销售执行',level:'员工',mgr:'e1',join:'2023-01-10',status:'在职'},
+    {id:'e4',no:'M002',name:'王淑芬',dept:'d2',pos:'客服经理',level:'经理',mgr:'',join:'2020-09-01',status:'在职'},
+    {id:'e5',no:'C201',name:'张伟杰',dept:'d2',pos:'客服专员',level:'员工',mgr:'e4',join:'2023-04-20',status:'在职'},
+    {id:'e6',no:'A301',name:'李晓彤',dept:'d3',pos:'行政主管',level:'主管',mgr:'',join:'2021-11-05',status:'在职'}
+  ];
+  DB.templates=[
+    {id:'t1',name:'销售岗位 KPI',dept:'d1',items:[
+      {name:'销售业绩达成',target:'季度目标 RM150,000',weight:50},
+      {name:'新客户开发',target:'≥ 12 位新客户',weight:25},
+      {name:'客户回访率',target:'≥ 90%',weight:15},
+      {name:'报告及时提交',target:'100% 准时',weight:10}
+    ]},
+    {id:'t2',name:'客服岗位 KPI',dept:'d2',items:[
+      {name:'客户满意度',target:'≥ 4.5 / 5.0',weight:40},
+      {name:'问题首次解决率',target:'≥ 85%',weight:30},
+      {name:'平均回应时间',target:'≤ 30 分钟',weight:20},
+      {name:'投诉处理',target:'24 小时内闭环',weight:10}
+    ]},
+    {id:'t3',name:'通用行政 KPI',dept:'d3',items:[
+      {name:'工作任务完成率',target:'≥ 95%',weight:40},
+      {name:'流程准确性',target:'错误率 ≤ 2%',weight:30},
+      {name:'跨部门协作',target:'按时支援',weight:20},
+      {name:'成本控制',target:'符合预算',weight:10}
+    ]}
+  ];
+  DB.cycles=[
+    {id:'c1',name:'2025 年度考核',type:'年度',start:'2025-01-01',end:'2025-12-31',status:'active',
+      weights:{kpi:50,comp:30,att:20}},
+    {id:'c2',name:'2025 Q3 季度考核',type:'季度',start:'2025-07-01',end:'2025-09-30',status:'closed',
+      weights:{kpi:60,comp:25,att:15}}
+  ];
+  DB.settings={
+    password:'1313',
+    apiKey:'',
+    values:['客户至上','团队协作','诚信正直','创新求变','结果导向'],
+    comp:['专业能力','执行能力','沟通协作','创新能力','领导能力'],
+    att:['责任心','积极主动','团队合作','纪律性','诚信操守'],
+    grades:[
+      {g:'S',min:90,label:'卓越',adj:8,bonus:2.0,note:'晋升/重点培养'},
+      {g:'A',min:80,label:'优秀',adj:5,bonus:1.5,note:'加薪/储备人才'},
+      {g:'B',min:70,label:'良好',adj:3,bonus:1.2,note:'维持/技能提升'},
+      {g:'C',min:60,label:'合格',adj:1,bonus:1.0,note:'辅导改进'},
+      {g:'D',min:0, label:'待改进',adj:0,bonus:0.5,note:'绩效改进计划 (PIP)'}
+    ]
+  };
+  // V2 集合
+  DB.objectives=[]; DB.potential={}; DB.feedback360=[]; DB.kudos=[]; DB.checkins=[];
+  // 预设一些考核记录
+  seedAppraisals();
+  seedV2();
+  save();
+}
+function seedV2(){
+  const cy=DB.cycles[0];
+  // OKR 层级:公司 → 部门 → 个人
+  DB.objectives=[
+    {id:'o_c',type:'company',ownerId:'company',cycleId:cy.id,parentId:'',title:'2025 年营收成长 30%,成为区域市场领导者',
+      krs:[{name:'全年营收达 RM2,000,000',progress:72},{name:'市场占有率提升至 25%',progress:60},{name:'客户留存率 ≥ 90%',progress:85}]},
+    {id:'o_d1',type:'dept',ownerId:'d1',cycleId:cy.id,parentId:'o_c',title:'销售部:达成季度销售目标并扩展客户群',
+      krs:[{name:'季度销售额 RM600,000',progress:78},{name:'新增企业客户 40 家',progress:55}]},
+    {id:'o_d2',type:'dept',ownerId:'d2',cycleId:cy.id,parentId:'o_c',title:'客服部:提升客户体验与满意度',
+      krs:[{name:'客户满意度 ≥ 4.6/5',progress:88},{name:'平均回应时间 ≤ 20 分钟',progress:70}]},
+    {id:'o_e2',type:'individual',ownerId:'e2',cycleId:cy.id,parentId:'o_d1',title:'林美玲:个人销售与团队带动',
+      krs:[{name:'个人销售额 RM180,000',progress:82},{name:'辅导 2 名新人达标',progress:50}]},
+    {id:'o_e5',type:'individual',ownerId:'e5',cycleId:cy.id,parentId:'o_d2',title:'张伟杰:客服质量提升',
+      krs:[{name:'首次解决率 ≥ 88%',progress:90},{name:'零有效投诉',progress:100}]}
+  ];
+  // 潜力评级 (9-box Y 轴):1 低 / 2 中 / 3 高
+  DB.potential={e1:3,e2:3,e3:2,e4:2,e5:3,e6:2};
+  // 即时认可
+  const now=Date.now();
+  DB.kudos=[
+    {id:uid('k'),fromId:'e1',toId:'e2',value:'团队协作',msg:'感谢美玲主动带新人,本月团队业绩起飞!',ts:now-86400000*1},
+    {id:uid('k'),fromId:'e4',toId:'e5',value:'客户至上',msg:'伟杰处理那位难缠客户超级专业,赞!',ts:now-86400000*2},
+    {id:uid('k'),fromId:'e2',toId:'e3',value:'结果导向',msg:'俊豪这季冲刺得很拼,继续加油 💪',ts:now-86400000*3}
+  ];
+  // 1:1 周报签到
+  DB.checkins=[
+    {id:uid('ci'),empId:'e2',week:thisWeek(),wins:'签下 2 个新客户,团队士气高',priorities:'跟进 Q4 大单、安排新人培训',blockers:'CRM 系统偶尔卡顿',mood:4,managerNote:'做得很好,CRM 问题我反映 IT。',ts:now-86400000},
+    {id:uid('ci'),empId:'e5',week:thisWeek(),wins:'满意度回升到 4.7',priorities:'优化常见问题知识库',blockers:'暂无',mood:5,managerNote:'',ts:now-86400000*2}
+  ];
+  // 360° 已完成示例(对象:林美玲 e2)— 自评偏高、他评略低,呈现「盲区」
+  const C=DB.settings.comp;
+  const sc=(arr)=>{const o={};C.forEach((n,i)=>o[n]=arr[i]);return o;};
+  DB.feedback360=[
+    {id:uid('f'),cycleId:cy.id,subjectId:'e2',raterId:'e2',relation:'self',scores:sc([5,5,4,5,4]),comment:'我对自己的执行力和专业度有信心。',done:true},
+    {id:uid('f'),cycleId:cy.id,subjectId:'e2',raterId:'e1',relation:'manager',scores:sc([4,5,4,4,3]),comment:'业绩强,跨部门沟通可再主动些。',done:true},
+    {id:uid('f'),cycleId:cy.id,subjectId:'e2',raterId:'e3',relation:'peer',scores:sc([4,4,3,4,3]),comment:'乐于带新人,有时节奏太快。',done:true},
+    {id:uid('f'),cycleId:cy.id,subjectId:'e2',raterId:'e1b',relation:'peer',scores:sc([3,4,3,3,3]),comment:'',done:true}
+  ];
+}
+function thisWeek(){const d=new Date();const on=new Date(d.getFullYear(),0,1);const w=Math.ceil(((d-on)/86400000+on.getDay()+1)/7);return d.getFullYear()+'-W'+w;}
+function seedAppraisals(){
+  const c=DB.cycles[0]; // 当前进行中的周期(年度)— 让首屏即有丰富数据
+  DB.appraisals=[];
+  const done=[
+    {emp:'e1',kpi:[92,88,95,100],comp:[5,5,4,4,5],att:[5,5,5,5,5]},
+    {emp:'e2',kpi:[88,95,92,100],comp:[4,4,3,4,2],att:[5,4,4,5,5]},
+    {emp:'e3',kpi:[72,60,80,90],comp:[3,3,3,2,2],att:[4,3,4,4,4]},
+    {emp:'e4',kpi:[85,80,90,95],comp:[4,4,4,4,4],att:[5,4,4,4,5]},
+    {emp:'e5',kpi:[95,90,88,100],comp:[4,5,4,3,3],att:[5,5,5,4,5]},
+    {emp:'e6',kpi:[60,55,50,70],comp:[2,3,2,2,1],att:[3,3,3,2,3]}
+  ];
+  done.forEach(d=>{
+    const emp=DB.employees.find(x=>x.id===d.emp);
+    const tpl=DB.templates.find(t=>t.dept===emp.dept);
+    const kpi=tpl.items.map((it,i)=>({name:it.name,target:it.target,weight:it.weight,self:d.kpi[i],mgr:d.kpi[i]}));
+    const comp={},att={};
+    DB.settings.comp.forEach((n,i)=>comp[n]={self:d.comp[i],mgr:d.comp[i]});
+    DB.settings.att.forEach((n,i)=>att[n]={self:d.att[i],mgr:d.att[i]});
+    const a={id:uid('a'),cycleId:c.id,empId:emp.id,status:'done',kpi,comp,att,
+      selfComment:'本期努力达成目标,持续改进中。',mgrComment:'表现稳定,值得肯定。',hrComment:'同意主管评分。'};
+    finalize(a,c); DB.appraisals.push(a);
+  });
+}
+
+/* ----------- 评分引擎 ----------- */
+function calcKPI(a){ // 加权达成分 → 0~100
+  let tot=0,w=0; a.kpi.forEach(it=>{tot+=(num(it.mgr))*it.weight; w+=it.weight;});
+  return w? +(tot/w).toFixed(1):0;
+}
+function calcComp(a){ const v=Object.values(a.comp).map(x=>num(x.mgr)); return scale5(v); }
+function calcAtt(a){ const v=Object.values(a.att).map(x=>num(x.mgr)); return scale5(v); }
+function scale5(arr){ if(!arr.length)return 0; const avg=arr.reduce((s,x)=>s+x,0)/arr.length; return +((avg/5)*100).toFixed(1); }
+function num(x){ x=parseFloat(x); return isNaN(x)?0:x; }
+function totalScore(a,cy){
+  const w=cy.weights; const k=calcKPI(a),c=calcComp(a),t=calcAtt(a);
+  return +((k*w.kpi + c*w.comp + t*w.att)/100).toFixed(1);
+}
+function gradeFor(score){
+  const g=DB.settings.grades.find(x=>score>=x.min)||DB.settings.grades[DB.settings.grades.length-1];
+  return g;
+}
+function finalize(a,cy){
+  a.totalScore=totalScore(a,cy);
+  const g=gradeFor(a.totalScore);
+  a.grade=g.g; a.salaryAdj=g.adj; a.bonus=g.bonus; a.recommend=a.recommend||g.note;
+}
+
+/* ----------- 状态 / 会话 ----------- */
+let USER=null;     // {role, empId, name}
+let CYCLE=null;    // 当前选中周期
+const ROLE_NAME={admin:'管理层',hr:'人力资源',manager:'部门主管',staff:'员工'};
+
+/* ----------- 工具 ----------- */
+function empById(id){return DB.employees.find(e=>e.id===id)}
+function deptName(id){const d=DB.departments.find(x=>x.id===id);return d?d.name:'—'}
+function cycleById(id){return DB.cycles.find(c=>c.id===id)}
+function appraisalOf(empId,cycleId){return DB.appraisals.find(a=>a.empId===empId&&a.cycleId===cycleId)}
+function teamOf(mgrId){return DB.employees.filter(e=>e.mgr===mgrId&&e.status==='在职')}
+const STATUS={self:{t:'待自评',cls:'tag-gray',step:0},manager:{t:'待主管评分',cls:'tag-amber',step:1},
+  hr:{t:'待HR复核',cls:'tag-blue',step:2},done:{t:'已完成',cls:'tag-green',step:3}};
+
+function toast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');setTimeout(()=>t.className='toast',2200);}
+function esc(s){return (s==null?'':''+s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
+/* ----------- 登录 ----------- */
+function initLogin(){
+  const sel=document.getElementById('loginRole');
+  sel.onchange=()=>{
+    const r=sel.value;
+    document.getElementById('empPickWrap').style.display=(r==='manager'||r==='staff')?'block':'none';
+    const ep=document.getElementById('loginEmp');
+    let list=DB.employees.filter(e=>e.status==='在职');
+    if(r==='manager') list=list.filter(e=>teamOf(e.id).length>0||e.level==='经理'||e.level==='主管');
+    ep.innerHTML=list.map(e=>`<option value="${e.id}">${esc(e.name)} · ${esc(e.pos)}</option>`).join('');
+  };
+  sel.onchange();
+}
+function doLogin(){
+  const role=document.getElementById('loginRole').value;
+  const pw=document.getElementById('loginPw').value;
+  const err=document.getElementById('loginErr');
+  if(pw!==DB.settings.password){err.textContent='密码错误,请重试';return;}
+  let empId='',name=ROLE_NAME[role];
+  if(role==='manager'||role==='staff'){empId=document.getElementById('loginEmp').value;name=empById(empId).name;}
+  USER={role,empId,name};
+  CYCLE=DB.cycles.find(c=>c.status==='active')||DB.cycles[0];
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('cloudState').textContent=MEM?'● 临时模式(不保存)':(FIREBASE_ENABLED?'● 云端模式':'● 本地存储');
+  buildNav(); buildCycleSelect(); refreshUserChip();
+  document.getElementById('aiFab').style.display=(role==='staff')?'none':'flex';
+  const start=(role==='staff')?'me':'dash';
+  renderView(start);
+}
+function logout(){USER=null;document.getElementById('app').style.display='none';document.getElementById('login').style.display='flex';document.getElementById('loginPw').value='';}
+function refreshUserChip(){
+  document.getElementById('uName').textContent=USER.name;
+  document.getElementById('uRole').textContent=ROLE_NAME[USER.role];
+  document.getElementById('uAvatar').textContent=USER.name.slice(-2,-1)||USER.name[0];
+}
+
+/* ----------- 导航 ----------- */
+const NAV=[
+  {grp:'总览'},
+  {id:'dash',name:'仪表板',ic:'dash',roles:['admin','hr','manager']},
+  {id:'me',name:'我的考核',ic:'user',roles:['admin','hr','manager','staff']},
+  {grp:'目标与考核'},
+  {id:'okr',name:'OKR 目标',ic:'okr',roles:['admin','hr','manager','staff']},
+  {id:'inbox',name:'待我评分',ic:'inbox',roles:['manager','hr','admin']},
+  {id:'appraisals',name:'考核记录',ic:'clip',roles:['hr','admin','manager']},
+  {id:'results',name:'结果与分析',ic:'chart',roles:['hr','admin','manager']},
+  {grp:'人才盘点'},
+  {id:'ninebox',name:'人才九宫格',ic:'grid',roles:['admin','hr','manager']},
+  {id:'calibration',name:'校准会议',ic:'calibrate',roles:['admin','hr']},
+  {grp:'持续反馈'},
+  {id:'feedback360',name:'360° 评估',ic:'rotate',roles:['admin','hr','manager','staff']},
+  {id:'recognition',name:'即时认可',ic:'kudos',roles:['admin','hr','manager','staff']},
+  {id:'checkins',name:'1:1 签到',ic:'chat',roles:['admin','hr','manager','staff']},
+  {grp:'设定'},
+  {id:'employees',name:'员工管理',ic:'users',roles:['hr','admin']},
+  {id:'cycles',name:'考核周期',ic:'cycle',roles:['hr','admin']},
+  {id:'templates',name:'KPI 指标库',ic:'target',roles:['hr','admin']},
+  {id:'settings',name:'系统设定',ic:'cog',roles:['admin','hr']}
+];
+function buildNav(){
+  const el=document.getElementById('navList');
+  let html='';
+  NAV.forEach((n,idx)=>{
+    if(n.grp){
+      let hasItem=false;
+      for(let j=idx+1;j<NAV.length&&!NAV[j].grp;j++){
+        if(NAV[j].roles.includes(USER.role)){hasItem=true;break;}
+      }
+      if(hasItem) html+=`<div class="sb-group">${n.grp}</div>`;
+      return;
+    }
+    if(!n.roles.includes(USER.role))return;
+    html+=`<div class="nav-item" data-v="${n.id}" onclick="renderView('${n.id}')">${icon(n.ic)}<span>${n.name}</span></div>`;
+  });
+  el.innerHTML=html;
+}
+function buildCycleSelect(){
+  const s=document.getElementById('cycleSelect');
+  s.innerHTML=DB.cycles.map(c=>`<option value="${c.id}" ${c.id===CYCLE.id?'selected':''}>${esc(c.name)}</option>`).join('');
+}
+function setCycle(id){CYCLE=cycleById(id);renderView(CUR);}
+function toggleSidebar(force){
+  const sb=document.getElementById('sidebar'),bd=document.getElementById('sbBackdrop');
+  const open=force===undefined?!sb.classList.contains('open'):force;
+  sb.classList.toggle('open',open);bd.classList.toggle('show',open);
+}
+
+/* ----------- 视图路由 ----------- */
+let CUR='dash';
+const TITLES={dash:'仪表板',me:'我的考核',inbox:'待我评分',appraisals:'考核记录',results:'结果与分析',
+  okr:'OKR 目标管理',ninebox:'人才九宫格',calibration:'校准会议',feedback360:'360° 评估',
+  recognition:'即时认可',checkins:'1:1 签到',
+  employees:'员工管理',cycles:'考核周期',templates:'KPI 指标库',settings:'系统设定'};
+function renderView(v){
+  CUR=v;
+  document.getElementById('pageTitle').textContent=TITLES[v]||'';
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('on',n.dataset.v===v));
+  toggleSidebar(false);
+  const c=document.getElementById('content');
+  ({dash:viewDash,me:viewMe,inbox:viewInbox,appraisals:viewAppraisals,results:viewResults,
+    okr:viewOKR,ninebox:viewNinebox,calibration:viewCalibration,feedback360:viewFeedback360,
+    recognition:viewRecognition,checkins:viewCheckins,
+    employees:viewEmployees,cycles:viewCycles,templates:viewTemplates,settings:viewSettings}[v]||viewDash)(c);
+  window.scrollTo(0,0);
+}
+
+/* ========== 仪表板 ========== */
+function viewDash(c){
+  const list=DB.employees.filter(e=>e.status==='在职');
+  const aps=DB.appraisals.filter(a=>a.cycleId===CYCLE.id);
+  const done=aps.filter(a=>a.status==='done');
+  const pending=list.length-done.length;
+  const avg=done.length?(done.reduce((s,a)=>s+a.totalScore,0)/done.length).toFixed(1):'—';
+  const progress=list.length?Math.round(done.length/list.length*100):0;
+  // 等级分布
+  const dist={};DB.settings.grades.forEach(g=>dist[g.g]=0);done.forEach(a=>dist[a.grade]++);
+  // 部门平均
+  const deptAvg=DB.departments.map(d=>{
+    const ds=done.filter(a=>empById(a.empId).dept===d.id);
+    return {name:d.name,avg:ds.length?+(ds.reduce((s,a)=>s+a.totalScore,0)/ds.length).toFixed(1):0,n:ds.length};
+  });
+  c.innerHTML=`
+  <div class="section-head"><div><div class="eyebrow">${esc(CYCLE.name)} · ${esc(CYCLE.type)}</div>
+    <h2 style="font-size:21px;color:var(--navy);margin-top:4px">绩效总览</h2></div>
+    ${can('manage')?`<button class="btn btn-gold" onclick="ensureAppraisals()">${icon('plus')}生成本期考核表</button>`:''}</div>
+  <div class="stat-grid">
+    <div class="stat"><div class="lbl">在职员工</div><div class="val num">${list.length}<small> 人</small></div></div>
+    <div class="stat"><div class="lbl">已完成考核</div><div class="val num">${done.length}<small> / ${list.length}</small></div>
+      <div class="delta">完成度 ${progress}%</div></div>
+    <div class="stat"><div class="lbl">待处理</div><div class="val num">${pending}<small> 项</small></div></div>
+    <div class="stat"><div class="lbl">平均综合得分</div><div class="val num">${avg}</div>
+      <div class="delta" style="color:var(--gold-d)">${CYCLE.weights.kpi}/${CYCLE.weights.comp}/${CYCLE.weights.att} 权重</div></div>
+  </div>
+  <div class="grid mt24" style="grid-template-columns:1.4fr 1fr">
+    <div class="card card-pad">
+      <div class="flex between aic" style="margin-bottom:14px"><h3>各部门平均得分</h3><span class="muted" style="font-size:12px">仅计已完成</span></div>
+      ${done.length?`<div class="chart-bars">${deptAvg.map(d=>`
+        <div class="cb"><div class="bar-v" style="height:${d.avg?Math.max(d.avg/100*150,4):4}px"><span>${d.avg||'—'}</span></div>
+        <div class="cb-lab">${esc(d.name)}<br><span class="muted">${d.n}人</span></div></div>`).join('')}</div>`
+        :emptyBox('尚无完成的考核','生成考核表并完成评分后显示')}
+    </div>
+    <div class="card card-pad">
+      <h3 style="margin-bottom:14px">考核进度</h3>
+      <div class="ring-wrap">
+        ${ringSVG(progress)}
+        <div><div class="num" style="font-size:13px;color:var(--muted)">完成 ${done.length} / ${list.length}</div>
+        <div style="margin-top:10px;font-size:12.5px;line-height:2">
+          <div><span class="dot" style="background:var(--green)"></span> 已完成 ${done.length}</div>
+          <div><span class="dot" style="background:var(--amber)"></span> 进行中 ${aps.length-done.length}</div>
+          <div><span class="dot" style="background:#cfd4dc"></span> 未开始 ${list.length-aps.length}</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card card-pad mt24">
+    <h3 style="margin-bottom:8px">等级分布</h3>
+    ${done.length?DB.settings.grades.map(g=>{const n=dist[g.g],p=done.length?Math.round(n/done.length*100):0;
+      return `<div class="dist-row"><div class="gl"><span class="grade-pill g-${g.g}">${g.g}</span></div>
+        <div class="db bar"><i style="width:${p}%;background:${gradeColor(g.g)}"></i></div>
+        <div class="dn">${n} 人</div></div>`}).join(''):`<div class="muted" style="padding:10px 0">尚无数据</div>`}
+  </div>
+  ${dashExtra()}`;
+}
+function dashExtra(){
+  const objs=DB.objectives.filter(o=>o.cycleId===CYCLE.id&&o.type!=='individual');
+  const kudos=[...DB.kudos].sort((a,b)=>b.ts-a.ts).slice(0,3);
+  return `<div class="grid mt24" style="grid-template-columns:1.3fr 1fr">
+    <div class="card card-pad"><div class="flex between aic" style="margin-bottom:12px"><h3>OKR 目标进度</h3>
+      <a href="#" onclick="renderView('okr');return false" style="font-size:12px;color:var(--gold-d);text-decoration:none;font-weight:600">全部 →</a></div>
+      ${objs.length?objs.slice(0,4).map(o=>{const p=objProgress(o);return `<div style="margin-bottom:13px">
+        <div class="flex between" style="font-size:12.5px;margin-bottom:5px"><span style="font-weight:600">${esc(objOwnerName(o))} <span class="muted">· ${esc(o.title.slice(0,18))}…</span></span><span class="num" style="font-weight:700">${p}%</span></div>
+        <div class="bar"><i style="width:${p}%;background:${p>=70?'var(--green)':p>=40?'var(--gold)':'var(--red)'}"></i></div></div>`}).join(''):'<div class="muted">尚未设定 OKR</div>'}
+    </div>
+    <div class="card card-pad"><div class="flex between aic" style="margin-bottom:12px"><h3>最新认可</h3>
+      <a href="#" onclick="renderView('recognition');return false" style="font-size:12px;color:var(--gold-d);text-decoration:none;font-weight:600">全部 →</a></div>
+      ${kudos.length?kudos.map(k=>`<div style="padding:9px 0;border-bottom:1px solid var(--line-2);font-size:12.5px">
+        <div><b style="color:var(--navy)">${esc(empById(k.fromId)?.name||'某人')}</b> → <b style="color:var(--navy)">${esc(empById(k.toId)?.name||'某人')}</b> <span class="tag tag-gold" style="font-size:10px">${esc(k.value)}</span></div>
+        <div class="muted" style="margin-top:3px">${esc(k.msg.slice(0,40))}${k.msg.length>40?'…':''}</div></div>`).join(''):'<div class="muted">尚无认可</div>'}
+    </div>
+  </div>`;
+}
+function ringSVG(p){const r=54,c2=2*Math.PI*r,off=c2*(1-p/100);
+  return `<div class="ring"><svg width="128" height="128">
+    <circle cx="64" cy="64" r="${r}" fill="none" stroke="#eef0f3" stroke-width="12"/>
+    <circle cx="64" cy="64" r="${r}" fill="none" stroke="var(--gold)" stroke-width="12" stroke-linecap="round"
+      stroke-dasharray="${c2}" stroke-dashoffset="${off}"/></svg>
+    <div class="ctr"><div class="sc">${p}<span style="font-size:16px">%</span></div><div class="lb">完成度</div></div></div>`;}
+function gradeColor(g){return {S:'#3b2f6e',A:'var(--green)',B:'var(--blue)',C:'var(--amber)',D:'var(--red)'}[g]}
+function emptyBox(t,s){return `<div class="empty">${icon('inbox','ic')}<p>${t}</p><span>${s||''}</span></div>`}
+function can(x){
+  if(x==='manage')return USER.role==='admin'||USER.role==='hr';
+  return true;
+}
+
+/* ========== 我的考核 ========== */
+function viewMe(c){
+  if(!USER.empId){c.innerHTML=emptyBox('管理身份无个人考核','请使用员工或主管身份登录查看个人考核');return;}
+  const me=empById(USER.empId);
+  const myAll=DB.appraisals.filter(a=>a.empId===me.id).map(a=>({a,cy:cycleById(a.cycleId)})).filter(x=>x.cy);
+  const cur=appraisalOf(me.id,CYCLE.id);
+  c.innerHTML=`
+  <div class="card card-pad" style="background:linear-gradient(135deg,var(--navy),var(--navy-l));color:#fff;border:none">
+    <div class="flex between aic" style="flex-wrap:wrap;gap:14px">
+      <div><div class="eyebrow" style="color:var(--gold-soft)">${esc(me.no)} · ${esc(deptName(me.dept))}</div>
+        <h2 style="color:#fff;font-size:22px;margin-top:6px">${esc(me.name)}</h2>
+        <div style="color:#A9BBD4;font-size:13px;margin-top:3px">${esc(me.pos)} · ${esc(me.level)}</div></div>
+      ${cur&&cur.status==='done'?`<div style="text-align:center"><div class="grade-pill g-${cur.grade}" style="width:56px;height:56px;font-size:24px;border-radius:14px">${cur.grade}</div>
+        <div class="num" style="font-size:22px;font-weight:800;margin-top:8px">${cur.totalScore}</div>
+        <div style="font-size:11px;color:#A9BBD4">综合得分</div></div>`:''}
+    </div>
+  </div>
+  <div class="card card-pad mt24">
+    <div class="flex between aic" style="margin-bottom:16px"><h3>${esc(CYCLE.name)}</h3>
+      ${cur?statusTag(cur.status):'<span class="tag tag-gray">未开始</span>'}</div>
+    ${cur?pipeHTML(cur.status):''}
+    <div class="mt24">
+    ${!cur?`<div class="muted">本周期考核尚未生成,请联系 HR。</div>`
+      :cur.status==='self'?`<p class="muted" style="margin-bottom:14px">请填写你的自评,完成后送交主管评分。</p>
+        <button class="btn btn-gold" onclick="openAppraisal('${cur.id}','self')">${icon('edit')}填写自评</button>`
+      :cur.status==='manager'?`<p class="muted">自评已提交,等待主管评分中。</p>
+        <button class="btn btn-ghost mt16" onclick="openAppraisal('${cur.id}','view')">查看我的自评</button>`
+      :cur.status==='hr'?`<p class="muted">主管已评分,HR 复核中。</p>
+        <button class="btn btn-ghost mt16" onclick="openAppraisal('${cur.id}','view')">查看评分</button>`
+      :resultCardMe(cur,CYCLE)}
+    </div>
+  </div>
+  <div class="card card-pad mt24">
+    <h3 style="margin-bottom:14px">历史考核</h3>
+    ${myAll.filter(x=>x.a.status==='done').length?`<div class="t-wrap" style="box-shadow:none;border:none"><table>
+      <thead><tr><th>周期</th><th>综合得分</th><th>等级</th><th>调薪建议</th><th></th></tr></thead><tbody>
+      ${myAll.filter(x=>x.a.status==='done').map(x=>`<tr>
+        <td>${esc(x.cy.name)}</td><td class="num" style="font-weight:700">${x.a.totalScore}</td>
+        <td><span class="grade-pill g-${x.a.grade}">${x.a.grade}</span></td>
+        <td class="num">+${x.a.salaryAdj}%</td>
+        <td class="right"><button class="btn btn-ghost btn-sm" onclick="openAppraisal('${x.a.id}','view')">查看</button></td>
+      </tr>`).join('')}</tbody></table></div>`:`<div class="muted">尚无历史记录</div>`}
+  </div>`;
+}
+function resultCardMe(a,cy){
+  return `<div class="row" style="gap:24px;align-items:center">
+    <div class="ring-wrap">${scoreRing(a.totalScore)}</div>
+    <div style="flex:1;min-width:220px">
+      ${breakdownBars(a,cy)}
+    </div></div>
+    <div class="card-pad" style="background:var(--ivory);border-radius:12px;margin-top:18px">
+      <div class="flex gap12" style="flex-wrap:wrap">
+        <div style="flex:1;min-width:130px"><div class="muted" style="font-size:12px">等级评定</div>
+          <div style="font-weight:700;margin-top:4px"><span class="grade-pill g-${a.grade}">${a.grade}</span> ${gradeFor(a.totalScore).label}</div></div>
+        <div style="flex:1;min-width:130px"><div class="muted" style="font-size:12px">调薪建议</div>
+          <div class="num" style="font-weight:700;font-size:18px;color:var(--green);margin-top:4px">+${a.salaryAdj}%</div></div>
+        <div style="flex:1;min-width:130px"><div class="muted" style="font-size:12px">奖金系数</div>
+          <div class="num" style="font-weight:700;font-size:18px;margin-top:4px">×${a.bonus}</div></div>
+      </div>
+      <div style="margin-top:14px"><div class="muted" style="font-size:12px">发展建议</div>
+        <div style="margin-top:4px">${esc(a.recommend)}</div></div>
+      ${a.mgrComment?`<div style="margin-top:12px"><div class="muted" style="font-size:12px">主管评语</div><div style="margin-top:4px">${esc(a.mgrComment)}</div></div>`:''}
+    </div>`;
+}
+function scoreRing(score){const p=Math.min(score,100),r=54,c2=2*Math.PI*r,off=c2*(1-p/100);
+  return `<div class="ring"><svg width="128" height="128">
+    <circle cx="64" cy="64" r="${r}" fill="none" stroke="#eef0f3" stroke-width="12"/>
+    <circle cx="64" cy="64" r="${r}" fill="none" stroke="var(--gold)" stroke-width="12" stroke-linecap="round"
+      stroke-dasharray="${c2}" stroke-dashoffset="${off}"/></svg>
+    <div class="ctr"><div class="sc">${score}</div><div class="lb">综合得分</div></div></div>`;}
+function breakdownBars(a,cy){
+  const k=calcKPI(a),cp=calcComp(a),at=calcAtt(a);
+  const rows=[['KPI 业绩',k,cy.weights.kpi,'var(--navy)'],['工作能力',cp,cy.weights.comp,'var(--gold)'],['工作态度',at,cy.weights.att,'var(--green)']];
+  return rows.map(([n,v,w,col])=>`<div style="margin-bottom:12px">
+    <div class="flex between" style="font-size:12.5px;margin-bottom:5px"><span style="font-weight:600">${n} <span class="muted">·${w}%</span></span><span class="num" style="font-weight:700">${v}</span></div>
+    <div class="bar"><i style="width:${v}%;background:${col}"></i></div></div>`).join('');
+}
+function statusTag(s){const x=STATUS[s];return `<span class="tag ${x.cls}">${x.t}</span>`}
+function pipeHTML(s){
+  const steps=['填写自评','主管评分','HR复核','完成'];const cur=STATUS[s].step;
+  let h='<div class="pipe">';
+  steps.forEach((st,i)=>{
+    const cls=i<cur?'done':i===cur?'active':'';
+    h+=`<div class="pipe-step ${cls}"><div class="pipe-dot">${i<cur?'✓':i+1}</div><span class="lab">${st}</span></div>`;
+    if(i<steps.length-1)h+='<div class="pipe-line"></div>';
+  });
+  return h+'</div>';
+}
+
+/* ========== 待我评分 (主管/HR) ========== */
+function viewInbox(c){
+  let items=[];
+  if(USER.role==='manager'){
+    const team=teamOf(USER.empId);
+    items=team.map(e=>appraisalOf(e.id,CYCLE.id)).filter(a=>a&&a.status==='manager');
+  }else{ // hr/admin → 待HR复核
+    items=DB.appraisals.filter(a=>a.cycleId===CYCLE.id&&a.status==='hr');
+  }
+  const label=USER.role==='manager'?'待你评分的部属':'待 HR 复核';
+  c.innerHTML=`<div class="section-head"><div><div class="eyebrow">${esc(CYCLE.name)}</div>
+    <h2 style="font-size:21px;color:var(--navy);margin-top:4px">${label}</h2></div></div>
+    ${items.length?`<div class="t-wrap"><table>
+      <thead><tr><th>员工</th><th>部门</th><th>职位</th><th>自评得分</th><th>状态</th><th></th></tr></thead><tbody>
+      ${items.map(a=>{const e=empById(a.empId);
+        return `<tr><td style="font-weight:600">${esc(e.name)}</td><td>${esc(deptName(e.dept))}</td><td>${esc(e.pos)}</td>
+        <td class="num">${selfPreview(a)}</td><td>${statusTag(a.status)}</td>
+        <td class="right"><button class="btn btn-gold btn-sm" onclick="openAppraisal('${a.id}','${USER.role==='manager'?'manager':'hr'}')">${icon('edit')}${USER.role==='manager'?'评分':'复核'}</button></td></tr>`}).join('')}
+      </tbody></table></div>`:emptyBox('目前没有待处理的项目','所有考核都已处理完毕 ✓')}`;
+}
+function selfPreview(a){ // 用自评估算
+  const tmp={...a,kpi:a.kpi.map(it=>({...it,mgr:it.self})),
+    comp:Object.fromEntries(Object.entries(a.comp).map(([k,v])=>[k,{mgr:v.self}])),
+    att:Object.fromEntries(Object.entries(a.att).map(([k,v])=>[k,{mgr:v.self}]))};
+  return totalScore(tmp,CYCLE).toFixed(1);
+}
+
+/* ========== 考核记录 ========== */
+function viewAppraisals(c){
+  let aps=DB.appraisals.filter(a=>a.cycleId===CYCLE.id);
+  if(USER.role==='manager'){const t=teamOf(USER.empId).map(e=>e.id);aps=aps.filter(a=>t.includes(a.empId));}
+  c.innerHTML=`<div class="section-head"><div><div class="eyebrow">${esc(CYCLE.name)}</div>
+    <h2 style="font-size:21px;color:var(--navy);margin-top:4px">考核记录</h2>
+    <div class="sub">共 ${aps.length} 笔记录</div></div>
+    <div class="flex gap8">
+    ${can('manage')?`<button class="btn btn-ghost" onclick="ensureAppraisals()">${icon('plus')}生成考核表</button>`:''}
+    <button class="btn btn-ghost" onclick="exportCSV()">${icon('dl')}导出 CSV</button></div></div>
+    ${aps.length?`<div class="t-wrap"><table>
+      <thead><tr><th>员工</th><th>部门</th><th>状态</th><th>KPI</th><th>能力</th><th>态度</th><th>综合</th><th>等级</th><th></th></tr></thead><tbody>
+      ${aps.map(a=>{const e=empById(a.empId);const dn=a.status==='done';
+        return `<tr><td style="font-weight:600">${esc(e.name)}</td><td>${esc(deptName(e.dept))}</td>
+        <td>${statusTag(a.status)}</td>
+        <td class="num">${dn?calcKPI(a):'—'}</td><td class="num">${dn?calcComp(a):'—'}</td><td class="num">${dn?calcAtt(a):'—'}</td>
+        <td class="num" style="font-weight:700">${dn?a.totalScore:'—'}</td>
+        <td>${dn?`<span class="grade-pill g-${a.grade}">${a.grade}</span>`:'—'}</td>
+        <td class="right"><button class="btn btn-ghost btn-sm" onclick="openAppraisal('${a.id}','${nextAction(a)}')">${dn?'查看':actionLabel(a)}</button></td></tr>`}).join('')}
+      </tbody></table></div>`:emptyBox('本周期尚无考核记录',can('manage')?'点击「生成考核表」为在职员工建立考核':'请联系 HR 生成考核表')}`;
+}
+function nextAction(a){
+  if(a.status==='done')return'view';
+  if(a.status==='self')return (USER.role==='staff'&&USER.empId===a.empId)?'self':'view';
+  if(a.status==='manager')return(USER.role==='manager'||can('manage'))?'manager':'view';
+  if(a.status==='hr')return can('manage')?'hr':'view';
+  return'view';
+}
+function actionLabel(a){const m={self:'自评中',manager:'评分',hr:'复核'};return m[a.status]||'查看'}
+
+/* ========== 结果与分析 ========== */
+function viewResults(c){
+  let done=DB.appraisals.filter(a=>a.cycleId===CYCLE.id&&a.status==='done');
+  if(USER.role==='manager'){const t=teamOf(USER.empId).map(e=>e.id);done=done.filter(a=>t.includes(a.empId));}
+  const sorted=[...done].sort((a,b)=>b.totalScore-a.totalScore);
+  const dist={};DB.settings.grades.forEach(g=>dist[g.g]=0);done.forEach(a=>dist[a.grade]++);
+  c.innerHTML=`<div class="section-head"><div><div class="eyebrow">${esc(CYCLE.name)}</div>
+    <h2 style="font-size:21px;color:var(--navy);margin-top:4px">结果与分析</h2>
+    <div class="sub">已完成 ${done.length} 笔 · 用于调薪 / 奖金 / 晋升决策</div></div>
+    <button class="btn btn-ghost" onclick="window.print()">${icon('doc')}打印 / 存 PDF</button></div>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="card card-pad"><h3 style="margin-bottom:14px">等级分布</h3>
+      ${done.length?DB.settings.grades.map(g=>{const n=dist[g.g],p=done.length?Math.round(n/done.length*100):0;
+        return `<div class="dist-row"><div class="gl"><span class="grade-pill g-${g.g}">${g.g}</span></div>
+        <div class="db bar"><i style="width:${p}%;background:${gradeColor(g.g)}"></i></div><div class="dn">${n}</div></div>`}).join(''):'<div class="muted">尚无数据</div>'}
+    </div>
+    <div class="card card-pad"><h3 style="margin-bottom:14px">维度平均</h3>
+      ${done.length?(()=>{const k=avgOf(done,calcKPI),cp=avgOf(done,calcComp),at=avgOf(done,calcAtt);
+        return [['KPI 业绩',k,'var(--navy)'],['工作能力',cp,'var(--gold)'],['工作态度',at,'var(--green)']].map(([n,v,col])=>
+        `<div style="margin-bottom:14px"><div class="flex between" style="font-size:13px;margin-bottom:5px"><span style="font-weight:600">${n}</span><span class="num" style="font-weight:700">${v}</span></div>
+        <div class="bar"><i style="width:${v}%;background:${col}"></i></div></div>`).join('')})():'<div class="muted">尚无数据</div>'}
+    </div>
+  </div>
+  <div class="card card-pad mt24"><h3 style="margin-bottom:8px">绩效排名与决策建议</h3>
+    ${sorted.length?`<div class="t-wrap" style="box-shadow:none;border:none"><table>
+      <thead><tr><th>排名</th><th>员工</th><th>部门</th><th>综合</th><th>等级</th><th>调薪</th><th>奖金系数</th><th>建议</th></tr></thead><tbody>
+      ${sorted.map((a,i)=>{const e=empById(a.empId);return `<tr>
+        <td class="num" style="font-weight:700">${i+1}</td><td style="font-weight:600">${esc(e.name)}</td><td>${esc(deptName(e.dept))}</td>
+        <td class="num" style="font-weight:700">${a.totalScore}</td><td><span class="grade-pill g-${a.grade}">${a.grade}</span></td>
+        <td class="num" style="color:var(--green);font-weight:600">+${a.salaryAdj}%</td><td class="num">×${a.bonus}</td>
+        <td style="font-size:12.5px">${esc(a.recommend)}</td></tr>`}).join('')}
+      </tbody></table></div>`:emptyBox('尚无完成的考核','完成评分流程后,这里会显示排名与决策建议')}
+  </div>`;
+}
+function avgOf(arr,fn){return arr.length?+(arr.reduce((s,a)=>s+fn(a),0)/arr.length).toFixed(1):0}
+
+/* ========== 员工管理 ========== */
+function viewEmployees(c){
+  c.innerHTML=`<div class="section-head"><div><h2 style="font-size:21px;color:var(--navy)">员工管理</h2>
+    <div class="sub">共 ${DB.employees.length} 名员工</div></div>
+    <button class="btn btn-primary" onclick="empForm()">${icon('plus')}新增员工</button></div>
+    <div class="t-wrap"><table>
+      <thead><tr><th>工号</th><th>姓名</th><th>部门</th><th>职位</th><th>层级</th><th>直属主管</th><th>状态</th><th></th></tr></thead><tbody>
+      ${DB.employees.map(e=>`<tr>
+        <td class="num">${esc(e.no)}</td><td style="font-weight:600">${esc(e.name)}</td><td>${esc(deptName(e.dept))}</td>
+        <td>${esc(e.pos)}</td><td><span class="tag tag-gray">${esc(e.level)}</span></td>
+        <td>${e.mgr?esc(empById(e.mgr)?.name||'—'):'<span class="muted">—</span>'}</td>
+        <td>${e.status==='在职'?'<span class="tag tag-green">在职</span>':'<span class="tag tag-red">离职</span>'}</td>
+        <td class="right"><button class="btn btn-ghost btn-sm" onclick="empForm('${e.id}')">${icon('edit')}</button>
+          <button class="btn btn-danger btn-sm" onclick="delEmp('${e.id}')">${icon('trash')}</button></td></tr>`).join('')}
+      </tbody></table></div>`;
+}
+function empForm(id){
+  const e=id?empById(id):{no:'',name:'',dept:DB.departments[0]?.id,pos:'',level:'员工',mgr:'',join:'',status:'在职'};
+  const mgrs=DB.employees.filter(x=>x.id!==id&&(x.level==='经理'||x.level==='主管'));
+  modal(id?'编辑员工':'新增员工',`
+    <div class="form-grid">
+      <div class="fg"><label>工号</label><input id="f_no" value="${esc(e.no)}"></div>
+      <div class="fg"><label>姓名</label><input id="f_name" value="${esc(e.name)}"></div>
+      <div class="fg"><label>部门</label><select id="f_dept">${DB.departments.map(d=>`<option value="${d.id}" ${d.id===e.dept?'selected':''}>${esc(d.name)}</option>`).join('')}</select></div>
+      <div class="fg"><label>职位</label><input id="f_pos" value="${esc(e.pos)}"></div>
+      <div class="fg"><label>层级</label><select id="f_level">${['员工','主管','经理'].map(l=>`<option ${l===e.level?'selected':''}>${l}</option>`).join('')}</select></div>
+      <div class="fg"><label>直属主管</label><select id="f_mgr"><option value="">— 无 —</option>${mgrs.map(m=>`<option value="${m.id}" ${m.id===e.mgr?'selected':''}>${esc(m.name)}</option>`).join('')}</select></div>
+      <div class="fg"><label>入职日期</label><input type="date" id="f_join" value="${esc(e.join)}"></div>
+      <div class="fg"><label>状态</label><select id="f_status">${['在职','离职'].map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}</select></div>
+    </div>`,
+    ()=>{
+      const o={no:val('f_no'),name:val('f_name'),dept:val('f_dept'),pos:val('f_pos'),level:val('f_level'),
+        mgr:val('f_mgr'),join:val('f_join'),status:val('f_status')};
+      if(!o.name){toast('请填写姓名','err');return false;}
+      if(id){Object.assign(empById(id),o);}else{DB.employees.push({id:uid('e'),...o});}
+      save();renderView('employees');toast('已保存','ok');
+    });
+}
+function delEmp(id){confirmBox('确定删除该员工?相关考核记录也会移除。',()=>{
+  DB.employees=DB.employees.filter(e=>e.id!==id);
+  DB.appraisals=DB.appraisals.filter(a=>a.empId!==id);
+  save();renderView('employees');toast('已删除');});}
+
+/* ========== 考核周期 ========== */
+function viewCycles(c){
+  c.innerHTML=`<div class="section-head"><div><h2 style="font-size:21px;color:var(--navy)">考核周期</h2>
+    <div class="sub">建立考核周期并设定三维权重</div></div>
+    <button class="btn btn-primary" onclick="cycleForm()">${icon('plus')}新增周期</button></div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+    ${DB.cycles.map(cy=>{const n=DB.appraisals.filter(a=>a.cycleId===cy.id).length;
+      const st={active:['进行中','tag-green'],closed:['已结束','tag-gray'],draft:['草稿','tag-amber']}[cy.status];
+      return `<div class="card card-pad">
+        <div class="flex between aic"><span class="tag tag-gold">${esc(cy.type)}</span><span class="tag ${st[1]}">${st[0]}</span></div>
+        <h3 style="margin:12px 0 4px;font-size:17px">${esc(cy.name)}</h3>
+        <div class="muted" style="font-size:12.5px">${esc(cy.start)} 至 ${esc(cy.end)}</div>
+        <div class="flex gap8" style="margin:14px 0;font-size:12px">
+          <span class="tag tag-gray">KPI ${cy.weights.kpi}%</span><span class="tag tag-gray">能力 ${cy.weights.comp}%</span><span class="tag tag-gray">态度 ${cy.weights.att}%</span></div>
+        <div class="muted" style="font-size:12.5px">${n} 笔考核记录</div>
+        <div class="flex gap8 mt16">
+          <button class="btn btn-ghost btn-sm" onclick="cycleForm('${cy.id}')">${icon('edit')}编辑</button>
+          ${cy.status!=='active'?`<button class="btn btn-ghost btn-sm" onclick="activateCycle('${cy.id}')">设为进行中</button>`:''}
+          <button class="btn btn-danger btn-sm" onclick="delCycle('${cy.id}')">${icon('trash')}</button>
+        </div></div>`}).join('')}
+    </div>`;
+}
+function cycleForm(id){
+  const cy=id?cycleById(id):{name:'',type:'季度',start:'',end:'',status:'draft',weights:{kpi:50,comp:30,att:20}};
+  modal(id?'编辑周期':'新增考核周期',`
+    <div class="form-grid">
+      <div class="fg full"><label>周期名称</label><input id="c_name" value="${esc(cy.name)}" placeholder="例:2025 年度考核"></div>
+      <div class="fg"><label>类型</label><select id="c_type">${['月度','季度','半年','年度'].map(t=>`<option ${t===cy.type?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="fg"><label>状态</label><select id="c_status">
+        <option value="draft" ${cy.status==='draft'?'selected':''}>草稿</option>
+        <option value="active" ${cy.status==='active'?'selected':''}>进行中</option>
+        <option value="closed" ${cy.status==='closed'?'selected':''}>已结束</option></select></div>
+      <div class="fg"><label>开始日期</label><input type="date" id="c_start" value="${esc(cy.start)}"></div>
+      <div class="fg"><label>结束日期</label><input type="date" id="c_end" value="${esc(cy.end)}"></div>
+    </div>
+    <div style="margin-top:18px"><label class="fg" style="font-size:12px;color:var(--muted);font-weight:600">三维权重 (总和需 = 100%)</label>
+    <div class="form-grid" style="margin-top:8px">
+      <div class="fg"><label>KPI 业绩 %</label><input type="number" id="c_wk" value="${cy.weights.kpi}" oninput="sumW()"></div>
+      <div class="fg"><label>工作能力 %</label><input type="number" id="c_wc" value="${cy.weights.comp}" oninput="sumW()"></div>
+      <div class="fg"><label>工作态度 %</label><input type="number" id="c_wa" value="${cy.weights.att}" oninput="sumW()"></div>
+      <div class="fg"><label>合计</label><input id="c_sum" value="100" disabled style="font-weight:700"></div>
+    </div></div>`,
+    ()=>{
+      const wk=+val('c_wk'),wc=+val('c_wc'),wa=+val('c_wa');
+      if(wk+wc+wa!==100){toast('权重总和必须等于 100%','err');return false;}
+      if(!val('c_name')){toast('请填写周期名称','err');return false;}
+      const o={name:val('c_name'),type:val('c_type'),start:val('c_start'),end:val('c_end'),status:val('c_status'),weights:{kpi:wk,comp:wc,att:wa}};
+      if(id){Object.assign(cycleById(id),o);}else{DB.cycles.push({id:uid('c'),...o});}
+      if(o.status==='active')DB.cycles.forEach(x=>{if(x.id!==(id||'')&&x.name===o.name){}});
+      save();buildCycleSelect();renderView('cycles');toast('已保存','ok');
+    });
+  setTimeout(sumW,50);
+}
+function sumW(){const s=(+val('c_wk')||0)+(+val('c_wc')||0)+(+val('c_wa')||0);const el=document.getElementById('c_sum');if(el){el.value=s+'%';el.style.color=s===100?'var(--green)':'var(--red)';}}
+function activateCycle(id){DB.cycles.forEach(c=>c.status=c.id===id?'active':(c.status==='active'?'closed':c.status));save();buildCycleSelect();renderView('cycles');toast('已设为进行中','ok');}
+function delCycle(id){confirmBox('确定删除此周期及其所有考核记录?',()=>{DB.cycles=DB.cycles.filter(c=>c.id!==id);DB.appraisals=DB.appraisals.filter(a=>a.cycleId!==id);if(CYCLE.id===id)CYCLE=DB.cycles[0];save();buildCycleSelect();renderView('cycles');toast('已删除');});}
+
+/* ========== KPI 指标库 ========== */
+function viewTemplates(c){
+  c.innerHTML=`<div class="section-head"><div><h2 style="font-size:21px;color:var(--navy)">KPI 指标库</h2>
+    <div class="sub">为不同部门设定 KPI 模板,生成考核表时自动套用</div></div>
+    <button class="btn btn-primary" onclick="tplForm()">${icon('plus')}新增模板</button></div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(320px,1fr))">
+    ${DB.templates.map(t=>{const sum=t.items.reduce((s,i)=>s+i.weight,0);
+      return `<div class="card card-pad">
+        <div class="flex between aic"><h3 style="font-size:16px">${esc(t.name)}</h3>
+          <span class="tag ${sum===100?'tag-green':'tag-red'}">${sum}%</span></div>
+        <div class="muted" style="font-size:12px;margin:3px 0 12px">${esc(deptName(t.dept))}</div>
+        ${t.items.map(it=>`<div class="flex between" style="padding:7px 0;border-bottom:1px solid var(--line-2);font-size:13px">
+          <span>${esc(it.name)}<br><span class="muted" style="font-size:11.5px">${esc(it.target)}</span></span>
+          <span class="num" style="font-weight:700;color:var(--gold-d)">${it.weight}%</span></div>`).join('')}
+        <div class="flex gap8 mt16">
+          <button class="btn btn-ghost btn-sm" onclick="tplForm('${t.id}')">${icon('edit')}编辑</button>
+          <button class="btn btn-danger btn-sm" onclick="delTpl('${t.id}')">${icon('trash')}</button></div>
+      </div>`}).join('')}
+    </div>`;
+}
+let TPL_ITEMS=[];
+function tplForm(id){
+  const t=id?DB.templates.find(x=>x.id===id):{name:'',dept:DB.departments[0]?.id,items:[]};
+  TPL_ITEMS=JSON.parse(JSON.stringify(t.items.length?t.items:[{name:'',target:'',weight:0}]));
+  modal(id?'编辑 KPI 模板':'新增 KPI 模板',`
+    <div class="form-grid">
+      <div class="fg"><label>模板名称</label><input id="tp_name" value="${esc(t.name)}" placeholder="例:销售岗位 KPI"></div>
+      <div class="fg"><label>适用部门</label><select id="tp_dept">${DB.departments.map(d=>`<option value="${d.id}" ${d.id===t.dept?'selected':''}>${esc(d.name)}</option>`).join('')}</select></div>
+    </div>
+    <div style="margin-top:18px"><div class="flex between aic"><label style="font-size:12px;color:var(--muted);font-weight:600">KPI 指标项 (权重总和需 = 100%)</label>
+      <button class="btn btn-ghost btn-sm" onclick="addTplItem()">${icon('plus')}加一项</button></div>
+      <div id="tplItems" style="margin-top:10px"></div>
+      <div class="right" style="margin-top:6px;font-size:13px;font-weight:600">合计:<span id="tplSum">0</span>%</div>
+    </div>`,
+    ()=>{
+      collectTplItems();
+      const sum=TPL_ITEMS.reduce((s,i)=>s+(+i.weight||0),0);
+      if(sum!==100){toast('权重总和必须等于 100%','err');return false;}
+      if(!val('tp_name')){toast('请填写模板名称','err');return false;}
+      const o={name:val('tp_name'),dept:val('tp_dept'),items:TPL_ITEMS.filter(i=>i.name)};
+      if(id){Object.assign(t,o);}else{DB.templates.push({id:uid('t'),...o});}
+      save();renderView('templates');toast('已保存','ok');
+    });
+  renderTplItems();
+}
+function renderTplItems(){
+  const el=document.getElementById('tplItems');if(!el)return;
+  el.innerHTML=TPL_ITEMS.map((it,i)=>`<div class="flex gap8" style="margin-bottom:8px;align-items:flex-start">
+    <input style="flex:1.3;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;background:#fbfaf7" placeholder="指标名称" value="${esc(it.name)}" oninput="TPL_ITEMS[${i}].name=this.value">
+    <input style="flex:1.5;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;background:#fbfaf7" placeholder="目标/标准" value="${esc(it.target)}" oninput="TPL_ITEMS[${i}].target=this.value">
+    <input type="number" style="width:74px;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;background:#fbfaf7" placeholder="%" value="${it.weight}" oninput="TPL_ITEMS[${i}].weight=+this.value;tplSum()">
+    <button class="btn btn-danger btn-sm" style="padding:9px 10px" onclick="TPL_ITEMS.splice(${i},1);renderTplItems();tplSum()">${icon('trash')}</button>
+  </div>`).join('');
+  tplSum();
+}
+function addTplItem(){collectTplItems();TPL_ITEMS.push({name:'',target:'',weight:0});renderTplItems();}
+function collectTplItems(){/* values bound live via oninput */}
+function tplSum(){const el=document.getElementById('tplSum');if(el){const s=TPL_ITEMS.reduce((a,i)=>a+(+i.weight||0),0);el.textContent=s;el.style.color=s===100?'var(--green)':'var(--red)';}}
+function delTpl(id){confirmBox('确定删除此 KPI 模板?',()=>{DB.templates=DB.templates.filter(t=>t.id!==id);save();renderView('templates');toast('已删除');});}
+
+/* ========== 系统设定 ========== */
+function viewSettings(c){
+  const s=DB.settings;
+  c.innerHTML=`<div class="section-head"><div><h2 style="font-size:21px;color:var(--navy)">系统设定</h2>
+    <div class="sub">评分维度项目 · 等级标准 · 登录密码</div></div></div>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="card card-pad"><h3 style="margin-bottom:6px">工作能力 评分项</h3><p class="muted" style="font-size:12px;margin-bottom:12px">每项以 1–5 分评定</p>
+      <div id="compList">${listEditor(s.comp,'comp')}</div>
+      <button class="btn btn-ghost btn-sm mt16" onclick="addSetItem('comp')">${icon('plus')}加一项</button></div>
+    <div class="card card-pad"><h3 style="margin-bottom:6px">工作态度 评分项</h3><p class="muted" style="font-size:12px;margin-bottom:12px">每项以 1–5 分评定</p>
+      <div id="attList">${listEditor(s.att,'att')}</div>
+      <button class="btn btn-ghost btn-sm mt16" onclick="addSetItem('att')">${icon('plus')}加一项</button></div>
+  </div>
+  <div class="card card-pad mt24"><h3 style="margin-bottom:14px">等级标准与决策对应</h3>
+    <div class="t-wrap" style="box-shadow:none;border:none"><table>
+      <thead><tr><th>等级</th><th>名称</th><th>最低分</th><th>调薪 %</th><th>奖金系数</th><th>发展建议</th></tr></thead><tbody>
+      ${s.grades.map((g,i)=>`<tr><td><span class="grade-pill g-${g.g}">${g.g}</span></td>
+        <td><input class="setinp" value="${esc(g.label)}" oninput="DB.settings.grades[${i}].label=this.value"></td>
+        <td><input type="number" class="setinp" style="width:70px" value="${g.min}" oninput="DB.settings.grades[${i}].min=+this.value"></td>
+        <td><input type="number" class="setinp" style="width:64px" value="${g.adj}" oninput="DB.settings.grades[${i}].adj=+this.value"></td>
+        <td><input type="number" step="0.1" class="setinp" style="width:64px" value="${g.bonus}" oninput="DB.settings.grades[${i}].bonus=+this.value"></td>
+        <td><input class="setinp" value="${esc(g.note)}" oninput="DB.settings.grades[${i}].note=this.value"></td></tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="card card-pad mt24"><h3 style="margin-bottom:6px">公司价值观</h3><p class="muted" style="font-size:12px;margin-bottom:12px">用于「即时认可」,表扬时挂钩对应价值观</p>
+    <div id="valList">${listEditor(s.values,'values')}</div>
+    <button class="btn btn-ghost btn-sm mt16" onclick="addSetItem('values')">${icon('plus')}加一项</button></div>
+  <div class="row mt24">
+    <div class="card card-pad" style="flex:1;min-width:300px"><h3 style="margin-bottom:12px">登录密码</h3>
+      <div class="fg"><input type="text" id="set_pw" value="${esc(s.password)}"></div></div>
+    <div class="card card-pad" style="flex:1.4;min-width:300px"><h3 style="margin-bottom:6px">${icon('spark','ic')} AI 设定</h3>
+      <p class="muted" style="font-size:12px;margin-bottom:12px">在 Claude 预览环境中 AI 功能开箱即用。部署到自有网站(GitHub Pages 等)时,填入 Anthropic API Key 才能启用 AI 助手与评语起草。</p>
+      <div class="fg"><label>Anthropic API Key(选填)</label><input type="password" id="set_apikey" value="${esc(s.apiKey||'')}" placeholder="sk-ant-..."></div>
+      <div class="muted" style="font-size:11px;margin-top:8px">Key 仅存于本机浏览器,不会上传。</div></div>
+  </div>
+  <div class="mt24"><button class="btn btn-primary" onclick="saveSettings()">${icon('check')}保存所有设定</button></div>
+  <style>.setinp{padding:7px 10px;border:1.5px solid var(--line);border-radius:7px;background:#fbfaf7;width:100%}.setinp:focus{outline:none;border-color:var(--gold)}</style>`;
+}
+function listEditor(arr,key){return arr.map((x,i)=>`<div class="flex gap8" style="margin-bottom:8px">
+  <input class="setinp" value="${esc(x)}" oninput="DB.settings.${key}[${i}]=this.value">
+  <button class="btn btn-danger btn-sm" onclick="DB.settings.${key}.splice(${i},1);document.getElementById('${key}List').innerHTML=listEditor(DB.settings.${key},'${key}')">${icon('trash')}</button></div>`).join('')}
+function addSetItem(key){DB.settings[key].push('新项目');document.getElementById(key+'List').innerHTML=listEditor(DB.settings[key],key);}
+function saveSettings(){DB.settings.password=val('set_pw')||'1313';DB.settings.apiKey=val('set_apikey');save();toast('设定已保存','ok');}
+
+/* ========== 考核表单 (核心) ========== */
+let CURA=null,MODE='view';
+function openAppraisal(aid,mode){
+  CURA=DB.appraisals.find(a=>a.id===aid);MODE=mode;
+  const a=CURA,e=empById(a.empId),cy=cycleById(a.cycleId);
+  const editable=mode==='self'||mode==='manager'||mode==='hr';
+  const showMgr=mode!=='self'&&a.status!=='self';
+  const html=`
+    <div class="flex between aic" style="flex-wrap:wrap;gap:10px;margin-bottom:6px">
+      <div><div class="eyebrow">${esc(cy.name)}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">${esc(e.name)} · ${esc(e.pos)} · ${esc(deptName(e.dept))}</div></div>
+      <div>${pipeHTML(a.status)}</div>
+    </div>
+    <!-- KPI -->
+    <div class="card card-pad mt16"><div class="flex between aic" style="margin-bottom:6px">
+      <h3>① KPI 业绩指标 <span class="muted" style="font-size:12px">权重 ${cy.weights.kpi}%</span></h3>
+      <span class="num" style="font-weight:700;color:var(--navy)">${calcKPI(showMgr?a:withSelf(a))} 分</span></div>
+      <p class="muted" style="font-size:12px;margin-bottom:10px">填写各指标达成分(0–100),系统按权重加权</p>
+      ${a.kpi.map((it,i)=>`<div class="score-line" style="grid-template-columns:1.4fr auto auto">
+        <div><div class="nm">${esc(it.name)} <span class="muted">·${it.weight}%</span></div><div class="desc">${esc(it.target)}</div></div>
+        <div class="center"><div class="muted" style="font-size:11px">自评</div>
+          <input type="number" min="0" max="100" value="${it.self||''}" ${mode==='self'?'':'disabled'} style="width:70px;text-align:center;padding:7px;border:1.5px solid var(--line);border-radius:7px;background:${mode==='self'?'#fbfaf7':'#f1f0ec'}" oninput="CURA.kpi[${i}].self=+this.value;recalc()"></div>
+        ${showMgr?`<div class="center"><div class="muted" style="font-size:11px">主管</div>
+          <input type="number" min="0" max="100" value="${it.mgr||''}" ${mode==='manager'?'':'disabled'} style="width:70px;text-align:center;padding:7px;border:1.5px solid var(--line);border-radius:7px;background:${mode==='manager'?'#fbfaf7':'#f1f0ec'}" oninput="CURA.kpi[${i}].mgr=+this.value;recalc()"></div>`:''}
+      </div>`).join('')}
+    </div>
+    <!-- 能力 -->
+    ${dimBlock('② 工作能力',cy.weights.comp,'comp',a,mode,showMgr,'comp')}
+    <!-- 态度 -->
+    ${dimBlock('③ 工作态度',cy.weights.att,'att',a,mode,showMgr,'att')}
+    <!-- 评语 -->
+    <div class="card card-pad mt16"><h3 style="margin-bottom:12px">评语</h3>
+      <div class="fg full" style="margin-bottom:14px"><div class="flex between aic"><label>员工自评</label>
+        ${mode==='self'?`<button class="btn-ai" onclick="aiDraftComment('selfCommentTA','self')">${icon('spark')}AI 起草</button>`:''}</div>
+        <textarea id="selfCommentTA" ${mode==='self'?'':'disabled'} oninput="CURA.selfComment=this.value">${esc(a.selfComment||'')}</textarea>
+        ${mode==='self'?'<div class="muted" style="font-size:11px;margin-top:4px">可先写几个要点,再按「AI 起草」润色成完整自评</div>':''}</div>
+      ${showMgr?`<div class="fg full" style="margin-bottom:14px"><div class="flex between aic"><label>主管评语</label>
+        ${mode==='manager'?`<button class="btn-ai" onclick="aiDraftComment('mgrCommentTA','mgr')">${icon('spark')}AI 起草</button>`:''}</div>
+        <textarea id="mgrCommentTA" ${mode==='manager'?'':'disabled'} oninput="CURA.mgrComment=this.value">${esc(a.mgrComment||'')}</textarea></div>`:''}
+      ${(mode==='hr'||a.status==='done')?`<div class="fg full"><label>HR 复核意见</label>
+        <textarea ${mode==='hr'?'':'disabled'} oninput="CURA.hrComment=this.value">${esc(a.hrComment||'')}</textarea></div>`:''}
+    </div>
+    <!-- 实时总分 -->
+    <div class="card card-pad mt16" style="background:linear-gradient(135deg,var(--navy),var(--navy-l));color:#fff;border:none">
+      <div class="flex between aic" style="flex-wrap:wrap;gap:14px">
+        <div><div class="eyebrow" style="color:var(--gold-soft)">即时综合得分预览</div>
+          <div class="num" id="liveScore" style="font-size:34px;font-weight:800;margin-top:4px">—</div></div>
+        <div id="liveGrade"></div>
+      </div></div>`;
+  modal('绩效考核表',html,editable?()=>submitAppraisal(mode):null,
+    editable?(mode==='self'?'提交自评':mode==='manager'?'提交评分':'确认完成'):null,'wide');
+  recalc();
+}
+function withSelf(a){return {...a,kpi:a.kpi.map(it=>({...it,mgr:it.self})),
+  comp:Object.fromEntries(Object.entries(a.comp).map(([k,v])=>[k,{mgr:v.self}])),
+  att:Object.fromEntries(Object.entries(a.att).map(([k,v])=>[k,{mgr:v.self}]))};}
+function dimBlock(title,weight,key,a,mode,showMgr,which){
+  const items=Object.keys(a[key]);
+  const sc=which==='comp'?calcComp(showMgr?a:withSelf(a)):calcAtt(showMgr?a:withSelf(a));
+  return `<div class="card card-pad mt16"><div class="flex between aic" style="margin-bottom:6px">
+    <h3>${title} <span class="muted" style="font-size:12px">权重 ${weight}%</span></h3>
+    <span class="num" style="font-weight:700;color:var(--navy)">${sc} 分</span></div>
+    <p class="muted" style="font-size:12px;margin-bottom:6px">每项 1–5 分</p>
+    ${items.map(nm=>`<div class="score-line">
+      <div class="nm">${esc(nm)}</div>
+      <div>${mode==='self'?rateUI(key,nm,'self',a[key][nm].self):`<div class="muted" style="font-size:12px">自评 ${a[key][nm].self||'—'} 分</div>`}
+        ${showMgr&&mode==='manager'?'<div style="margin-top:6px">'+rateUI(key,nm,'mgr',a[key][nm].mgr)+'</div>':showMgr?`<div class="muted" style="font-size:12px;margin-top:4px">主管 ${a[key][nm].mgr||'—'} 分</div>`:''}
+      </div>
+      <div class="num right" style="font-weight:700;min-width:30px">${showMgr?(a[key][nm].mgr||'—'):(a[key][nm].self||'—')}</div>
+    </div>`).join('')}
+  </div>`;
+}
+function rateUI(key,nm,who,cur){
+  let h=`<div class="rate">`;
+  for(let i=1;i<=5;i++) h+=`<button class="${cur==i?'on':''}" onclick="setRate('${key}','${esc(nm).replace(/'/g,"")}','${who}',${i},this)">${i}</button>`;
+  return h+'</div>';
+}
+function setRate(key,nm,who,v,btn){
+  CURA[key][nm][who]=v;
+  btn.parentElement.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',i+1===v));
+  recalc();
+}
+function recalc(){
+  const showMgr=MODE!=='self'&&CURA.status!=='self';
+  const a=showMgr?CURA:withSelf(CURA);
+  const cy=cycleById(CURA.cycleId);
+  const sc=totalScore(a,cy);const g=gradeFor(sc);
+  const ls=document.getElementById('liveScore');if(ls)ls.textContent=sc;
+  const lg=document.getElementById('liveGrade');
+  if(lg)lg.innerHTML=`<div style="text-align:center"><div class="grade-pill g-${g.g}" style="width:50px;height:50px;font-size:22px;border-radius:12px">${g.g}</div>
+    <div style="font-size:12px;margin-top:6px;color:var(--gold-soft)">${g.label} · +${g.adj}%</div></div>`;
+}
+function submitAppraisal(mode){
+  const a=CURA,cy=cycleById(a.cycleId);
+  if(mode==='self'){
+    if(a.kpi.some(it=>!it.self)||Object.values(a.comp).some(v=>!v.self)||Object.values(a.att).some(v=>!v.self)){
+      toast('请完成所有自评项目','err');return false;}
+    a.status='manager';save();closeModal();toast('自评已提交,等待主管评分','ok');renderView(CUR);return;
+  }
+  if(mode==='manager'){
+    if(a.kpi.some(it=>!it.mgr)||Object.values(a.comp).some(v=>!v.mgr)||Object.values(a.att).some(v=>!v.mgr)){
+      toast('请完成所有主管评分项目','err');return false;}
+    a.status='hr';save();closeModal();toast('主管评分已提交,等待 HR 复核','ok');renderView(CUR);return;
+  }
+  if(mode==='hr'){
+    a.status='done';finalize(a,cy);save();closeModal();toast('考核已完成 ✓','ok');renderView(CUR);return;
+  }
+}
+
+/* ========== 生成考核表 ========== */
+function ensureAppraisals(){
+  const list=DB.employees.filter(e=>e.status==='在职');
+  let made=0;
+  list.forEach(e=>{
+    if(appraisalOf(e.id,CYCLE.id))return;
+    const tpl=DB.templates.find(t=>t.dept===e.dept)||DB.templates[0];
+    const kpi=(tpl?tpl.items:[{name:'工作目标',target:'达成岗位目标',weight:100}]).map(it=>({name:it.name,target:it.target,weight:it.weight,self:0,mgr:0}));
+    const comp={},att={};
+    DB.settings.comp.forEach(n=>comp[n]={self:0,mgr:0});
+    DB.settings.att.forEach(n=>att[n]={self:0,mgr:0});
+    DB.appraisals.push({id:uid('a'),cycleId:CYCLE.id,empId:e.id,status:'self',kpi,comp,att,selfComment:'',mgrComment:'',hrComment:''});
+    made++;
+  });
+  save();renderView(CUR);
+  toast(made?`已生成 ${made} 份考核表`:'所有员工已有考核表','ok');
+}
+
+/* ========== CSV 导出 ========== */
+function exportCSV(){
+  const aps=DB.appraisals.filter(a=>a.cycleId===CYCLE.id&&a.status==='done');
+  if(!aps.length){toast('尚无完成的考核可导出','err');return;}
+  const rows=[['工号','姓名','部门','职位','KPI得分','能力得分','态度得分','综合得分','等级','调薪%','奖金系数','发展建议']];
+  aps.forEach(a=>{const e=empById(a.empId);
+    rows.push([e.no,e.name,deptName(e.dept),e.pos,calcKPI(a),calcComp(a),calcAtt(a),a.totalScore,a.grade,a.salaryAdj,a.bonus,a.recommend]);});
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${(''+c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`绩效考核_${CYCLE.name}.csv`;a.click();URL.revokeObjectURL(url);
+  toast('CSV 已导出','ok');
+}
+
+/* =====================================================================
+   V2 模块:OKR · 9-Box · 校准 · 360° · 即时认可 · 1:1 · AI 助手
+   ===================================================================== */
+
+/* ---------- 共用:取员工最新综合得分 ---------- */
+function latestScore(empId){
+  const done=DB.appraisals.filter(a=>a.empId===empId&&a.status==='done');
+  if(!done.length)return null;
+  // 优先当前周期,否则最近
+  const cur=done.find(a=>a.cycleId===CYCLE.id);
+  return (cur||done[done.length-1]).totalScore;
+}
+function perfBand(empId){const s=latestScore(empId);if(s==null)return null;return s>=80?2:s>=65?1:0;} // 0低1中2高
+function potBand(empId){const p=DB.potential[empId]||2;return p-1;} // 0低1中2高
+
+/* ========== OKR 目标管理 ========== */
+function objProgress(o){return o.krs.length?Math.round(o.krs.reduce((s,k)=>s+(+k.progress||0),0)/o.krs.length):0;}
+function objOwnerName(o){return o.type==='company'?'全公司':o.type==='dept'?deptName(o.ownerId):(empById(o.ownerId)?.name||'—');}
+function viewOKR(c){
+  const objs=DB.objectives.filter(o=>o.cycleId===CYCLE.id);
+  const canEdit=can('manage')||USER.role==='manager';
+  const company=objs.filter(o=>o.type==='company');
+  c.innerHTML=`<div class="section-head"><div><div class="eyebrow">${esc(CYCLE.name)}</div>
+    <h2 style="font-size:21px;color:var(--navy);margin-top:4px">OKR 目标管理</h2>
+    <div class="sub">公司 → 部门 → 个人,目标层层对齐</div></div>
+    ${canEdit?`<button class="btn btn-gold" onclick="okrForm()">${icon('plus')}新增目标</button>`:''}</div>
+    ${objs.length?company.map(o=>okrNodeHTML(o,objs)).join(''):emptyBox('尚未设定目标',canEdit?'点击「新增目标」建立公司级 OKR':'请等待管理层设定目标')}
+    ${objs.length&&USER.role==='staff'?renderMyOKR(objs):''}`;
+}
+function okrNodeHTML(o,all){
+  const p=objProgress(o);const children=all.filter(x=>x.parentId===o.id);
+  const lvlName={company:'公司目标',dept:'部门目标',individual:'个人目标'}[o.type];
+  const mine=(o.type==='individual'&&o.ownerId===USER.empId)||can('manage')||(USER.role==='manager'&&teamOf(USER.empId).some(e=>e.id===o.ownerId));
+  return `<div class="okr-node okr-bar-l">
+    <div class="okr-head">
+      <div class="ot"><span class="lvl lvl-${o.type}">${lvlName} · ${esc(objOwnerName(o))}</span><h4>${esc(o.title)}</h4></div>
+      <div class="op"><div class="flex between" style="font-size:12px;margin-bottom:4px"><span class="muted">进度</span><span class="num" style="font-weight:700;color:var(--navy)">${p}%</span></div>
+        <div class="bar"><i style="width:${p}%;background:${p>=70?'var(--green)':p>=40?'var(--gold)':'var(--red)'}"></i></div></div>
+      ${(can('manage')||mine)?`<button class="btn btn-ghost btn-sm" onclick="okrForm('${o.id}')">${icon('edit')}</button>`:''}
+    </div>
+    ${o.krs.map((k,i)=>`<div class="kr"><span class="krn">◆ ${esc(k.name)}</span>
+      <div class="krp">${mine?`<input type="range" min="0" max="100" value="${k.progress}" oninput="updKR('${o.id}',${i},this.value,this)">`:`<div class="bar" style="flex:1"><i style="width:${k.progress}%"></i></div>`}
+        <span class="num krpv" style="font-weight:700;width:38px;text-align:right">${k.progress}%</span></div></div>`).join('')}
+    ${children.length?`<div class="okr-children">${children.map(ch=>okrNodeHTML(ch,all)).join('')}</div>`:''}
+  </div>`;
+}
+function updKR(oid,i,v,el){
+  const o=DB.objectives.find(x=>x.id===oid);o.krs[i].progress=+v;
+  el.closest('.kr').querySelector('.krpv').textContent=v+'%';
+  // 更新本节点进度条
+  save();
+  // 轻量刷新父进度显示
+  const head=el.closest('.okr-node').querySelector('.op');
+  const p=objProgress(o);
+  head.querySelector('.num').textContent=p+'%';
+  head.querySelector('.bar i').style.width=p+'%';
+}
+function renderMyOKR(objs){
+  const mine=objs.filter(o=>o.type==='individual'&&o.ownerId===USER.empId);
+  if(!mine.length)return'';
+  return `<div class="card card-pad mt24" style="background:var(--blue-bg);border-color:#cfdcef"><h3 style="margin-bottom:6px">提示</h3>
+    <div class="muted" style="font-size:13px">拖动你个人目标的进度条即可更新 Key Result 完成度,系统会自动汇总到部门与公司目标。</div></div>`;
+}
+function okrForm(id){
+  const o=id?DB.objectives.find(x=>x.id===id):{type:'individual',ownerId:'',cycleId:CYCLE.id,parentId:'',title:'',krs:[{name:'',progress:0}]};
+  OKR_KRS=JSON.parse(JSON.stringify(o.krs.length?o.krs:[{name:'',progress:0}]));
+  const parents=DB.objectives.filter(x=>x.cycleId===CYCLE.id&&x.id!==id&&x.type!=='individual');
+  modal(id?'编辑目标':'新增目标',`
+    <div class="form-grid">
+      <div class="fg"><label>目标层级</label><select id="ok_type" onchange="okrOwnerOpts()">
+        <option value="company" ${o.type==='company'?'selected':''}>公司目标</option>
+        <option value="dept" ${o.type==='dept'?'selected':''}>部门目标</option>
+        <option value="individual" ${o.type==='individual'?'selected':''}>个人目标</option></select></div>
+      <div class="fg"><label>归属</label><select id="ok_owner"></select></div>
+      <div class="fg full"><label>目标 (Objective)</label><input id="ok_title" value="${esc(o.title)}" placeholder="例:本季提升客户满意度至业界领先水平"></div>
+      <div class="fg full"><label>对齐上级目标</label><select id="ok_parent"><option value="">— 不对齐 —</option>
+        ${parents.map(p=>`<option value="${p.id}" ${p.id===o.parentId?'selected':''}>${esc(objOwnerName(p))}:${esc(p.title.slice(0,24))}</option>`).join('')}</select></div>
+    </div>
+    <div style="margin-top:16px"><div class="flex between aic"><label style="font-size:12px;color:var(--muted);font-weight:600">关键结果 (Key Results)</label>
+      <button class="btn btn-ghost btn-sm" onclick="addKR()">${icon('plus')}加一项</button></div>
+      <div id="krList" style="margin-top:10px"></div></div>`,
+    ()=>{
+      const type=val('ok_type'),title=val('ok_title');
+      if(!title){toast('请填写目标内容','err');return false;}
+      const krs=OKR_KRS.filter(k=>k.name);
+      if(!krs.length){toast('至少要有一个关键结果','err');return false;}
+      const obj={type,ownerId:val('ok_owner'),cycleId:CYCLE.id,parentId:val('ok_parent'),title,krs};
+      if(id){Object.assign(o,obj);}else{DB.objectives.push({id:uid('o'),...obj});}
+      save();renderView('okr');toast('目标已保存','ok');
+    });
+  setTimeout(()=>{okrOwnerOpts(o.ownerId);renderKR();},30);
+}
+let OKR_KRS=[];
+function okrOwnerOpts(sel){
+  const t=val('ok_type');const el=document.getElementById('ok_owner');if(!el)return;
+  if(t==='company'){el.innerHTML='<option value="company">全公司</option>';}
+  else if(t==='dept'){el.innerHTML=DB.departments.map(d=>`<option value="${d.id}" ${d.id===sel?'selected':''}>${esc(d.name)}</option>`).join('');}
+  else{el.innerHTML=DB.employees.filter(e=>e.status==='在职').map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.name)}</option>`).join('');}
+}
+function addKR(){OKR_KRS.push({name:'',progress:0});renderKR();}
+function renderKR(){const el=document.getElementById('krList');if(!el)return;
+  el.innerHTML=OKR_KRS.map((k,i)=>`<div class="flex gap8" style="margin-bottom:8px">
+    <input style="flex:1;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;background:#fbfaf7" placeholder="关键结果(可量化)" value="${esc(k.name)}" oninput="OKR_KRS[${i}].name=this.value">
+    <input type="number" min="0" max="100" style="width:74px;padding:9px;border:1.5px solid var(--line);border-radius:8px;background:#fbfaf7" placeholder="%" value="${k.progress}" oninput="OKR_KRS[${i}].progress=+this.value">
+    <button class="btn btn-danger btn-sm" style="padding:9px 10px" onclick="OKR_KRS.splice(${i},1);renderKR()">${icon('trash')}</button></div>`).join('');
+}
+
+/* ========== 人才九宫格 9-Box ========== */
+const NB_CELLS={
+  '2-2':{t:'明星人才',cls:'nb-star',note:'加速晋升 · 继任核心'},
+  '2-1':{t:'潜力新星',cls:'nb-good',note:'重点培养 · 轮岗历练'},
+  '2-0':{t:'待观察之谜',cls:'nb-watch',note:'诊断动因 · 1对1辅导'},
+  '1-2':{t:'中坚骨干',cls:'nb-good',note:'保留激励 · 扩大职责'},
+  '1-1':{t:'核心员工',cls:'nb-core',note:'稳定发展 · 持续投入'},
+  '1-0':{t:'待提升者',cls:'nb-watch',note:'改进计划 · 明确预期'},
+  '0-2':{t:'专家匠人',cls:'nb-pro',note:'专业深耕 · 知识传承'},
+  '0-1':{t:'称职者',cls:'nb-core',note:'维持现状 · 激发动力'},
+  '0-0':{t:'风险员工',cls:'nb-risk',note:'绩效改进 (PIP) / 调整'}
+};
+function viewNinebox(c){
+  let emps=DB.employees.filter(e=>e.status==='在职');
+  if(USER.role==='manager')emps=teamOf(USER.empId);
+  const placed=emps.map(e=>({e,pf:perfBand(e.id),pt:potBand(e.id)}));
+  const noScore=placed.filter(x=>x.pf==null);
+  const yLabels=['高 潜力','中 潜力','低 潜力'];
+  const xLabels=['低 绩效','中 绩效','高 绩效'];
+  // 构建网格 (potential 高在上)
+  let cells='';
+  for(let pt=2;pt>=0;pt--){
+    cells+=`<div class="nb-ylab">${yLabels[2-pt]}</div>`;
+    for(let pf=0;pf<3;pf++){
+      const meta=NB_CELLS[pf+'-'+pt];
+      const members=placed.filter(x=>x.pf===pf&&x.pt===pt);
+      cells+=`<div class="nb-cell ${meta.cls}">
+        <div class="cell-t"><span>${meta.t}</span><span class="cell-n">${members.length}</span></div>
+        <div>${members.map(m=>`<span class="nb-chip" onclick="setPotential('${m.e.id}')"><span class="av">${esc(m.e.name.slice(-2,-1)||m.e.name[0])}</span>${esc(m.e.name)}</span>`).join('')}</div>
+        <div style="position:absolute;bottom:8px;left:11px;right:11px;font-size:10px;color:var(--muted)">${meta.note}</div>
+      </div>`;
+    }
+  }
+  c.innerHTML=`<div class="section-head"><div><div class="eyebrow">${esc(CYCLE.name)} · 人才盘点</div>
+    <h2 style="font-size:21px;color:var(--navy);margin-top:4px">9-Box 人才九宫格</h2>
+    <div class="sub">绩效(横轴,来自考核得分)× 潜力(纵轴,主管评定)· 点击姓名调整潜力</div></div></div>
+  <div class="card card-pad">
+    <div class="ninebox">
+      <div class="nb-corner"></div><div class="nb-axis-x" style="grid-row:1">${xLabels.map(x=>`<span style="display:inline-block;width:33%">${x}</span>`).join('')}</div>
+      ${cells}
+    </div>
+    <div class="legend">
+      <span><i style="background:#efe9fb"></i>明星/骨干</span><span><i style="background:var(--green-bg)"></i>高潜培养</span>
+      <span><i style="background:#fffaf0"></i>核心稳定</span><span><i style="background:var(--amber-bg)"></i>需关注</span>
+      <span><i style="background:var(--red-bg)"></i>风险/PIP</span><span><i style="background:var(--blue-bg)"></i>专业专家</span>
+    </div>
+  </div>
+  ${noScore.length?`<div class="card card-pad mt24"><h3 style="margin-bottom:8px">尚无考核得分(未纳入矩阵)</h3>
+    <div class="flex gap8" style="flex-wrap:wrap">${noScore.map(x=>`<span class="tag tag-gray">${esc(x.e.name)}</span>`).join('')}</div>
+    <div class="muted" style="font-size:12.5px;margin-top:10px">完成这些员工的绩效考核后,会自动落入九宫格对应位置。</div></div>`:''}`;
+}
+function setPotential(empId){
+  const e=empById(empId);const cur=DB.potential[empId]||2;
+  modal('设定潜力评级 · '+esc(e.name),`
+    <p class="muted" style="font-size:13px;margin-bottom:16px">潜力(Potential)反映该员工未来承担更大责任的可能性,由主管/HR 评定。</p>
+    <div class="fg"><label>潜力等级</label><select id="pot_v">
+      <option value="3" ${cur===3?'selected':''}>高潜力 — 可快速晋升 / 继任候选</option>
+      <option value="2" ${cur===2?'selected':''}>中潜力 — 稳定发展,有成长空间</option>
+      <option value="1" ${cur===1?'selected':''}>低潜力 — 适合当前岗位深耕</option></select></div>
+    <div style="margin-top:14px;font-size:13px;color:var(--muted)">当前绩效得分:<b style="color:var(--navy)">${latestScore(empId)??'未考核'}</b></div>`,
+    ()=>{DB.potential[empId]=+val('pot_v');save();renderView('ninebox');toast('潜力评级已更新','ok');});
+}
+
+/* ========== 校准会议 Calibration ========== */
+function viewCalibration(c){
+  const done=DB.appraisals.filter(a=>a.cycleId===CYCLE.id&&a.status==='done');
+  const dist={};DB.settings.grades.forEach(g=>dist[g.g]=0);done.forEach(a=>dist[a.grade]++);
+  // 强制分布建议 (常态曲线): S10 A20 B40 C20 D10
+  const ideal={S:10,A:20,B:40,C:20,D:10};
+  // 各主管评分宽松度
+  const mgrStats={};
+  done.forEach(a=>{const e=empById(a.empId);const m=e.mgr||'_self';mgrStats[m]=mgrStats[m]||[];mgrStats[m].push(a.totalScore);});
+  const overallAvg=done.length?done.reduce((s,a)=>s+a.totalScore,0)/done.length:0;
+  c.innerHTML=`<div class="section-head"><div><div class="eyebrow">${esc(CYCLE.name)}</div>
+    <h2 style="font-size:21px;color:var(--navy);margin-top:4px">校准会议 Calibration</h2>
+    <div class="sub">对齐评分标准、检测评分偏差,确保公平 — 已完成 ${done.length} 笔</div></div></div>
+  ${!done.length?emptyBox('尚无完成的考核','完成评分后才能进行校准分析'):`
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div class="card card-pad"><h3 style="margin-bottom:6px">实际 vs 建议分布</h3>
+      <p class="muted" style="font-size:12px;margin-bottom:14px">参照常态分布(强制分布)检视等级是否合理</p>
+      ${DB.settings.grades.map(g=>{const n=dist[g.g],ap=done.length?Math.round(n/done.length*100):0,ip=ideal[g.g];
+        return `<div style="margin-bottom:13px"><div class="flex between" style="font-size:12.5px;margin-bottom:5px">
+          <span><span class="grade-pill g-${g.g}" style="width:22px;height:22px;font-size:11px">${g.g}</span> ${g.label}</span>
+          <span class="num">实际 ${ap}% <span class="muted">/ 建议 ${ip}%</span></span></div>
+          <div class="bar" style="position:relative"><i style="width:${ap}%;background:${gradeColor(g.g)}"></i>
+          <span style="position:absolute;top:-3px;left:${ip}%;width:2px;height:13px;background:var(--navy-d)"></span></div></div>`}).join('')}
+      <div class="muted" style="font-size:11.5px;margin-top:6px">▏黑线 = 建议比例</div>
+    </div>
+    <div class="card card-pad"><h3 style="margin-bottom:6px">主管评分宽松度</h3>
+      <p class="muted" style="font-size:12px;margin-bottom:14px">全员平均 ${overallAvg.toFixed(1)} 分 · 偏离越大越需校准</p>
+      ${Object.entries(mgrStats).map(([m,arr])=>{const avg=arr.reduce((s,x)=>s+x,0)/arr.length;const diff=avg-overallAvg;
+        const nm=m==='_self'?'(无主管/高管)':(empById(m)?.name||'—');
+        const tag=diff>5?'tag-red':diff<-5?'tag-blue':'tag-green';const lab=diff>5?'偏宽松':diff<-5?'偏严苛':'正常';
+        return `<div class="flex between aic" style="padding:9px 0;border-bottom:1px solid var(--line-2)">
+          <div><b style="font-size:13px">${esc(nm)}</b> <span class="muted" style="font-size:11.5px">${arr.length} 人</span></div>
+          <div class="flex aic gap8"><span class="num" style="font-weight:700">${avg.toFixed(1)}</span>
+          <span class="tag ${tag}">${lab} ${diff>0?'+':''}${diff.toFixed(1)}</span></div></div>`}).join('')}
+    </div>
+  </div>
+  <div class="card card-pad mt24"><div class="flex between aic" style="margin-bottom:8px"><h3>校准清单(可手动调整等级)</h3>
+    <span class="muted" style="font-size:12px">校准会议中如有共识,可微调个别等级</span></div>
+    <div class="t-wrap" style="box-shadow:none;border:none"><table>
+      <thead><tr><th>员工</th><th>部门</th><th>主管</th><th>得分</th><th>系统等级</th><th>校准后</th></tr></thead><tbody>
+      ${[...done].sort((a,b)=>b.totalScore-a.totalScore).map(a=>{const e=empById(a.empId);
+        return `<tr><td style="font-weight:600">${esc(e.name)}</td><td>${esc(deptName(e.dept))}</td>
+        <td>${e.mgr?esc(empById(e.mgr)?.name||'—'):'—'}</td><td class="num" style="font-weight:700">${a.totalScore}</td>
+        <td><span class="grade-pill g-${a.grade}">${a.grade}</span></td>
+        <td><select onchange="calibrate('${a.id}',this.value)" style="padding:5px 8px;border:1.5px solid var(--line);border-radius:7px;background:#fbfaf7">
+          ${DB.settings.grades.map(g=>`<option value="${g.g}" ${g.g===a.grade?'selected':''}>${g.g} · ${g.label}</option>`).join('')}</select></td></tr>`}).join('')}
+    </tbody></table></div></div>`}`;
+}
+function calibrate(aid,grade){
+  const a=DB.appraisals.find(x=>x.id===aid);const g=DB.settings.grades.find(x=>x.g===grade);
+  a.grade=g.g;a.salaryAdj=g.adj;a.bonus=g.bonus;a.recommend=g.note;a.calibrated=true;
+  save();toast('已校准为 '+grade+' 级','ok');
+}
+
+/* ========== 360° 评估 ========== */
+function viewFeedback360(c){
+  const myPending=DB.feedback360.filter(f=>f.raterId===USER.empId&&f.cycleId===CYCLE.id&&!f.done);
+  const canRun=can('manage')||USER.role==='manager';
+  c.innerHTML=`<div class="section-head"><div><div class="eyebrow">${esc(CYCLE.name)}</div>
+    <h2 style="font-size:21px;color:var(--navy);margin-top:4px">360° 多源评估</h2>
+    <div class="sub">自评 · 上级 · 同级 · 下属多视角评价,发现认知盲区</div></div>
+    ${canRun?`<button class="btn btn-gold" onclick="launch360()">${icon('rotate')}发起评估</button>`:''}</div>
+  ${myPending.length?`<div class="card card-pad" style="border-color:var(--gold);background:#fffdf7">
+    <h3 style="margin-bottom:10px">${icon('inbox','ic')} 待我填写的评估 (${myPending.length})</h3>
+    ${myPending.map(f=>{const s=empById(f.subjectId);return `<div class="flex between aic" style="padding:9px 0;border-bottom:1px solid var(--line-2)">
+      <div><b>${esc(s.name)}</b> <span class="tag tag-gray">${rel360(f.relation)}</span></div>
+      <button class="btn btn-gold btn-sm" onclick="fill360('${f.id}')">${icon('edit')}填写</button></div>`}).join('')}</div>`:''}
+  ${canRun?render360Results():`<div class="card card-pad mt24"><div class="muted">完成上方分配给你的评估即可。你自己的 360° 结果会在管理员汇总后,于「我的考核」中呈现。</div></div>`}`;
+}
+function rel360(r){return {self:'自评',manager:'上级',peer:'同级',report:'下属'}[r]||r;}
+function render360Results(){
+  const cy=CYCLE.id;
+  const subjects=[...new Set(DB.feedback360.filter(f=>f.cycleId===cy).map(f=>f.subjectId))];
+  if(!subjects.length)return `<div class="card card-pad mt24">${emptyBox('尚未发起 360° 评估','点击「发起评估」为员工建立多源反馈')}</div>`;
+  const sel=F360_SUBJECT||subjects[0];
+  return `<div class="card card-pad mt24">
+    <div class="flex between aic" style="flex-wrap:wrap;gap:10px;margin-bottom:14px"><h3>评估结果汇总</h3>
+      <select onchange="F360_SUBJECT=this.value;renderView('feedback360')" style="padding:7px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fbfaf7">
+        ${subjects.map(s=>`<option value="${s}" ${s===sel?'selected':''}>${esc(empById(s)?.name||'—')}</option>`).join('')}</select></div>
+    ${aggregate360(sel)}</div>`;
+}
+let F360_SUBJECT=null;
+function aggregate360(subjectId){
+  const recs=DB.feedback360.filter(f=>f.subjectId===subjectId&&f.cycleId===CYCLE.id&&f.done);
+  if(!recs.length)return `<div class="muted">尚无人提交评估(共 ${DB.feedback360.filter(f=>f.subjectId===subjectId&&f.cycleId===CYCLE.id).length} 份待回收)</div>`;
+  const comps=DB.settings.comp;
+  const byRel={};['self','manager','peer','report'].forEach(r=>{const rr=recs.filter(x=>x.relation===r);if(rr.length)byRel[r]=rr;});
+  const submitted=Object.entries(byRel).map(([r,arr])=>`<span class="rel-tab">${rel360(r)} ${arr.length}</span>`).join('');
+  // 每能力:自评 vs 他评(非自评平均)
+  const rows=comps.map(comp=>{
+    const selfV=byRel.self?avg(byRel.self.map(x=>x.scores[comp]||0)):null;
+    const others=recs.filter(x=>x.relation!=='self');
+    const otherV=others.length?avg(others.map(x=>x.scores[comp]||0)):null;
+    const gap=(selfV!=null&&otherV!=null)?(selfV-otherV):null;
+    return {comp,selfV,otherV,gap};
+  });
+  return `<div style="margin-bottom:12px">参与:${submitted}</div>
+    <div class="gap-row" style="font-weight:700;color:var(--muted);border-bottom:1.5px solid var(--line)"><span>能力项</span><span>他评(均分,▏=自评)</span><span class="right">差距</span></div>
+    ${rows.map(r=>{const op=(r.otherV||0)/5*100,sp=(r.selfV||0)/5*100;
+      const gtag=r.gap==null?'':r.gap>0.6?'<span class="tag tag-amber">高估</span>':r.gap<-0.6?'<span class="tag tag-green">低估</span>':'<span class="tag tag-gray">一致</span>';
+      return `<div class="gap-row"><span class="gname">${esc(r.comp)}</span>
+        <div class="minibar"><i style="width:${op}%"></i>${r.selfV!=null?`<span class="mk" style="left:${sp}%"></span>`:''}</div>
+        <span class="right num" style="font-weight:700">${r.otherV?r.otherV.toFixed(1):'—'}</span></div>
+        <div style="font-size:11px;color:var(--muted);margin:-4px 0 4px 106px">${r.selfV!=null?`自评 ${r.selfV.toFixed(1)} `:''}${gtag}</div>`}).join('')}
+    <div class="mt16" style="font-size:12.5px;color:var(--muted)">「高估」= 自评高于他人评价(可能的盲区);「低估」= 自评低于他人(被低估的优势)。</div>`;
+}
+function avg(a){return a.length?a.reduce((s,x)=>s+(+x||0),0)/a.length:0;}
+function launch360(){
+  const emps=DB.employees.filter(e=>e.status==='在职');
+  modal('发起 360° 评估',`
+    <div class="fg"><label>评估对象</label><select id="f3_sub">${emps.map(e=>`<option value="${e.id}">${esc(e.name)} · ${esc(deptName(e.dept))}</option>`).join('')}</select></div>
+    <p class="muted" style="font-size:12.5px;margin-top:14px">系统会自动指派评估人:本人(自评)、直属主管(上级)、同部门同事(同级,最多3位)、直接下属(下属)。被指派者会在「360°评估 → 待我填写」看到任务。</p>`,
+    ()=>{
+      const sid=val('f3_sub');const subj=empById(sid);
+      // 移除该对象本周期旧的未完成记录
+      DB.feedback360=DB.feedback360.filter(f=>!(f.subjectId===sid&&f.cycleId===CYCLE.id&&!f.done));
+      const raters=[];
+      raters.push({rid:sid,rel:'self'});
+      if(subj.mgr)raters.push({rid:subj.mgr,rel:'manager'});
+      DB.employees.filter(e=>e.dept===subj.dept&&e.id!==sid&&e.status==='在职').slice(0,3).forEach(p=>raters.push({rid:p.id,rel:'peer'}));
+      teamOf(sid).forEach(r=>raters.push({rid:r.id,rel:'report'}));
+      raters.forEach(r=>{
+        if(DB.feedback360.some(f=>f.subjectId===sid&&f.raterId===r.rid&&f.cycleId===CYCLE.id&&f.relation===r.rel))return;
+        DB.feedback360.push({id:uid('f'),cycleId:CYCLE.id,subjectId:sid,raterId:r.rid,relation:r.rel,scores:{},comment:'',done:false});
+      });
+      save();F360_SUBJECT=sid;renderView('feedback360');toast(`已为 ${subj.name} 指派 ${raters.length} 位评估人`,'ok');
+    });
+}
+function fill360(fid){
+  const f=DB.feedback360.find(x=>x.id===fid);const s=empById(f.subjectId);
+  F360_CUR=f;
+  modal(`评估:${esc(s.name)} (${rel360(f.relation)})`,
+    `<p class="muted" style="font-size:13px;margin-bottom:14px">请就以下能力为 ${esc(s.name)} 评分(1–5 分)</p>
+    ${DB.settings.comp.map(comp=>`<div class="score-line"><div class="nm">${esc(comp)}</div>
+      <div>${rate360(comp,f.scores[comp])}</div>
+      <div class="num right" style="font-weight:700;min-width:30px" id="r3v_${cssid(comp)}">${f.scores[comp]||'—'}</div></div>`).join('')}
+    <div class="fg full" style="margin-top:14px"><label>综合评语(选填)</label><textarea id="f3_comment" oninput="F360_CUR.comment=this.value">${esc(f.comment||'')}</textarea></div>`,
+    ()=>{
+      if(DB.settings.comp.some(c=>!f.scores[c])){toast('请完成所有能力评分','err');return false;}
+      f.done=true;save();renderView('feedback360');toast('评估已提交,感谢!','ok');
+    },'提交评估');
+}
+let F360_CUR=null;
+function cssid(s){return s.replace(/[^a-zA-Z0-9]/g,'_');}
+function rate360(comp,cur){let h='<div class="rate">';for(let i=1;i<=5;i++)h+=`<button class="${cur==i?'on':''}" onclick="set360('${cssid(comp)}','${esc(comp)}',${i},this)">${i}</button>`;return h+'</div>';}
+function set360(cid,comp,v,btn){F360_CUR.scores[comp]=v;btn.parentElement.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',i+1===v));const el=document.getElementById('r3v_'+cid);if(el)el.textContent=v;}
+
+/* ========== 即时认可 Kudos ========== */
+function viewRecognition(c){
+  const feed=[...DB.kudos].sort((a,b)=>b.ts-a.ts);
+  // 排行榜
+  const cnt={};DB.kudos.forEach(k=>cnt[k.toId]=(cnt[k.toId]||0)+1);
+  const board=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  c.innerHTML=`<div class="section-head"><div><h2 style="font-size:21px;color:var(--navy)">即时认可</h2>
+    <div class="sub">公开表扬,挂钩公司价值观,营造正向文化</div></div>
+    <button class="btn btn-gold" onclick="kudoForm()">${icon('kudos')}送出认可</button></div>
+  <div class="grid" style="grid-template-columns:1.6fr 1fr">
+    <div class="card card-pad"><h3 style="margin-bottom:6px">认可动态</h3>
+      ${feed.length?feed.map(k=>{const f=empById(k.fromId),t=empById(k.toId);
+        return `<div class="kudo"><div class="kic">${icon('kudos')}</div>
+        <div class="kb"><div class="kmeta"><b>${esc(f?.name||'某人')}</b> 认可了 <b>${esc(t?.name||'某人')}</b></div>
+        <div class="kmsg">${esc(k.msg)}</div><span class="kval tag tag-gold">${esc(k.value)}</span></div>
+        <div class="kt">${timeAgo(k.ts)}</div></div>`}).join(''):emptyBox('还没有认可记录','成为第一个送出认可的人 👏')}
+    </div>
+    <div><div class="card card-pad"><h3 style="margin-bottom:12px">本期之星 🌟</h3>
+      ${board.length?board.map(([id,n],i)=>`<div class="flex between aic" style="padding:8px 0;border-bottom:1px solid var(--line-2)">
+        <div class="flex aic gap8"><span class="num" style="font-weight:700;color:var(--gold-d);width:18px">${i+1}</span>
+        <span class="avatar" style="width:28px;height:28px;font-size:11px">${esc((empById(id)?.name||'?').slice(-2,-1))}</span>
+        <b style="font-size:13px">${esc(empById(id)?.name||'—')}</b></div>
+        <span class="tag tag-gold">${n} 次</span></div>`).join(''):'<div class="muted">尚无数据</div>'}
+    </div>
+    <div class="card card-pad mt16"><h3 style="margin-bottom:10px">公司价值观</h3>
+      ${DB.settings.values.map(v=>`<span class="tag tag-gray" style="margin:0 5px 6px 0;display:inline-block">${esc(v)}</span>`).join('')}</div>
+    </div>
+  </div>`;
+}
+function kudoForm(){
+  const others=DB.employees.filter(e=>e.status==='在职'&&e.id!==USER.empId);
+  modal('送出认可',`
+    <div class="fg"><label>认可对象</label><select id="ku_to">${others.map(e=>`<option value="${e.id}">${esc(e.name)} · ${esc(deptName(e.dept))}</option>`).join('')}</select></div>
+    <div class="fg" style="margin-top:14px"><label>体现的价值观</label><select id="ku_val">${DB.settings.values.map(v=>`<option>${esc(v)}</option>`).join('')}</select></div>
+    <div class="fg full" style="margin-top:14px"><label>认可内容</label><textarea id="ku_msg" placeholder="具体说说 TA 做了什么值得肯定的事…"></textarea></div>`,
+    ()=>{
+      if(!USER.empId){toast('管理身份无法以个人名义送出,请用员工/主管身份','err');return false;}
+      if(!val('ku_msg')){toast('请填写认可内容','err');return false;}
+      DB.kudos.push({id:uid('k'),fromId:USER.empId,toId:val('ku_to'),value:val('ku_val'),msg:val('ku_msg'),ts:Date.now()});
+      save();renderView('recognition');toast('认可已送出 👏','ok');
+    },'送出');
+}
+function timeAgo(ts){const d=(Date.now()-ts)/1000;if(d<3600)return Math.max(1,Math.floor(d/60))+' 分钟前';if(d<86400)return Math.floor(d/3600)+' 小时前';return Math.floor(d/86400)+' 天前';}
+
+/* ========== 1:1 签到 Check-in ========== */
+function viewCheckins(c){
+  const isStaff=!!USER.empId;
+  const mine=USER.empId?DB.checkins.filter(x=>x.empId===USER.empId).sort((a,b)=>b.ts-a.ts):[];
+  let team=[];
+  if(USER.role==='manager')team=DB.checkins.filter(x=>teamOf(USER.empId).some(e=>e.id===x.empId)).sort((a,b)=>b.ts-a.ts);
+  else if(can('manage'))team=[...DB.checkins].sort((a,b)=>b.ts-a.ts);
+  c.innerHTML=`<div class="section-head"><div><h2 style="font-size:21px;color:var(--navy)">1:1 周报签到</h2>
+    <div class="sub">每周轻量同步:成果 · 计划 · 障碍 · 心情,让 1对1 更有方向</div></div>
+    ${USER.empId?`<button class="btn btn-gold" onclick="checkinForm()">${icon('plus')}本周签到</button>`:''}</div>
+  ${USER.empId?`<div class="card card-pad"><h3 style="margin-bottom:12px">我的签到</h3>
+    ${mine.length?mine.map(ci=>ciCard(ci,false)).join(''):emptyBox('本周还没签到','点击「本周签到」分享你的进展')}</div>`:''}
+  ${team.length?`<div class="card card-pad mt24"><h3 style="margin-bottom:12px">${USER.role==='manager'?'团队签到':'全员签到'}</h3>
+    ${team.map(ci=>ciCard(ci,USER.role==='manager'||can('manage'))).join('')}</div>`:(USER.empId?'':emptyBox('暂无团队签到','员工提交周报后会显示在这里'))}`;
+}
+function ciCard(ci,canNote){const e=empById(ci.empId);const moods=['😣','😕','😐','🙂','😄'];
+  return `<div class="ci-card"><div class="ci-h">
+    <div class="flex aic gap8"><span class="avatar" style="width:30px;height:30px;font-size:12px">${esc((e?.name||'?').slice(-2,-1))}</span>
+    <div><b style="font-size:13.5px">${esc(e?.name||'—')}</b> <span class="muted" style="font-size:11.5px">· ${esc(ci.week)}</span></div></div>
+    <span style="font-size:22px" title="心情">${moods[(ci.mood||3)-1]}</span></div>
+    <div style="font-size:13px;line-height:1.8">
+      <div><b class="muted">✅ 本周成果:</b>${esc(ci.wins||'—')}</div>
+      <div><b class="muted">🎯 下周计划:</b>${esc(ci.priorities||'—')}</div>
+      <div><b class="muted">🚧 遇到障碍:</b>${esc(ci.blockers||'无')}</div>
+    </div>
+    ${ci.managerNote?`<div style="margin-top:10px;padding:10px 12px;background:var(--blue-bg);border-radius:9px;font-size:12.5px"><b style="color:var(--blue)">主管回应:</b> ${esc(ci.managerNote)}</div>`:''}
+    ${canNote&&ci.empId!==USER.empId?`<button class="btn btn-ghost btn-sm mt16" onclick="noteCheckin('${ci.id}')">${icon('edit')}${ci.managerNote?'修改回应':'写回应'}</button>`:''}
+  </div>`;
+}
+function checkinForm(){
+  const existing=DB.checkins.find(x=>x.empId===USER.empId&&x.week===thisWeek());
+  const ci=existing||{wins:'',priorities:'',blockers:'',mood:4};
+  CI_MOOD=ci.mood||4;
+  modal(existing?'更新本周签到':'本周签到 · '+thisWeek(),`
+    <div class="fg full" style="margin-bottom:14px"><label>✅ 本周主要成果</label><textarea id="ci_wins" placeholder="完成了哪些事?">${esc(ci.wins)}</textarea></div>
+    <div class="fg full" style="margin-bottom:14px"><label>🎯 下周重点计划</label><textarea id="ci_pri" placeholder="接下来聚焦什么?">${esc(ci.priorities)}</textarea></div>
+    <div class="fg full" style="margin-bottom:14px"><label>🚧 遇到的障碍 / 需要支援</label><textarea id="ci_blk" placeholder="有什么卡住了?需要主管帮忙吗?">${esc(ci.blockers)}</textarea></div>
+    <div class="fg"><label>本周心情</label><div class="mood" id="ci_mood">${['😣','😕','😐','🙂','😄'].map((m,i)=>`<button class="${CI_MOOD===i+1?'on':''}" onclick="CI_MOOD=${i+1};this.parentElement.querySelectorAll('button').forEach((b,j)=>b.classList.toggle('on',j===${i}))">${m}</button>`).join('')}</div></div>`,
+    ()=>{
+      if(!val('ci_wins')){toast('至少填写本周成果','err');return false;}
+      const o={empId:USER.empId,week:thisWeek(),wins:val('ci_wins'),priorities:val('ci_pri'),blockers:val('ci_blk'),mood:CI_MOOD,ts:Date.now()};
+      if(existing){Object.assign(existing,o);}else{o.managerNote='';DB.checkins.push({id:uid('ci'),...o});}
+      save();renderView('checkins');toast('签到完成 ✓','ok');
+    },'提交');
+}
+let CI_MOOD=4;
+function noteCheckin(id){const ci=DB.checkins.find(x=>x.id===id);
+  modal('主管回应',`<div class="fg full"><label>给 ${esc(empById(ci.empId)?.name)} 的回应</label><textarea id="ci_note">${esc(ci.managerNote||'')}</textarea></div>`,
+    ()=>{ci.managerNote=val('ci_note');save();renderView('checkins');toast('已回应','ok');});}
+
+/* ========== AI 助手 (Claude in Claude) ========== */
+let AI_HISTORY=[];
+function openAI(){
+  document.getElementById('aiPanel').classList.add('open');
+  if(!AI_HISTORY.length){
+    aiAddMsg('a','你好,我是绩效 AI 助手 👋\n我可以分析当前的考核数据、九宫格、OKR 进度等,帮你做人才决策。试试下面的问题,或直接问我。');
+    renderAISugg(['这个周期整体表现如何?','谁是高潜力但绩效待提升的员工?','哪个部门的平均分最高?','哪些人应该考虑晋升?']);
+  }
+  setTimeout(()=>document.getElementById('aiInput')?.focus(),300);
+}
+function closeAI(){document.getElementById('aiPanel').classList.remove('open');}
+function renderAISugg(arr){document.getElementById('aiSugg').innerHTML=arr.map(s=>`<button onclick="quickAI('${esc(s).replace(/'/g,'')}')">${esc(s)}</button>`).join('');}
+function quickAI(s){document.getElementById('aiInput').value=s;sendAI();}
+function aiAddMsg(role,text){
+  AI_HISTORY.push({role:role==='u'?'user':'assistant',content:text});
+  const el=document.getElementById('aiMsgs');
+  const d=document.createElement('div');d.className='ai-msg '+role;d.innerHTML=mdLite(text);el.appendChild(d);el.scrollTop=el.scrollHeight;
+  return d;
+}
+function mdLite(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');}
+function buildAIContext(){
+  // 汇总当前周期数据(脱敏到姓名+岗位,适合分析)
+  const done=DB.appraisals.filter(a=>a.cycleId===CYCLE.id&&a.status==='done');
+  const lines=[];
+  lines.push(`当前考核周期:${CYCLE.name}(权重 KPI ${CYCLE.weights.kpi}% / 能力 ${CYCLE.weights.comp}% / 态度 ${CYCLE.weights.att}%)`);
+  lines.push(`在职员工 ${DB.employees.filter(e=>e.status==='在职').length} 人,已完成考核 ${done.length} 人。`);
+  lines.push('【已完成考核明细】');
+  done.forEach(a=>{const e=empById(a.empId);const pot=['低','中','高'][(DB.potential[e.id]||2)-1];
+    lines.push(`- ${e.name}(${deptName(e.dept)}/${e.pos}):综合${a.totalScore} 等级${a.grade},KPI ${calcKPI(a)} 能力 ${calcComp(a)} 态度 ${calcAtt(a)};潜力${pot};调薪建议+${a.salaryAdj}%,${a.recommend}`);});
+  // OKR
+  const objs=DB.objectives.filter(o=>o.cycleId===CYCLE.id);
+  if(objs.length){lines.push('【OKR 进度】');objs.forEach(o=>lines.push(`- [${o.type}] ${objOwnerName(o)}:${o.title} — 进度 ${objProgress(o)}%`));}
+  // Kudos
+  if(DB.kudos.length){const cnt={};DB.kudos.forEach(k=>cnt[k.toId]=(cnt[k.toId]||0)+1);
+    const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id,n])=>`${empById(id)?.name}(${n}次)`).join('、');
+    lines.push(`【近期认可】收到最多认可:${top}`);}
+  return lines.join('\n');
+}
+async function sendAI(){
+  const inp=document.getElementById('aiInput');const q=inp.value.trim();if(!q)return;
+  inp.value='';inp.style.height='auto';
+  document.getElementById('aiSugg').innerHTML='';
+  aiAddMsg('u',q);
+  const btn=document.getElementById('aiSend');btn.disabled=true;
+  const el=document.getElementById('aiMsgs');
+  const load=document.createElement('div');load.className='ai-msg a';load.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';el.appendChild(load);el.scrollTop=el.scrollHeight;
+  const sys=`你是企业绩效管理系统内建的 AI 分析助手,服务对象是 HR 与管理层。请基于以下「系统数据」用简体中文专业、简洁地回答问题,给出可执行的人才管理建议。不要编造数据中没有的人或数字。适当使用 **粗体** 强调重点。\n\n=== 系统数据 ===\n${buildAIContext()}`;
+  try{
+    const msgs=AI_HISTORY.slice(-8).map(m=>({role:m.role,content:m.content}));
+    const headers={'Content-Type':'application/json'};
+    if(DB.settings.apiKey){headers['x-api-key']=DB.settings.apiKey;headers['anthropic-version']='2023-06-01';headers['anthropic-dangerous-direct-browser-access']='true';}
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1024,system:sys,messages:msgs})});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n')||'(没有返回内容)';
+    load.remove();aiAddMsg('a',text);
+  }catch(err){
+    load.remove();
+    aiAddMsg('a','⚠️ 无法连接 AI 服务。\n\n在 Claude 的预览环境中可直接使用;若你已把系统部署到自己的网站(如 GitHub Pages),需到「系统设定 → AI 设定」填入 Anthropic API Key 才能启用。\n\n错误:'+esc(err.message));
+  }
+  btn.disabled=false;
+}
+/* 在考核表评语处用 AI 起草 */
+async function aiDraftComment(targetId,kind){
+  const ta=document.getElementById(targetId);if(!ta)return;
+  const a=CURA;const e=empById(a.empId);
+  const bullets=ta.value.trim();
+  const ctx=`员工:${e.name}(${e.pos});本次 KPI ${calcKPI(withSelf(a))} 能力 ${calcComp(withSelf(a))} 态度 ${calcAtt(withSelf(a))}。`;
+  const prompt=kind==='self'
+    ? `请把以下要点整理成一段专业、得体的员工自评(第一人称,简体中文,120字内):\n要点:${bullets||'(请根据数据生成一段中肯的自评)'}\n\n${ctx}`
+    : `请把以下要点整理成一段专业、建设性的主管评语(简体中文,120字内,先肯定再给改进建议):\n要点:${bullets||'(请根据数据生成一段中肯的评语)'}\n\n${ctx}`;
+  const old=ta.value;ta.value='✨ AI 正在起草…';ta.disabled=true;
+  try{
+    const headers={'Content-Type':'application/json'};
+    if(DB.settings.apiKey){headers['x-api-key']=DB.settings.apiKey;headers['anthropic-version']='2023-06-01';headers['anthropic-dangerous-direct-browser-access']='true';}
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+    ta.value=text||old;ta.disabled=false;ta.dispatchEvent(new Event('input'));
+    toast('AI 已生成草稿,可再编辑','ok');
+  }catch(err){ta.value=old;ta.disabled=false;toast('AI 起草失败:预览环境可用,自有部署需在设定填 API Key','err');}
+}
+
+
+function modal(title,body,onOk,okText,cls){
+  MODAL_OK=onOk;
+  document.getElementById('modalBox').className='modal '+(cls||'');
+  document.getElementById('modalBox').innerHTML=`
+    <div class="modal-head"><h3>${esc(title)}</h3><div class="x" onclick="closeModal()">×</div></div>
+    <div class="modal-body">${body}</div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal()">${onOk?'取消':'关闭'}</button>
+      ${onOk?`<button class="btn btn-gold" onclick="modalOk()">${okText||'保存'}</button>`:''}</div>`;
+  document.getElementById('modalBg').classList.add('show');
+}
+function modalOk(){if(MODAL_OK){const r=MODAL_OK();if(r!==false)closeModal();}else closeModal();}
+function closeModal(){document.getElementById('modalBg').classList.remove('show');MODAL_OK=null;CURA=null;}
+function confirmBox(msg,onYes){modal('请确认',`<p style="font-size:14px;line-height:1.7">${esc(msg)}</p>`,()=>{onYes();},'确定');}
+function val(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+document.getElementById('modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')closeModal();});
+
+/* ========== 启动 ========== */
+(function(){
+  if(!load()||!DB.employees||!DB.employees.length) seed();
+  if(!DB.settings||!DB.settings.grades) {seed();}
+  // V2 迁移:旧资料补上新集合
+  DB.objectives=DB.objectives||[]; DB.potential=DB.potential||{};
+  DB.feedback360=DB.feedback360||[]; DB.kudos=DB.kudos||[]; DB.checkins=DB.checkins||[];
+  if(!DB.settings.values)DB.settings.values=['客户至上','团队协作','诚信正直','创新求变','结果导向'];
+  if(DB.settings.apiKey===undefined)DB.settings.apiKey='';
+  initLogin();
+})();
+</script>
+</body>
+</html>
